@@ -6,18 +6,17 @@
     <title>Eloi Silva | Visual Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F5F5F7;
-            --text: #000000;
+            --bg: #E0E0E0; /* Cinza cimento */
+            --black: #000000;
             --white: #FFFFFF;
-            --wheel-color: #000000; /* Cor da borda e ticks */
-            --ball-color: #FF4500;  /* Vermelho Alaranjado */
+            --ball: #FF4500; /* Laranja Internacional */
         }
 
-        /* --- CONFIGURAÇÕES GERAIS (IOS FIXES) --- */
+        /* --- RESET & IOS FIXES --- */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -27,125 +26,210 @@
 
         body {
             background-color: var(--bg);
+            /* Padrão de grelha sutil no fundo para dar vibe técnica */
+            background-image: radial-gradient(var(--black) 1px, transparent 1px);
+            background-size: 20px 20px;
+            
             font-family: 'Inter', sans-serif;
-            color: var(--text);
+            color: var(--black);
             height: 100dvh; width: 100%; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 30px 20px;
+            padding: 20px;
         }
 
-        /* HEADER */
-        header { text-align: center; z-index: 10; pointer-events: none; }
-        h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+        /* --- HEADER AGRESSIVO --- */
+        header { 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start;
+            z-index: 10; 
+            pointer-events: none;
+            border-bottom: 4px solid var(--black);
+            padding-bottom: 15px;
+            background: var(--bg);
+        }
+
+        h1 { 
+            font-size: 2.5rem; 
+            font-weight: 900; 
+            line-height: 0.9; 
+            text-transform: uppercase; 
+            letter-spacing: -2px;
+        }
+
+        .meta {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        
         .badge {
-            margin-top: 10px; display: inline-block; background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08); padding: 5px 15px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-        #sound-hint {
-            position: absolute; top: 80px; font-size: 0.6rem; color: #aaa; 
-            opacity: 0; transition: opacity 1s; pointer-events: none; left: 50%; transform: translateX(-50%);
+            background: var(--black); color: var(--white);
+            padding: 4px 8px; font-size: 0.7rem;
+            display: inline-block; margin-top: 4px;
         }
 
-        /* STAGE */
+        /* --- STAGE DA RODA --- */
         .stage {
-            position: relative; width: 280px; height: 280px;
+            position: relative; width: 300px; height: 300px;
             display: flex; align-items: center; justify-content: center;
             touch-action: none;
         }
 
-        /* Sombra Fixa */
+        /* Sombra Sólida (Hard Shadow) */
         .static-shadow {
-            position: absolute; width: 90%; height: 90%; border-radius: 50%;
-            background: transparent; box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            background: rgba(0,0,0,0.2);
+            transform: translate(10px, 10px); /* Deslocada para dar peso */
             z-index: 0; pointer-events: none;
         }
 
-        /* --- NOVA RODA TRANSPARENTE BOLD --- */
+        /* RODA BRUTALISTA */
         .wheel {
             position: relative;
             width: 100%; height: 100%;
-            background-color: transparent; /* Fundo transparente */
             border-radius: 50%;
-            /* Borda preta grossa (BOLD) */
-            border: 6px solid var(--wheel-color);
+            /* BORDA SUPER GROSSA */
+            border: 16px solid var(--black); 
+            background: transparent;
             cursor: grab; z-index: 2;
             display: flex; align-items: center; justify-content: center;
-            /* Transform para performance iOS */
             transform: translateZ(0);
         }
         .wheel:active { cursor: grabbing; }
 
-        /* Ticks do Relógio (Gerados via JS) */
-        .tick {
-            position: absolute;
-            background-color: var(--wheel-color);
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center;
+        /* Decoração Interna (Gira com a roda) */
+        .wheel-decor {
+            position: absolute; width: 100%; height: 100%;
             pointer-events: none;
-        }
-        .tick.major { width: 3px; height: 12px; margin-left: -1.5px; }
-        .tick.minor { width: 1px; height: 7px; margin-left: -0.5px; opacity: 0.7; }
-
-        /* Área interna (onde a bola bate) */
-        .hollow {
-            width: 180px; height: 180px;
-            background: transparent; /* Transparente também */
-            border-radius: 50%;
-            /* Sombra interna sutil para profundidade */
-            box-shadow: inset 0 5px 15px rgba(0,0,0,0.2);
-            border: 1px solid rgba(0,0,0,0.05);
-            position: relative; pointer-events: none;
-            z-index: 3;
         }
         
-        /* --- BOLA VERMELHO ALARANJADO --- */
+        /* Linhas em cruz */
+        .cross-line {
+            position: absolute; background: var(--black);
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+        }
+        .cross-line.v { width: 2px; height: 100%; }
+        .cross-line.h { width: 100%; height: 2px; }
+
+        /* Letras Industriais */
+        .compass {
+            position: absolute; font-family: 'JetBrains Mono', monospace;
+            font-weight: 900; font-size: 1.2rem; color: var(--black);
+        }
+        .compass.n { top: 10px; left: 50%; transform: translateX(-50%); }
+        .compass.s { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .compass.w { left: 15px; top: 50%; transform: translateY(-50%); }
+        .compass.e { right: 15px; top: 50%; transform: translateY(-50%); }
+
+        /* Buraco */
+        .hollow {
+            width: 180px; height: 180px;
+            border: 4px solid var(--black); /* Borda interna grossa */
+            border-radius: 50%;
+            background: var(--bg); /* Oculta as linhas de trás */
+            position: relative; pointer-events: none; z-index: 3;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .center-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; opacity: 0.5; text-align: center;
+        }
+
+        /* Ticks grossos */
+        .tick {
+            position: absolute; background: var(--black);
+            width: 6px; height: 16px; 
+            left: 50%; bottom: 100%; margin-left: -3px; margin-bottom: -10px;
+            transform-origin: center 160px; /* Raio ajustado */
+        }
+
+        /* --- BOLA DESTAQUE --- */
         .ball {
-            position: absolute; width: 28px; height: 28px;
-            /* Nova Cor */
-            background-color: var(--ball-color);
+            position: absolute; width: 36px; height: 36px;
+            background-color: var(--ball);
+            border: 3px solid var(--black); /* Outline preto na bola */
             border-radius: 50%;
             z-index: 5;
-            /* Sombra colorida sutil */
-            box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
+            /* Sombra dura na bola também */
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
             pointer-events: none;
-            top: 50%; left: 50%; margin-top: -14px; margin-left: -14px;
+            top: 50%; left: 50%; margin-top: -18px; margin-left: -18px;
             will-change: transform;
         }
 
-        /* Links */
-        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
+        /* --- LINKS --- */
+        .menu { width: 100%; max-width: 500px; display: grid; gap: 12px; z-index: 10; padding-bottom: 20px;}
+        
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px;
+            background: var(--white); 
+            padding: 20px; 
             display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); font-weight: 600;
-            transition: transform 0.1s; border: 1px solid rgba(0,0,0,0.03);
+            text-decoration: none; color: var(--black); 
+            
+            /* ESTILO BRUTALISTA NOS BOTÕES */
+            border: 3px solid var(--black);
+            box-shadow: 6px 6px 0px var(--black); /* Sombra dura deslocada */
+            font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;
+            transition: all 0.1s;
             cursor: pointer;
         }
-        .card-left { display: flex; align-items: center; gap: 12px; }
-        .card-icon { width: 20px; height: 20px; fill: currentColor; }
-        .card:active { transform: scale(0.96); background: #f0f0f0; }
-        @media(hover: hover) {
-            .card:hover { background: var(--text); color: var(--white); transform: scale(1.02); }
+
+        .card-left { display: flex; align-items: center; gap: 15px; }
+        .card-icon { width: 24px; height: 24px; fill: var(--black); }
+
+        .card:active {
+            transform: translate(4px, 4px); /* Botão afunda fisicamente */
+            box-shadow: 2px 2px 0px var(--black);
         }
 
-        footer { font-size: 0.7rem; color: #999; letter-spacing: 1px; text-transform: uppercase; }
+        @media(hover: hover) {
+            .card:hover {
+                background: var(--black); color: var(--white);
+            }
+            .card:hover .card-icon { fill: var(--white); }
+        }
+
+        /* Sound Hint escondido */
+        #sound-hint { position: absolute; opacity: 0; pointer-events: none; }
+
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Eloi Silva</h1>
-        <div class="badge">10+ Anos de Experiência</div>
-        <div id="sound-hint">🔊 Sound On for Haptics</div>
+        <div>
+            <h1>Eloi<br>Silva.</h1>
+        </div>
+        <div class="meta">
+            DESIGNER<br>
+            <span class="badge">10+ ANOS</span>
+        </div>
     </header>
+    
+    <div id="sound-hint">Sound On</div>
 
     <div class="stage">
         <div class="static-shadow"></div>
+        
         <div class="wheel" id="wheel">
-            <div class="hollow"></div>
+            <div class="wheel-decor">
+                <div class="cross-line v"></div>
+                <div class="cross-line h"></div>
+                <div class="compass n">N</div>
+                <div class="compass s">S</div>
+                <div class="compass e">E</div>
+                <div class="compass w">W</div>
+            </div>
+            
+            <div class="hollow">
+                <div class="center-text">DRAG<br>TO SPIN</div>
+            </div>
         </div>
+        
         <div class="ball" id="ball"></div>
     </div>
 
@@ -155,48 +239,31 @@
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
+        
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
             <div class="card-left">
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
                 Behance
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
+
         <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
             <div class="card-left">
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
                 WhatsApp
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
     </nav>
 
-    <footer>Portugal 2026</footer>
-
     <script>
         const wheel = document.getElementById('wheel');
-        const hollow = document.querySelector('.hollow');
         const ball = document.getElementById('ball');
 
-        // --- GERAR TICKS DO RELÓGIO ---
-        function generateTicks() {
-            const numTicks = 60; // 60 segundos
-            const radius = 132; // Posicionar ligeiramente dentro da borda
-            for (let i = 0; i < numTicks; i++) {
-                const tick = document.createElement('div');
-                const angle = (i / numTicks) * 360;
-                // Ticks maiores a cada 5
-                tick.className = (i % 5 === 0) ? 'tick major' : 'tick minor';
-                // Posicionar radialmente
-                tick.style.transform = `rotate(${angle}deg) translateY(-${radius}px)`;
-                wheel.insertBefore(tick, hollow);
-            }
-        }
-        generateTicks();
-
-        // --- SISTEMA DE ÁUDIO (IOS HAPTICS) ---
+        // --- HAPTICS / AUDIO (Heavy Clunk) ---
         let audioCtx = null;
         let isAudioUnlocked = false;
 
@@ -211,32 +278,37 @@
                 source.connect(audioCtx.destination);
                 source.start(0);
                 isAudioUnlocked = true;
-                const hint = document.getElementById('sound-hint');
-                hint.style.opacity = 1;
-                setTimeout(() => hint.style.opacity = 0, 3000);
             }
         }
 
-        function playClickSound() {
+        function playClunk() {
             if (!audioCtx || audioCtx.state === 'suspended') { if(audioCtx) audioCtx.resume(); return;}
+            
+            // Som mais grave e mecânico para combinar com o design brutalista
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
+            
             osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.04);
-            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-            osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+            
+            // Frequência mais baixa (som de engrenagem pesada)
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
+            
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+            
+            osc.type = 'sawtooth'; // Onda dente de serra é mais "áspera"
+            osc.start(); osc.stop(audioCtx.currentTime + 0.08);
         }
 
-        // --- FÍSICA E LÓGICA ---
+        // --- FÍSICA ---
         let wheelAngle = 0, isDragging = false, startAngle = 0, wheelVelocity = 0;
         let lastTickAngle = 0;
-        const tickInterval = 30; 
+        const tickInterval = 20; // Mais cliques porque é mais pesado
 
         let ballX = 0, ballY = 0, ballVX = 0, ballVY = 0;
-        const gravity = 0.5, friction = 0.985, bounce = 0.65;
-        const boundary = 76; 
+        const gravity = 0.6, friction = 0.98, bounce = 0.6; // Gravidade mais forte
+        const boundary = 72; 
 
         function getAngle(x, y) {
             const rect = wheel.getBoundingClientRect();
@@ -255,8 +327,8 @@
 
         function handleTick(currentAngle) {
             if (Math.abs(currentAngle - lastTickAngle) > tickInterval) {
-                playClickSound();
-                if (navigator.vibrate) navigator.vibrate(5);
+                playClunk();
+                if (navigator.vibrate) navigator.vibrate(10); // Vibração mais forte
                 lastTickAngle = currentAngle;
             }
         }
@@ -278,7 +350,8 @@
 
         function update() {
             if (!isDragging) {
-                wheelVelocity *= 0.98; wheelAngle += wheelVelocity;
+                wheelVelocity *= 0.97; // Desacelera mais rápido (mais peso)
+                wheelAngle += wheelVelocity;
                 wheel.style.transform = `rotate(${wheelAngle}deg)`;
                 if (Math.abs(wheelVelocity) > 0.5) handleTick(wheelAngle); 
             }
@@ -290,7 +363,7 @@
                 const dot = ballVX * nx + ballVY * ny;
                 ballVX -= 2 * dot * nx; ballVY -= 2 * dot * ny;
                 ballVX *= bounce; ballVY *= bounce;
-                const spin = wheelVelocity * 0.8;
+                const spin = wheelVelocity * 0.9;
                 ballVX += -ny * spin; ballVY += nx * spin;
             }
             ballVX *= friction; ballVY *= friction;
