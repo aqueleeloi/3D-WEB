@@ -3,420 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eloi Silva | Links</title>
+    <title>Eloi Silva | Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- CONFIGURAÇÕES GERAIS E VARIÁVEIS --- */
+        /* --- 1. VARIÁVEIS E RESET --- */
         :root {
-            --bg-color: #f2f2f7;
-            --card-white: #ffffff;
-            --card-black: #111111;
-            --accent-color: #d64933; /* O laranja da imagem */
-            --text-main: #111111;
-            --text-muted: #8e8e93;
-            --radius-phone: 40px;
-            --radius-card: 24px;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --bg: #F0F0F0;
+            --surface: #FFFFFF;
+            --black: #050505;
+            --accent: #D63D2E; /* O Laranja/Terracotta da tua imagem */
+            --text-grey: #888888;
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --radius: 28px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: #e0e0e0; /* Fundo fora do telemóvel */
-            font-family: var(--font-family);
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--black);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: var(--text-main);
+            padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* --- O CONTENTOR "TELEMÓVEL" --- */
-        .phone-wrapper {
-            background-color: var(--bg-color);
+        /* --- 2. LAYOUT BENTO GRID (O Segredo do Design Moderno) --- */
+        .container {
             width: 100%;
-            max-width: 400px; /* Largura típica de telemóvel */
-            min-height: 100vh;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            opacity: 0;
+            animation: fadeIn 1s var(--ease-out) forwards;
+        }
+
+        /* Responsive Grid para PC */
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: auto auto;
+            }
+            /* O cartão principal ocupa 2 colunas */
+            .card-profile { grid-column: span 2; }
+            /* O Dial ocupa 1 coluna */
+            .card-dial { grid-column: span 1; }
+            /* Links em baixo */
+            .card-link { grid-column: span 1; }
+        }
+
+        /* --- 3. ESTILO DOS CARTÕES --- */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             overflow: hidden;
+            transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+            border: 1px solid rgba(0,0,0,0.03);
             display: flex;
             flex-direction: column;
-            padding: 0 24px 24px 24px;
-        }
-
-        /* Ajuste para parecer um telemóvel em ecrãs grandes */
-        @media (min-width: 450px) {
-            .phone-wrapper {
-                min-height: 850px;
-                height: 850px;
-                border-radius: var(--radius-phone);
-                border: 8px solid #333;
-                margin: 20px;
-            }
-        }
-
-        /* --- CABEÇALHO (STATUS BAR) --- */
-        .status-bar {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding-top: 14px;
-            padding-bottom: 20px;
-            font-weight: 600;
-            font-size: 14px;
         }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        /* Títulos e Textos */
+        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin-bottom: 10px; }
+        h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+        p { color: var(--text-grey); font-size: 1rem; line-height: 1.5; }
         
-        /* --- HEADER COM DATA E NOME --- */
-        .header-section {
+        .badge {
+            display: inline-block;
+            background: var(--black);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
             margin-bottom: 20px;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
         }
 
-        .header-date {
-            font-size: 32px;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 8px;
-        }
-
-        .header-subtitle {
-            font-size: 16px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* --- O "DIAL" (Elemento visual da esquerda) --- */
-        /* Recriando o botão redondo preto da imagem como elemento de destaque */
-        .dial-container {
+        /* --- 4. O DIAL INTERATIVO (A "Jóia" Visual) --- */
+        .card-dial {
+            background: var(--black);
+            color: white;
             display: flex;
+            align-items: center;
             justify-content: center;
-            margin: 20px 0 40px 0;
-            position: relative;
-            perspective: 1000px;
+            min-height: 250px;
+            cursor: grab;
         }
 
-        .dial {
+        .dial-wrapper {
+            position: relative;
             width: 160px;
             height: 160px;
-            background-color: var(--card-black);
             border-radius: 50%;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            background: #1a1a1a;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            flex-direction: column;
-            cursor: pointer;
-            transition: transform 0.3s ease;
         }
 
-        /* O ponto branco no dial */
-        .dial::after {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: white;
+        .dial-rotator {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            bottom: 25px;
-            left: 35px;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .dial:hover::after {
-            transform:  translate(60px, -10px); /* Animação do ponto */
-        }
-
-        .dial:active {
-            transform: scale(0.95);
-        }
-
-        .dial-text {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-            opacity: 0.7;
-        }
-
-        .dial-icon {
-            font-size: 30px;
-        }
-
-        /* Marcadores laterais do dial */
-        .dial-ticks {
             position: absolute;
-            bottom: 10px;
-            width: 180px;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            color: var(--text-main);
-            font-weight: bold;
-            font-size: 12px;
+            transition: transform 0.1s linear; /* Fluidez na rotação */
         }
 
-        /* --- GRELHA DE LINKS (TILT 3D) --- */
-        .grid-links {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            flex-grow: 1;
+        .dial-dot {
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--accent);
         }
 
-        .card {
-            border-radius: var(--radius-card);
-            padding: 24px;
-            text-decoration: none;
-            transition: all 0.1s ease; /* Transição rápida para o efeito tilt */
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            cursor: pointer;
-            /* Efeito de entrada */
-            opacity: 0;
-            animation: slideUp 0.6s ease-out forwards;
-        }
-
-        /* Card Grande Preto (Destaque) */
-        .card.dark {
-            background-color: var(--card-black);
-            color: white;
-            height: 140px;
-            animation-delay: 0.2s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        /* Cards Brancos */
-        .card.light {
-            background-color: var(--card-white);
-            color: var(--text-main);
-            height: 100px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        .card.light:nth-child(2) { animation-delay: 0.3s; }
-        .card.light:nth-child(3) { animation-delay: 0.4s; }
-
-        /* Tipografia dos Cards */
-        .card-label {
-            font-size: 14px;
-            opacity: 0.7;
-            margin-bottom: 4px;
+        .dial-label {
+            position: absolute;
+            text-align: center;
+            pointer-events: none;
         }
         
-        .card-title {
-            font-size: 22px;
-            font-weight: 600;
-        }
+        .dial-value { font-size: 2rem; font-weight: 800; }
+        .dial-sub { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
 
-        .card-icon {
-            font-size: 28px;
-        }
-
-        /* Flecha no card */
-        .arrow-icon {
-            margin-left: auto;
-            font-size: 20px;
-        }
-
-        /* --- BOTÃO FLUTUANTE INFERIOR (Footer) --- */
-        .bottom-nav {
-            margin-top: 20px;
-            background-color: var(--card-black);
-            border-radius: 40px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 8px;
+        /* --- 5. LINKS ESPECÍFICOS (Instagram, Behance, WhatsApp) --- */
+        .card-link {
+            text-decoration: none;
+            color: var(--black);
+            min-height: 200px;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .nav-pill {
-            background-color: var(--card-white);
-            color: var(--card-black);
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 14px;
+        .icon-box {
+            font-size: 2rem;
+            margin-bottom: auto;
         }
 
-        .nav-text {
+        .link-arrow {
+            position: absolute;
+            top: 32px;
+            right: 32px;
+            font-size: 1.5rem;
+            transition: transform 0.3s var(--ease-out);
+        }
+
+        .card-link:hover .link-arrow {
+            transform: translate(5px, -5px);
+            color: var(--accent);
+        }
+
+        /* Estilo Behance (Destaque Visual) */
+        .card.behance {
+            background-color: #0057ff; /* Cor da marca ou usar preto */
+            background: var(--black);
             color: white;
-            font-weight: 600;
-            margin-right: 30px;
-            font-size: 14px;
+        }
+        .card.behance p { color: rgba(255,255,255,0.6); }
+        .card.behance .link-arrow { color: white; }
+
+        /* Estilo WhatsApp (Destaque Urgência) */
+        .card.whatsapp {
+            background-color: #F5F5F7;
+        }
+        .card.whatsapp:hover {
+            background-color: #E8E8E8;
         }
 
-        /* --- ANIMAÇÕES --- */
+        /* --- 6. ANIMAÇÕES --- */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Efeito de Brilho (Glare) no Tilt */
-        .glare {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: linear-gradient(125deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 40%);
-            pointer-events: none;
+        /* Rodapé Flutuante */
+        .floating-status {
+            position: fixed;
+            bottom: 30px;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 50px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00ff40;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 64, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(0, 255, 64, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 64, 0); }
         }
 
     </style>
 </head>
 <body>
 
-    <div class="phone-wrapper">
+    <main class="container">
         
-        <div class="status-bar">
-            <span id="clock">9:41</span>
-            <span>
-                <span style="letter-spacing: -2px;">IIII</span> &nbsp; 5G
-            </span>
-        </div>
-
-        <div class="header-section">
-            <div class="header-date" id="full-date">Monday<br>28 May</div>
-            <div class="header-subtitle">Bem-vindo ao meu espaço</div>
-        </div>
-
-        <div class="dial-container">
-            <div class="dial" id="interactive-dial">
-                <div class="dial-icon">👋</div>
-                <div class="dial-text">Conectar</div>
+        <section class="card card-profile">
+            <div>
+                <span class="badge" id="time-badge">LISBON 10:00</span>
+                <h1>Eloi Silva.</h1>
+                <p style="max-width: 400px; margin-top: 16px; font-size: 1.1rem;">
+                    Visual Designer & Creative. <br>
+                    A criar experiências digitais que ligam marcas a pessoas.
+                </p>
             </div>
-            <div class="dial-ticks">
-                <span>Start</span>
-                <span>Max</span>
+            <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; display: flex; gap: 20px;">
+                <div>
+                    <strong style="display:block; font-size:1.2rem;">3+</strong>
+                    <span style="font-size:0.8rem; color:var(--text-grey)">Years Exp.</span>
+                </div>
+                <div>
+                    <strong style="display:block; font-size:1.2rem;">50+</strong>
+                    <span style="font-size:0.8rem; color:var(--text-grey)">Projects</span>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="grid-links">
-            
-            <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card dark js-tilt">
-                <div>
-                    <div class="card-label">Social Media</div>
-                    <div class="card-title">Instagram</div>
+        <section class="card card-dial" id="dial-card">
+            <div class="dial-wrapper">
+                <div class="dial-rotator" id="dial-rotator">
+                    <div class="dial-dot"></div>
                 </div>
-                <div class="card-icon">📸</div>
-                <div class="glare"></div>
-            </a>
-
-            <a href="https://www.behance.net/eloi_silva" target="_blank" class="card light js-tilt">
-                <div>
-                    <div class="card-title">Behance</div>
-                    <div class="card-label" style="color: var(--accent-color)">Portfolio & Design</div>
+                <div class="dial-label">
+                    <div class="dial-value">100%</div>
+                    <div class="dial-sub">CREATIVITY</div>
                 </div>
-                <div class="arrow-icon">➔</div>
-            </a>
+            </div>
+        </section>
 
-            <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="card light js-tilt">
-                <div>
-                    <div class="card-title">WhatsApp</div>
-                    <div class="card-label">Falar agora</div>
-                </div>
-                <div class="arrow-icon">➔</div>
-            </a>
+        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card card-link">
+            <div class="icon-box">📸</div>
+            <div class="link-arrow">↗</div>
+            <div>
+                <h2>Instagram</h2>
+                <p>O meu dia-a-dia visual.</p>
+            </div>
+        </a>
 
-        </div>
+        <a href="https://www.behance.net/eloi_silva" target="_blank" class="card card-link behance">
+            <div class="icon-box" style="color:var(--accent)">🎨</div>
+            <div class="link-arrow">↗</div>
+            <div>
+                <h2>Behance</h2>
+                <p>Portfólio detalhado & Case Studies.</p>
+            </div>
+        </a>
 
-        <div class="bottom-nav">
-            <div class="nav-pill">Home</div>
-            <div class="nav-text">Aquele Eloi ©</div>
-        </div>
+        <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="card card-link whatsapp">
+            <div class="icon-box">💬</div>
+            <div class="link-arrow">↗</div>
+            <div>
+                <h2>WhatsApp</h2>
+                <p style="color: var(--accent); font-weight: 600;">Vamos trabalhar juntos?</p>
+            </div>
+        </a>
 
+    </main>
+
+    <div class="floating-status">
+        <div class="status-dot"></div>
+        <span>Available for Freelance</span>
     </div>
 
     <script>
-        // 1. Relógio e Data em Tempo Real
+        // --- 1. LÓGICA DO RELÓGIO (LISBON) ---
         function updateTime() {
             const now = new Date();
-            
-            // Hora (ex: 9:41)
-            const hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').textContent = `${hours}:${minutes}`;
-
-            // Data (ex: Monday, 28 May) - Adaptado para PT se preferires
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            // Podes mudar 'en-GB' para 'pt-PT' se quiseres a data em português
-            const dateString = now.toLocaleDateString('pt-PT', options); 
-            
-            // Formatando para quebrar linha como na imagem
-            const splitDate = dateString.split(',');
-            if(splitDate.length > 1) {
-                 document.getElementById('full-date').innerHTML = `${splitDate[0]}<br>${splitDate[1]}`;
-            } else {
-                document.getElementById('full-date').textContent = dateString;
-            }
+            const timeString = now.toLocaleTimeString('pt-PT', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                timeZone: 'Europe/Lisbon' 
+            });
+            document.getElementById('time-badge').innerText = `LISBON ${timeString}`;
         }
         setInterval(updateTime, 1000);
         updateTime();
 
-        // 2. Efeito TILT 3D (Vanilla JS - Sem bibliotecas externas)
-        // Faz os cartões mexerem quando passas o rato ou tocas
-        const cards = document.querySelectorAll('.js-tilt');
+        // --- 2. LÓGICA DO DIAL INTERATIVO (Segue o Rato) ---
+        const dialCard = document.getElementById('dial-card');
+        const dialRotator = document.getElementById('dial-rotator');
 
-        cards.forEach(card => {
-            card.addEventListener('mousemove', handleMove);
-            card.addEventListener('mouseleave', handleLeave);
-            // Para mobile (touch)
-            card.addEventListener('touchmove', handleMove);
-            card.addEventListener('touchend', handleLeave);
-        });
+        if(window.matchMedia("(pointer: fine)").matches) {
+            // Apenas em PC (com rato) para economizar bateria em mobile
+            document.addEventListener('mousemove', (e) => {
+                const rect = dialCard.getBoundingClientRect();
+                const dialCenterX = rect.left + rect.width / 2;
+                const dialCenterY = rect.top + rect.height / 2;
 
-        function handleMove(e) {
-            e.preventDefault(); // Previne scroll ao tocar nos cards
-            
-            const card = this;
-            const height = card.clientHeight;
-            const width = card.clientWidth;
+                // Calcular ângulo entre rato e centro do dial
+                const deltaX = e.clientX - dialCenterX;
+                const deltaY = e.clientY - dialCenterY;
+                const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
-            // Detectar se é touch ou mouse
-            const xVal = e.layerX || (e.touches ? e.touches[0].clientX - card.getBoundingClientRect().left : 0);
-            const yVal = e.layerY || (e.touches ? e.touches[0].clientY - card.getBoundingClientRect().top : 0);
-
-            const yRotation = 20 * ((xVal - width / 2) / width);
-            const xRotation = -20 * ((yVal - height / 2) / height);
-
-            const string = `perspective(500px) scale(1.02) rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
-            
-            card.style.transform = string;
+                // Adicionar 90deg porque o ponto começa no topo
+                dialRotator.style.transform = `rotate(${angle + 90}deg)`;
+            });
+        } else {
+            // Em Mobile, animação automática suave
+            let angle = 0;
+            setInterval(() => {
+                angle += 1;
+                dialRotator.style.transform = `rotate(${angle}deg)`;
+            }, 50);
         }
 
-        function handleLeave() {
-            this.style.transform = `perspective(500px) scale(1) rotateX(0) rotateY(0)`;
-        }
-
-        // 3. Animação simples do Dial ao clicar
-        const dial = document.getElementById('interactive-dial');
-        dial.addEventListener('click', () => {
-            dial.style.transform = "rotate(180deg)";
-            setTimeout(() => {
-                 dial.style.transform = "rotate(0deg)";
-            }, 500);
+        // --- 3. EFEITO DE ENTRADA STAGGERED (Um por um) ---
+        // Pequeno script para fazer os cards aparecerem com delay
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.animation = `fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards ${index * 0.1}s`;
         });
 
     </script>
