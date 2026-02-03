@@ -10,18 +10,18 @@
     
     <style>
         :root {
-            --bg: #F5F5F7;
+            --bg: #F2F2F4;
             --text: #000000;
             --white: #FFFFFF;
             --wheel-border: #000000;
             --ball-color: #FF4500;
         }
 
-        /* --- IOS & MOBILE FIXES --- */
+        /* --- IOS & MOBILE RESET --- */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
-            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+            -webkit-user-select: none; user-select: none;
             touch-action: manipulation;
         }
 
@@ -31,93 +31,107 @@
             color: var(--text);
             height: 100dvh; width: 100%; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 30px 20px;
+            padding: 40px 24px 20px 24px;
         }
 
-        header { text-align: center; z-index: 10; pointer-events: none; }
-        h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+        /* --- TITULO ESTÉTICO --- */
+        header { 
+            text-align: center; 
+            z-index: 10; 
+            pointer-events: none;
+        }
+
+        h1 { 
+            font-size: 2.8rem; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            letter-spacing: -0.07em; /* Kerning apertado para look premium */
+            line-height: 0.85;
+            margin-bottom: 12px;
+        }
+
         .badge {
-            margin-top: 10px; display: inline-block; background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08); padding: 5px 15px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            display: inline-block;
+            background: var(--text);
+            color: var(--white);
+            padding: 5px 14px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 2px; /* Visual mais bruto/quadrado */
         }
 
-        /* --- STAGE DA RODA --- */
+        /* --- STAGE RODA --- */
         .stage {
-            position: relative; width: 290px; height: 290px;
+            position: relative; width: 280px; height: 280px;
             display: flex; align-items: center; justify-content: center;
             touch-action: none;
         }
 
         .static-shadow {
-            position: absolute; width: 92%; height: 92%; border-radius: 50%;
-            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
-            z-index: 0; pointer-events: none;
+            position: absolute; width: 90%; height: 90%; border-radius: 50%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.15); z-index: 0;
         }
 
-        /* --- RODA ULTRA-BOLD AGRESSIVA --- */
         .wheel {
             position: relative;
             width: 100%; height: 100%;
             border-radius: 50%;
-            border: 14px solid var(--wheel-border); /* Borda grossa e agressiva */
+            border: 14px solid var(--wheel-border);
             cursor: grab; z-index: 2;
             display: flex; align-items: center; justify-content: center;
             transform: translateZ(0);
         }
-        .wheel:active { cursor: grabbing; }
 
-        /* SETAS DENTRO DA BORDA */
         .arrow-marker {
-            position: absolute;
-            width: 0; height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 12px solid var(--wheel-border);
-            left: 50%; top: 2px;
-            transform: translateX(-50%);
-            pointer-events: none;
+            position: absolute; width: 0; height: 0;
+            border-left: 7px solid transparent; border-right: 7px solid transparent;
+            border-bottom: 11px solid var(--wheel-border);
+            left: 50%; top: 2px; transform: translateX(-50%);
         }
 
-        /* BOLA VERMELHO ALARANJADO */
         .ball {
             position: absolute; width: 28px; height: 28px;
             background-color: var(--ball-color);
             border-radius: 50%; z-index: 5;
-            box-shadow: 0 4px 12px rgba(255, 69, 0, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
             top: 50%; left: 50%; margin-top: -14px; margin-left: -14px;
             will-change: transform;
         }
 
-        /* --- LINKS (VISUAL MINIMALISTA ORIGINAL) --- */
-        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
+        /* --- LINKS BOLD MINIMALISTAS --- */
+        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; z-index: 10; }
         
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px;
+            background: var(--white); 
+            padding: 20px 24px; 
+            border-radius: 4px; /* Mais quadrado para aspeto industrial */
             display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            text-decoration: none; color: var(--text); 
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            /* Borda preta grossa */
+            border: 3px solid var(--text);
+            transition: all 0.15s cubic-bezier(0.2, 1, 0.3, 1);
         }
         
-        .card-left { display: flex; align-items: center; gap: 12px; }
+        .card-left { display: flex; align-items: center; gap: 14px; }
         .card-icon { width: 20px; height: 20px; fill: currentColor; }
 
-        .card:active { transform: scale(0.97); background: #fafafa; }
+        .card:active { transform: scale(0.97); }
         
         @media(hover: hover) {
             .card:hover {
                 background: var(--text);
                 color: var(--white);
-                transform: scale(1.02);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             }
         }
 
-        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        
-        #sound-hint { position: absolute; top: 80px; font-size: 0.65rem; color: #BBB; opacity: 0; transition: 1s; left: 50%; transform: translateX(-50%); }
+        footer { font-size: 0.65rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em; }
+        #sound-hint { position: absolute; opacity: 0; top: 120px; }
 
     </style>
 </head>
@@ -126,7 +140,7 @@
     <header>
         <h1>Eloi Silva</h1>
         <div class="badge">10+ Anos de Experiência</div>
-        <div id="sound-hint">🔊 Sound On</div>
+        <div id="sound-hint">Audio On</div>
     </header>
 
     <div class="stage">
@@ -147,21 +161,21 @@
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
             <div class="card-left">
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
                 Behance
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
         <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
             <div class="card-left">
                 <svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
                 WhatsApp
             </div>
-            <span>→</span>
+            <span>↗</span>
         </a>
     </nav>
 
@@ -171,7 +185,7 @@
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
 
-        // AUDIO
+        // AUDIO SYSTEM
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -191,11 +205,10 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.03);
         }
 
-        // PHYSICS
+        // PHYSICS ENGINE
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
-        const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.82;
-        // Limite: raio roda (145) - espessura (14) - raio bola (14) ~= 117
+        const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
         const LIMIT = 117; 
 
         function getA(x, y) {
@@ -239,7 +252,7 @@
                 const dot = bVX*nx + bVY*ny;
                 bVX -= 2*dot*nx; bVY -= 2*dot*ny;
                 bVX *= BOUNCE; bVY *= BOUNCE;
-                const s = wVel * 1.1; 
+                const s = wVel * 1.2; 
                 bVX += -ny*s; bVY += nx*s;
             }
             bVX *= FRICTION; bVY *= FRICTION;
@@ -254,7 +267,7 @@
         window.addEventListener('touchmove', move, {passive: false});
         window.addEventListener('touchend', end);
 
-        bY = -40; loop();
+        bY = -50; loop();
     </script>
 </body>
 </html>
