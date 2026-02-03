@@ -17,15 +17,31 @@
             --inner: #1A1A1A;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* --- CORREÇÃO DE BUG: REMOVER SELEÇÃO AZUL --- */
+        * {
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            
+            /* Essencial para Mobile: Remove o highlight azul ao tocar */
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            
+            /* Impede seleção de texto acidental */
+            -webkit-user-select: none;
+            user-select: none;
+            
+            /* Melhora a resposta ao toque */
+            touch-action: manipulation;
+        }
 
         body {
             background-color: var(--bg);
             font-family: 'Inter', sans-serif;
             color: var(--text);
-            height: 100dvh;
+            height: 100dvh; /* Altura dinâmica real do mobile */
             width: 100%;
-            overflow: hidden;
+            overflow: hidden; /* Proíbe scroll da página */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -37,6 +53,7 @@
         header {
             text-align: center;
             z-index: 10;
+            pointer-events: none; /* Deixa passar o toque se necessário */
         }
 
         h1 {
@@ -58,7 +75,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
 
-        /* --- STAGE DA RODA (CORREÇÃO DA SOMBRA) --- */
+        /* --- STAGE DA RODA --- */
         .stage {
             position: relative;
             width: 280px;
@@ -66,9 +83,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Impede comportamentos padrão do browser nesta área */
+            touch-action: none; 
         }
 
-        /* Esta é a sombra que fica parada atrás de tudo */
+        /* Sombra estática (não gira) */
         .static-shadow {
             position: absolute;
             width: 95%;
@@ -80,7 +99,7 @@
             pointer-events: none;
         }
 
-        /* Roda que o utilizador gira */
+        /* Roda interativa */
         .wheel {
             position: relative;
             width: 100%;
@@ -93,7 +112,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            /* Detalhe de luz interna sutil */
             box-shadow: inset 0 2px 10px rgba(255,255,255,0.1);
         }
 
@@ -106,6 +124,19 @@
             background-color: var(--inner);
             border-radius: 50%;
             box-shadow: inset 0 10px 30px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        
+        /* Ponto de referência visual para ver a roda girar */
+        .marker {
+            position: absolute;
+            top: 10px;
+            width: 4px;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         /* A BOLA (FISICA SOLTA) */
@@ -115,11 +146,12 @@
             height: 28px;
             background-color: var(--white);
             border-radius: 50%;
-            z-index: 5; /* Entre a roda e o conteúdo */
+            z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            pointer-events: none;
+            pointer-events: none; /* O clique passa através da bola */
             top: 50%; left: 50%;
             margin-top: -14px; margin-left: -14px;
+            will-change: transform; /* Otimização de performance */
         }
 
         /* --- LINKS --- */
@@ -142,19 +174,28 @@
             text-decoration: none;
             color: var(--text);
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+            transition: transform 0.1s linear, background 0.2s;
             border: 1px solid rgba(0,0,0,0.03);
+            /* Garante que o clique funciona bem */
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .card-left { display: flex; align-items: center; gap: 12px; }
         .card-icon { width: 20px; height: 20px; fill: currentColor; }
 
-        /* Hover Effect Apple-style */
-        .card:hover {
-            background: var(--text);
-            color: var(--white);
-            transform: scale(1.02);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .card:active {
+            transform: scale(0.96);
+            background: #f0f0f0;
+        }
+
+        @media(hover: hover) {
+            .card:hover {
+                background: var(--text);
+                color: var(--white);
+                transform: scale(1.02);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            }
         }
 
         footer {
@@ -177,7 +218,7 @@
         <div class="static-shadow"></div>
 
         <div class="wheel" id="wheel">
-            <div class="hollow"></div>
+            <div class="marker"></div> <div class="hollow"></div>
         </div>
 
         <div class="ball" id="ball"></div>
@@ -215,14 +256,27 @@
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
 
+        // Configuração
         let wheelAngle = 0;
         let isDragging = false;
         let startAngle = 0;
         let wheelVelocity = 0;
+        
+        // Variaveis para Haptics (Vibração)
+        let lastHapticAngle = 0;
+        const hapticInterval = 30; // Vibra a cada 30 graus
 
         let ballX = 0, ballY = 0, ballVX = 0, ballVY = 0;
-        const gravity = 0.45, friction = 0.985, bounce = 0.65;
-        const boundary = 76; // trackRadius(90) - ballRadius(14)
+        const gravity = 0.5, friction = 0.985, bounce = 0.65;
+        const boundary = 76; 
+
+        // Função de Vibração (Clique)
+        function triggerHaptic() {
+            // Verifica se o browser suporta
+            if (navigator.vibrate) {
+                navigator.vibrate(5); // Vibração super curta (5ms)
+            }
+        }
 
         function getAngle(x, y) {
             const rect = wheel.getBoundingClientRect();
@@ -254,17 +308,30 @@
             wheelVelocity = delta;
             wheelAngle += delta;
             wheel.style.transform = `rotate(${wheelAngle}deg)`;
+
+            // Verificar se deve vibrar
+            if (Math.abs(wheelAngle - lastHapticAngle) > hapticInterval) {
+                triggerHaptic();
+                lastHapticAngle = wheelAngle;
+            }
         }
 
         function stopDrag() { isDragging = false; wheel.style.cursor = 'grab'; }
 
         function update() {
             if (!isDragging) {
-                wheelVelocity *= 0.98;
+                wheelVelocity *= 0.98; // Inércia
                 wheelAngle += wheelVelocity;
                 wheel.style.transform = `rotate(${wheelAngle}deg)`;
+
+                // Vibração na inércia também
+                if (Math.abs(wheelAngle - lastHapticAngle) > hapticInterval && Math.abs(wheelVelocity) > 0.5) {
+                    triggerHaptic();
+                    lastHapticAngle = wheelAngle;
+                }
             }
 
+            // Física da Bola
             ballVY += gravity;
             ballX += ballVX;
             ballY += ballVY;
@@ -282,10 +349,12 @@
             }
 
             ballVX *= friction; ballVY *= friction;
+            // Translate3d força aceleração de hardware (mais fluido)
             ball.style.transform = `translate3d(${ballX}px, ${ballY}px, 0)`;
             requestAnimationFrame(update);
         }
 
+        // Listeners (Passive: false é crucial para impedir scroll)
         wheel.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', onDrag);
         window.addEventListener('mouseup', stopDrag);
