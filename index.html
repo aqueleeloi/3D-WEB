@@ -6,14 +6,15 @@
     <title>Eloi Silva | Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F0F0F2;
-            --text: #080808;
+            --bg: #EAEAEA;
+            --text: #111111;
             --white: #FFFFFF;
-            --wheel-black: #111111;
+            --wheel: #0a0a0a;
+            --inner-track: #2a2a2a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -24,216 +25,158 @@
             color: var(--text);
             height: 100dvh;
             width: 100%;
-            overflow: hidden;
+            overflow: hidden; /* Zero scroll */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 20px 10px 20px;
+            padding: 20px;
+            user-select: none;
         }
 
         /* --- HEADER --- */
         header {
             text-align: center;
             z-index: 10;
-            padding-top: 10px;
+            pointer-events: none; /* Deixa clicar através se necessário */
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 900;
-            letter-spacing: -0.06em;
+            letter-spacing: -0.05em;
             line-height: 1;
-            margin-bottom: 6px;
         }
 
-        .subtitle {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .exp-pill {
+        .role-badge {
+            margin-top: 8px;
+            display: inline-block;
             border: 1px solid rgba(0,0,0,0.1);
-            padding: 3px 10px;
-            border-radius: 100px;
+            background: rgba(255,255,255,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
-            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(5px);
         }
 
-        /* --- A ÁREA DA RODA (Stage) --- */
-        .stage {
-            flex-grow: 1;
-            width: 100%;
+        /* --- O PALCO DA FÍSICA --- */
+        .physics-stage {
+            position: relative;
+            width: 300px;
+            height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
-        /* Container que segura a sombra e a roda separadamente */
-        .wheel-assembly {
-            position: relative;
-            width: 280px;
-            height: 280px;
+        /* Responsividade para ecrãs pequenos */
+        @media (max-width: 360px) {
+            .physics-stage { width: 260px; height: 260px; }
         }
 
-        /* Responsivo para ecrãs pequenos */
-        @media (max-height: 700px) {
-            .wheel-assembly { width: 220px; height: 220px; }
-            h1 { font-size: 1.8rem; }
-        }
-
-        /* A SOMBRA ESTÁTICA (Correção: Não gira) */
-        .static-shadow {
+        /* 1. A Roda Grande (Gira com o user) */
+        .wheel-container {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
-            border-radius: 50%;
-            background: transparent;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.25);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* A RODA QUE GIRA */
-        .wheel {
-            position: relative;
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            background-color: var(--wheel-black);
+            background-color: var(--wheel);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
             cursor: grab;
-            z-index: 2;
-            will-change: transform;
-            /* Detalhe de luz sutil para dar volume 3D sem girar a sombra */
-            box-shadow: inset 0 4px 20px rgba(255,255,255,0.15), inset 0 -10px 30px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
         }
+        
+        .wheel-container:active { cursor: grabbing; }
 
-        .wheel:active { cursor: grabbing; }
-
-        /* O PONTO (Anchor) */
-        .dot-anchor {
+        /* Marcadores visuais na roda para ver que ela gira */
+        .wheel-marker {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            /* Esta div não roda com o JS, ela roda dentro da wheel */
-        }
-
-        .dot {
-            position: absolute;
-            top: 25px; /* Distância do topo */
+            width: 4px;
+            height: 15px;
+            background: rgba(255,255,255,0.2);
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 14px;
-            height: 14px;
-            background: white;
+            border-radius: 2px;
+        }
+        .wheel-marker.bottom { top: auto; bottom: 10px; }
+        .wheel-marker.left { top: 50%; left: 10px; transform: translateY(-50%) rotate(90deg); }
+        .wheel-marker.right { top: 50%; left: auto; right: 10px; transform: translateY(-50%) rotate(90deg); }
+
+        /* 2. A "Bola do Meio" (O buraco/pista) */
+        /* Esta parte é visual, gira com a roda grande */
+        .inner-hollow {
+            width: 180px;
+            height: 180px;
+            background-color: var(--inner-track);
             border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255,255,255,0.9);
-            z-index: 4;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); /* Sombra interna para profundidade */
+            position: relative;
         }
 
-        /* O RASTO (TRAIL) - A Criatividade */
-        /* SVG circular sobreposto para fazer o efeito de rasto */
-        .trail-svg {
+        /* 3. A BOLA SOLTA (PHYSICS BALL) */
+        /* Importante: Esta bola NÃO está dentro do HTML da roda que gira.
+           Ela é "irmã" para podermos controlar a posição X/Y independentemente da rotação da roda. */
+        .physics-ball {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 3;
-            transform: rotate(-90deg); /* Começar no topo */
-        }
-
-        .trail-path {
-            fill: none;
-            stroke: rgba(255,255,255,0.4); /* Rasto branco semitransparente */
-            stroke-width: 14; /* Mesma largura do ponto */
-            stroke-linecap: round;
-            /* O segredo: dasharray controla o comprimento do rasto */
-            stroke-dasharray: 0, 1000; 
-            transition: stroke-dasharray 0.1s linear; /* Fluidez */
+            width: 30px;
+            height: 30px;
+            background-color: var(--white);
+            border-radius: 50%;
+            z-index: 10; /* Fica por cima de tudo */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            pointer-events: none; /* O rato passa por ela e agarra a roda */
+            /* A posição será controlada via JS (Translate) */
+            top: 50%; 
+            left: 50%;
+            margin-top: -15px; /* Metade da altura para centrar o 0,0 */
+            margin-left: -15px;
         }
 
         /* --- LINKS --- */
         .menu {
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding-bottom: 20px;
             z-index: 10;
         }
 
-        .card {
+        .link-card {
             background: var(--white);
-            padding: 16px 20px;
+            padding: 16px 24px;
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             text-decoration: none;
             color: var(--text);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.04);
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .card-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+        .link-info { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+        .link-icon { width: 20px; height: 20px; fill: var(--text); }
+        .link-arrow { opacity: 0.3; transition: 0.2s; }
 
-        .card-icon { width: 22px; height: 22px; }
-        
-        .card-title {
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: -0.01em;
-        }
-
-        .card-arrow { 
-            opacity: 0.2; 
-            transform: translateX(0);
-            transition: all 0.2s;
-        }
-
-        /* Interatividade dos botões */
-        .card:active { transform: scale(0.96); }
-        
+        .link-card:active { transform: scale(0.95); }
         @media(hover: hover) {
-            .card:hover {
-                transform: scale(1.02);
-                background: var(--text);
-                color: var(--white);
-                border-color: var(--text);
-            }
-            .card:hover .card-arrow { opacity: 1; fill: white; transform: translateX(5px); }
-            .card:hover svg { fill: white; }
+            .link-card:hover { transform: scale(1.02); background: #111; color: #FFF; }
+            .link-card:hover .link-icon { fill: #FFF; }
+            .link-card:hover .link-arrow { opacity: 1; fill: #FFF; transform: translateX(5px); }
         }
 
-        /* Footer minúsculo */
-        .status {
+        footer {
             font-size: 0.7rem;
-            color: #AAA;
-            text-align: center;
+            color: #999;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
     </style>
@@ -242,66 +185,78 @@
 
     <header>
         <h1>Eloi Silva</h1>
-        <div class="subtitle">
-            Visual Designer
-            <span class="exp-pill">10+ Years</span>
-        </div>
+        <div class="role-badge">10+ Years Design</div>
     </header>
 
-    <div class="stage">
-        <div class="wheel-assembly">
-            <div class="static-shadow"></div>
-
-            <div class="wheel" id="wheel">
-                <div class="dot"></div>
-                
-                <svg class="trail-svg" viewBox="0 0 100 100">
-                    <circle class="trail-path" id="trail" cx="50" cy="50" r="41" /> 
-                    </svg>
-            </div>
+    <div class="physics-stage">
+        <div class="wheel-container" id="wheel">
+            <div class="wheel-marker"></div>
+            <div class="wheel-marker bottom"></div>
+            <div class="wheel-marker left"></div>
+            <div class="wheel-marker right"></div>
+            
+            <div class="inner-hollow"></div>
         </div>
+
+        <div class="physics-ball" id="ball"></div>
     </div>
 
     <nav class="menu">
-        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
-                <span class="card-title">Instagram</span>
+        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="link-card">
+            <div class="link-info">
+                <svg class="link-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
+                Instagram
             </div>
-            <svg class="card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+        </a>
+        
+        <a href="https://www.behance.net/eloi_silva" target="_blank" class="link-card">
+            <div class="link-info">
+                <svg class="link-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
+                Behance
+            </div>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
         </a>
 
-        <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
-                <span class="card-title">Behance</span>
+        <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="link-card">
+            <div class="link-info">
+                <svg class="link-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+                WhatsApp
             </div>
-            <svg class="card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
         </a>
-
-        <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-                <span class="card-title">WhatsApp</span>
-            </div>
-            <svg class="card-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
-        </a>
-
-        <div class="status">Available for Projects</div>
     </nav>
+
+    <footer>
+        © Eloi Silva • Portugal
+    </footer>
 
     <script>
         const wheel = document.getElementById('wheel');
-        const trail = document.getElementById('trail');
-        
-        // Variáveis de Física
-        let currentAngle = 0;
+        const ball = document.getElementById('ball');
+
+        // --- Variáveis da Roda (User Input) ---
+        let wheelAngle = 0;
         let isDragging = false;
         let startAngle = 0;
-        let velocity = 0;
-        let animationFrame;
+        let wheelVelocity = 0; // Velocidade angular da roda
+        let lastTimestamp = 0;
 
-        // Função para calcular ângulo
+        // --- Variáveis da Bola (Physics) ---
+        let ballX = 0; // Posição relativa ao centro (0,0 é o centro da roda)
+        let ballY = 0; 
+        let ballVX = 0; // Velocidade X
+        let ballVY = 0; // Velocidade Y
+        
+        // Configurações Físicas
+        const gravity = 0.5; // Força da gravidade para baixo
+        const friction = 0.98; // Atrito do ar (bola desacelera)
+        const bounce = 0.6; // O quanto a bola salta (0 a 1)
+        const trackRadius = 90; // Raio da área interna (metade de 180px)
+        const ballRadius = 15; // Raio da bola (metade de 30px)
+        const boundary = trackRadius - ballRadius; // Limite de colisão
+        
+        // --- 1. LÓGICA DE ARRASTAR A RODA (INPUT) ---
         function getAngle(x, y) {
             const rect = wheel.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
@@ -309,95 +264,123 @@
             return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
         }
 
-        // Função Visual (Rasto do Cometa)
-        function updateVisuals(vel) {
-            // Normalizar velocidade para o efeito (0 a 100+)
-            const speed = Math.abs(vel);
-            
-            // O rasto (dasharray) aumenta com a velocidade
-            // StrokeDasharray: primeiro valor é o comprimento do traço, segundo é o espaço
-            const trailLength = Math.min(speed * 3, 220); // Limite máximo do rasto
-            trail.style.strokeDasharray = `${trailLength}, 1000`;
-            
-            // Escala (Squash & Stretch sutil)
-            const scale = 1 + Math.min(speed / 1000, 0.05); // Cresce até 5%
-            wheel.style.transform = `rotate(${currentAngle}deg) scale(${scale})`;
-        }
-
-        // --- DRAG EVENTS ---
-
         function startDrag(e) {
             isDragging = true;
-            velocity = 0;
-            cancelAnimationFrame(animationFrame);
+            wheelVelocity = 0;
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-            startAngle = getAngle(clientX, clientY) - currentAngle;
+            startAngle = getAngle(clientX, clientY) - wheelAngle;
             wheel.style.cursor = 'grabbing';
         }
 
         function onDrag(e) {
             if (!isDragging) return;
-            e.preventDefault(); // Previne scroll no mobile
-
+            e.preventDefault();
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
             const angle = getAngle(clientX, clientY);
             
             const newAngle = angle - startAngle;
-            let delta = newAngle - currentAngle;
-
-            // Correção matemática para a rotação contínua (evitar salto 360->0)
+            let delta = newAngle - wheelAngle;
+            
+            // Correção matemática circular (evitar salto 360)
             if (delta > 180) delta -= 360;
             if (delta < -180) delta += 360;
 
-            velocity = delta;
-            currentAngle = newAngle;
-
-            updateVisuals(velocity);
+            wheelVelocity = delta; // A velocidade é o quanto movemos
+            wheelAngle = newAngle;
+            
+            wheel.style.transform = `rotate(${wheelAngle}deg)`;
         }
 
         function stopDrag() {
-            if (!isDragging) return;
             isDragging = false;
             wheel.style.cursor = 'grab';
-            requestAnimationFrame(inertiaLoop);
         }
 
-        // --- INÉRCIA ---
-        function inertiaLoop() {
-            if (isDragging) return;
-
-            // Fricção super baixa (0.99) para rodar muito tempo
-            velocity *= 0.99;
-
-            // Parar quando estiver muito lento
-            if (Math.abs(velocity) < 0.01) {
-                velocity = 0;
-                updateVisuals(0);
-                return;
+        // --- 2. LOOP DE FÍSICA (GAME LOOP) ---
+        function updatePhysics() {
+            // A. Inércia da Roda
+            if (!isDragging) {
+                wheelVelocity *= 0.98; // Roda desacelera sozinha
+                if (Math.abs(wheelVelocity) < 0.01) wheelVelocity = 0;
+                wheelAngle += wheelVelocity;
+                wheel.style.transform = `rotate(${wheelAngle}deg)`;
             }
 
-            currentAngle += velocity;
-            updateVisuals(velocity);
-            
-            requestAnimationFrame(inertiaLoop);
+            // B. Física da Bola
+            // 1. Aplicar Gravidade
+            ballVY += gravity;
+
+            // 2. Aplicar Velocidade Atual
+            ballX += ballVX;
+            ballY += ballVY;
+
+            // 3. Detetar Colisão com a Parede Circular (O Momento Mágico)
+            // Calcular distância do centro
+            const dist = Math.sqrt(ballX * ballX + ballY * ballY);
+
+            if (dist > boundary) {
+                // A bola bateu na parede!
+                
+                // Vetor Normal (direção do centro para a bola)
+                const nx = ballX / dist;
+                const ny = ballY / dist;
+
+                // Reposicionar a bola na borda (para não atravessar)
+                ballX = nx * boundary;
+                ballY = ny * boundary;
+
+                // Refletir Velocidade (Bounce)
+                // Produto escalar da velocidade com a normal
+                const dot = ballVX * nx + ballVY * ny;
+                
+                ballVX -= 2 * dot * nx;
+                ballVY -= 2 * dot * ny;
+
+                // Aplicar perda de energia (bounciness)
+                ballVX *= bounce;
+                ballVY *= bounce;
+
+                // --- A PARTE GENIAL: TRANSFERÊNCIA DE ENERGIA DA RODA ---
+                // Se a roda está a girar, ela "chuta" a bola na direção da tangente.
+                // Tangente (-ny, nx)
+                const spinForce = wheelVelocity * 0.8; // Ajustar força
+                
+                ballVX += -ny * spinForce; 
+                ballVY += nx * spinForce;
+
+                // Feedback Haptico se bater forte
+                if (Math.abs(spinForce) > 2 && navigator.vibrate) {
+                    navigator.vibrate(5);
+                }
+            }
+
+            // 4. Atrito da Bola (para não rolar para sempre)
+            ballVX *= friction;
+            ballVY *= friction;
+
+            // 5. Renderizar Bola
+            // Translate3d para performance de GPU
+            ball.style.transform = `translate3d(${ballX}px, ${ballY}px, 0)`;
+
+            requestAnimationFrame(updatePhysics);
         }
 
         // --- LISTENERS ---
         wheel.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', onDrag);
         window.addEventListener('mouseup', stopDrag);
-
         wheel.addEventListener('touchstart', startDrag, {passive: false});
         window.addEventListener('touchmove', onDrag, {passive: false});
         window.addEventListener('touchend', stopDrag);
 
-        // Impulso inicial para demo
-        setTimeout(() => {
-            velocity = 20;
-            inertiaLoop();
-        }, 500);
+        // Iniciar
+        updatePhysics();
+        
+        // Dar um empurrão inicial na bola para ela cair
+        ballX = 10; 
+        ballY = -50; 
 
     </script>
 </body>
