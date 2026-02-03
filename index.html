@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Visual Designer</title>
+    <title>Eloi Silva | Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. DESIGN SYSTEM --- */
         :root {
-            --bg: #F2F2F2;
-            --text: #050505;
-            --accent: #D64933; /* Terracotta da imagem */
+            --bg: #F4F4F6;
+            --text: #0A0A0A;
             --white: #FFFFFF;
-            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+            --accent: #FF3B30; /* Vermelho apenas para detalhes minimos */
+            --wheel-base: #111111;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -24,424 +23,333 @@
             background-color: var(--bg);
             font-family: 'Inter', sans-serif;
             color: var(--text);
-            min-height: 100vh;
+            height: 100dvh; /* Garante que ocupa 100% do ecrã móvel real */
+            width: 100%;
+            overflow: hidden; /* Proíbe scroll */
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-            overflow-x: hidden;
+            justify-content: space-between;
+            padding: 24px 20px 10px 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            opacity: 0;
-            animation: fadeIn 0.8s var(--ease) forwards;
-        }
-
-        /* --- 2. CABEÇALHO --- */
+        /* --- CABEÇALHO COMPACTO --- */
         header {
             text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--white);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #00C853;
-            border-radius: 50%;
-            box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
-            animation: pulse 2s infinite;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
         h1 {
-            font-size: 2.8rem;
-            font-weight: 900;
-            letter-spacing: -0.04em;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
             line-height: 1;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .role {
-            font-size: 1.1rem;
+        .meta-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.85rem;
             color: #666;
             font-weight: 500;
         }
-        
-        .exp-badge {
-            display: inline-block;
-            margin-top: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--accent);
-            background: rgba(214, 73, 51, 0.1);
+
+        /* O Badge Moderno (Clean) */
+        .badge-exp {
+            border: 1px solid rgba(0,0,0,0.15);
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 20px;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(4px);
         }
 
-        /* --- 3. A RODA FIDGET SPINNER (BOLD) --- */
-        .spinner-container {
-            position: relative;
+        /* --- A RODA (FIDGET SPINNER) --- */
+        .spinner-wrapper {
+            flex-grow: 1; /* Ocupa todo o espaço disponível no meio */
             width: 100%;
-            height: 320px; /* Espaço generoso */
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             perspective: 1000px;
+            position: relative;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 260px; /* Tamanho base */
+            height: 260px;
+        }
+
+        /* Ajuste responsivo para ecrãs pequenos */
+        @media (max-height: 700px) {
+            .wheel-container { width: 200px; height: 200px; }
+            h1 { font-size: 1.8rem; }
         }
 
         .wheel {
-            width: 240px;
-            height: 240px;
-            background-color: var(--text); /* Preto Sólido Bold */
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
+            background-color: var(--wheel-base);
             position: relative;
             cursor: grab;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            touch-action: none; /* Impede scroll enquanto toca na roda */
-            transition: transform 0.1s linear; /* Atualização fluida via JS */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            /* Sombra suave para profundidade */
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), inset 0 0 0 2px rgba(255,255,255,0.1);
+            transition: transform 0.05s linear; /* Atualização ultra-rápida JS */
         }
 
-        .wheel:active {
-            cursor: grabbing;
-            transform: scale(0.98); /* Feedback tátil visual */
-        }
+        .wheel:active { cursor: grabbing; }
 
-        /* O Ponto Branco (Indicador de Rotação) */
+        /* O Indicador (Ponto) */
         .wheel-dot {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: var(--white);
+            width: 12px;
+            height: 12px;
+            background: white;
             border-radius: 50%;
-            top: 30px; /* Distância da borda */
+            top: 25px;
             left: 50%;
             transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
             pointer-events: none;
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
         }
 
-        /* Texto decorativo no centro */
-        .wheel-center-text {
-            color: var(--white);
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.5;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        /* Instrução flutuante */
-        .drag-hint {
-            position: absolute;
-            bottom: 20px;
-            font-size: 0.75rem;
-            color: #999;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            pointer-events: none;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        /* --- 4. LINKS (LISTA MODERNA) --- */
-        .links-list {
+        /* --- LINKS (BOTTOM SHEET STYLE) --- */
+        .links-container {
+            width: 100%;
+            max-width: 450px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
+            padding-bottom: 20px;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
-        .link-card {
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: var(--white);
-            padding: 24px;
-            border-radius: 20px;
+            padding: 18px 24px;
+            border-radius: 18px;
             text-decoration: none;
             color: var(--text);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid transparent;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            border: 1px solid rgba(0,0,0,0.02);
         }
 
-        .link-info {
+        .link-left {
             display: flex;
             align-items: center;
             gap: 16px;
-            z-index: 2;
         }
 
-        .icon-box {
-            width: 40px;
-            height: 40px;
+        .icon-svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text);
+            transition: fill 0.2s;
+        }
+
+        .link-label {
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .link-arrow {
+            opacity: 0.3;
+            transition: all 0.2s;
+        }
+
+        /* Hover Interactions */
+        .link-item:hover {
+            transform: scale(1.02);
+            background: var(--text);
+            color: var(--white);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .link-item:hover .icon-svg { fill: var(--white); }
+        .link-item:hover .link-arrow { opacity: 1; transform: translateX(4px); fill: var(--white); }
+
+        /* Status flutuante minúsculo */
+        .footer-status {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #999;
+            text-align: center;
+            margin-top: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
         }
-        
-        .icon-svg {
-            width: 28px;
-            height: 28px;
-            fill: var(--text);
-            transition: fill 0.3s ease;
-        }
-
-        .link-text h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-        
-        .link-text p {
-            font-size: 0.9rem;
-            color: #888;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .arrow {
-            font-size: 1.5rem;
-            transform: rotate(-45deg);
-            transition: transform 0.3s ease;
-            z-index: 2;
-        }
-
-        /* HOVER EFFECT: Inversão de Cores */
-        .link-card:hover {
-            background: var(--text);
-            transform: scale(1.02);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-
-        .link-card:hover h3, 
-        .link-card:hover .arrow {
-            color: var(--white);
-        }
-        
-        .link-card:hover p {
-            color: rgba(255,255,255,0.6);
-        }
-
-        .link-card:hover .icon-svg {
-            fill: var(--white);
-        }
-
-        .link-card:hover .arrow {
-            transform: rotate(0deg);
-        }
-
-        /* --- 5. RODAPÉ --- */
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #aaa;
-            font-weight: 500;
-        }
-
-        /* KEYFRAMES */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4); }
-            70% { box-shadow: 0 0 0 6px rgba(0, 200, 83, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
+        .status-dot { width: 6px; height: 6px; background: #00D26A; border-radius: 50%; }
 
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <header>
-            <div class="status-pill">
-                <div class="status-dot"></div>
-                Disponível para Freelance
-            </div>
-            <h1>Eloi Silva.</h1>
-            <div class="role">Visual Designer & Art Director</div>
-            <div class="exp-badge">+10 Anos de Experiência</div>
-        </header>
-
-        <div class="spinner-container">
-            <div class="wheel" id="wheel">
-                <div class="wheel-dot"></div>
-                <div class="wheel-center-text">Gira-me</div>
-            </div>
-            <div class="drag-hint">Arraste para girar</div>
+    <header>
+        <h1>Eloi Silva</h1>
+        <div class="meta-wrapper">
+            <span>Visual Designer</span>
+            <div class="badge-exp">10+ Years Exp.</div>
         </div>
+    </header>
 
-        <nav class="links-list">
-            
-            <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="link-card">
-                <div class="link-info">
-                    <div class="icon-box">
-                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z" /></svg>
-                    </div>
-                    <div class="link-text">
-                        <h3>Instagram</h3>
-                        <p>Feed Visual</p>
-                    </div>
-                </div>
-                <div class="arrow">➔</div>
-            </a>
-
-            <a href="https://www.behance.net/eloi_silva" target="_blank" class="link-card">
-                <div class="link-info">
-                    <div class="icon-box">
-                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z" /></svg>
-                    </div>
-                    <div class="link-text">
-                        <h3>Behance</h3>
-                        <p>Portfolio</p>
-                    </div>
-                </div>
-                <div class="arrow">➔</div>
-            </a>
-
-            <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="link-card">
-                <div class="link-info">
-                    <div class="icon-box">
-                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z" /></svg>
-                    </div>
-                    <div class="link-text">
-                        <h3>WhatsApp</h3>
-                        <p>Start a project</p>
-                    </div>
-                </div>
-                <div class="arrow">➔</div>
-            </a>
-
-        </nav>
-
-        <footer>
-            © 2026 Eloi Silva. All Rights Reserved.
-        </footer>
-
+    <div class="spinner-wrapper">
+        <div class="wheel-container">
+            <div class="wheel" id="fidget-wheel">
+                <div class="wheel-dot"></div>
+            </div>
+        </div>
     </div>
 
+    <nav class="links-container">
+        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="link-item">
+            <div class="link-left">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z" /></svg>
+                <span class="link-label">Instagram</span>
+            </div>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+        </a>
+
+        <a href="https://www.behance.net/eloi_silva" target="_blank" class="link-item">
+            <div class="link-left">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z" /></svg>
+                <span class="link-label">Behance</span>
+            </div>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+        </a>
+
+        <a href="https://api.whatsapp.com/send/?phone=351913525033&text=Ol%C3%A1&type=phone_number&app_absent=0" target="_blank" class="link-item">
+            <div class="link-left">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z" /></svg>
+                <span class="link-label">WhatsApp</span>
+            </div>
+            <svg class="link-arrow" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+        </a>
+
+        <div class="footer-status">
+            <div class="status-dot"></div>
+            Open for Freelance
+        </div>
+    </nav>
+
     <script>
-        const wheel = document.getElementById('wheel');
+        const wheel = document.getElementById('fidget-wheel');
         let currentAngle = 0;
         let isDragging = false;
         let startAngle = 0;
-        let previousAngle = 0;
         let velocity = 0;
         let animationFrame;
-        let lastTime = 0;
+        
+        // Configuração de cores (Aquecer ao rodar)
+        // De Preto (111111) para Laranja Quente (FF4500)
+        function updateColor(vel) {
+            // Normalizar a velocidade (max speed visual ~50)
+            const speed = Math.min(Math.abs(vel), 50);
+            const intensity = speed / 50; // 0 a 1
 
-        // Função para calcular o ângulo baseado na posição do mouse/toque
+            // Se rodar muito rápido, vibra (Haptic Feedback)
+            if (intensity > 0.8 && navigator.vibrate) {
+                // Vibração muito curta e suave para não chatear
+                navigator.vibrate(5);
+            }
+
+            if (intensity < 0.1) {
+                wheel.style.backgroundColor = '#111111'; // Preto base
+            } else {
+                // Interpolar cor: Começa preto, vai aquecendo para vermelho/laranja
+                // HSL é melhor para isso. Preto é L=0, Cor é L=50
+                const lightness = intensity * 50; // Vai até 50%
+                const hue = 10 + (30 * (1 - intensity)); // 40 (Laranja) -> 10 (Vermelho escuro)
+                
+                // Cor "Quente"
+                wheel.style.backgroundColor = `hsl(${hue}, 100%, ${Math.max(7, lightness)}%)`;
+                
+                // Brilho externo (Glow)
+                wheel.style.boxShadow = `0 20px 60px rgba(0,0,0,0.2), 0 0 ${intensity * 30}px rgba(255, 69, 0, ${intensity * 0.6})`;
+            }
+        }
+
+        // Matemática de ângulos
         function getAngle(x, y) {
             const rect = wheel.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            // Math.atan2 retorna o ângulo em radianos, convertemos para graus
             return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
         }
 
-        // --- EVENT LISTENERS (Mouse & Touch) ---
-
-        // Iniciar
         function startDrag(e) {
             isDragging = true;
-            velocity = 0; // Parar inércia ao agarrar
-            cancelAnimationFrame(animationFrame); // Parar loop de física
-            
+            velocity = 0;
+            cancelAnimationFrame(animationFrame);
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-            
-            // Ângulo inicial do clique em relação ao centro
-            const angle = getAngle(clientX, clientY);
-            // Ajustar o offset para a roda não "saltar" para a posição do mouse
-            startAngle = angle - currentAngle;
-            
+            startAngle = getAngle(clientX, clientY) - currentAngle;
             wheel.style.cursor = 'grabbing';
         }
 
-        // Mover
         function onDrag(e) {
             if (!isDragging) return;
-            e.preventDefault(); // Evitar scroll em mobile
-
+            e.preventDefault();
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-            
             const angle = getAngle(clientX, clientY);
             const newAngle = angle - startAngle;
-
-            // Calcular velocidade instantânea (Delta do ângulo)
-            // Lidar com a virada de 180 para -180
-            let delta = newAngle - currentAngle;
             
-            // Atualizar ângulo
-            currentAngle = newAngle;
-            velocity = delta; // A velocidade é o quanto movemos neste frame
+            // Calcular velocidade instantânea
+            let delta = newAngle - currentAngle;
+            // Correção para quando passa de 360 para 0
+            if (delta > 180) delta -= 360;
+            if (delta < -180) delta += 360;
 
+            velocity = delta;
+            currentAngle = newAngle;
+            
             wheel.style.transform = `rotate(${currentAngle}deg)`;
+            updateColor(velocity);
         }
 
-        // Soltar (Ativar Inércia)
         function stopDrag() {
-            if (!isDragging) return;
             isDragging = false;
             wheel.style.cursor = 'grab';
-            
-            // Iniciar loop de inércia
             requestAnimationFrame(inertiaLoop);
         }
 
-        // --- FÍSICA DE INÉRCIA (O Efeito Fidget Spinner) ---
         function inertiaLoop() {
             if (isDragging) return;
 
-            // Desaceleração (Fricção)
-            velocity *= 0.95; // Perde 5% de velocidade a cada frame
+            // Fricção muito baixa para durar muito (0.985)
+            velocity *= 0.985;
 
-            // Parar se for muito lento
-            if (Math.abs(velocity) < 0.1) {
+            if (Math.abs(velocity) < 0.05) {
                 velocity = 0;
+                updateColor(0); // Volta ao preto
                 return;
             }
 
             currentAngle += velocity;
             wheel.style.transform = `rotate(${currentAngle}deg)`;
+            updateColor(velocity);
             
             requestAnimationFrame(inertiaLoop);
         }
 
-        // Adicionar eventos
+        // Event Listeners
         wheel.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', onDrag);
         window.addEventListener('mouseup', stopDrag);
@@ -450,11 +358,11 @@
         window.addEventListener('touchmove', onDrag, {passive: false});
         window.addEventListener('touchend', stopDrag);
 
-        // Um pequeno impulso inicial para mostrar que roda
+        // Impulso inicial automático para demonstrar
         setTimeout(() => {
-            velocity = 15; // Velocidade inicial
+            velocity = 40; // Começa a girar rápido
             inertiaLoop();
-        }, 1000);
+        }, 800);
 
     </script>
 </body>
