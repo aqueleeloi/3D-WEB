@@ -3,159 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Interaction</title>
+    <title>Eloi Silva | Kinetic Reactor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F0F0F2;
-            --text: #050505;
+            --bg: #EAEAEB;
+            --text: #111111;
             --white: #FFFFFF;
-            --wheel-border: #1a1a1a;
-            --accent-color: #FF4500; /* Laranja Néon */
-            --cyan: #00FFFF;
-            --magenta: #FF0055;
+            --accent: #FF3300; /* Laranja Internacional */
+            --glow: #FF5500;
         }
 
-        /* --- RESET & NO SCROLL --- */
-        * {
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; outline: none;
-            -webkit-user-select: none; user-select: none;
-            touch-action: manipulation;
-        }
-
-        html, body {
-            height: 100%; width: 100%; overflow: hidden; /* BLOQUEAR SCROLL */
-            position: fixed; /* Fixar layout no iOS */
-        }
+        /* RESET & LOCK SCROLL */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; }
 
         body {
             background-color: var(--bg);
+            /* Grelha técnica subtil no fundo */
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
             font-family: 'Inter', sans-serif;
             color: var(--text);
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- TITULO 3D (Quantum Style) --- */
+        /* --- HEADER TÉCNICO --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            height: 100px; display: flex; align-items: center; justify-content: center;
-            perspective: 800px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-
-        .title-wrapper { position: relative; display: inline-block; transform-style: preserve-3d; }
 
         h1 {
-            font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: -0.04em; line-height: 0.9; margin: 0; padding: 0;
-            color: transparent; 
+            font-size: 3rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: -0.05em; line-height: 0.9; margin: 0;
+            color: var(--text);
         }
 
-        .title-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            white-space: nowrap; will-change: transform, filter, opacity;
+        .status-bar {
+            display: flex; gap: 15px; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; color: #888; letter-spacing: 0.1em;
+            border: 1px solid rgba(0,0,0,0.1); padding: 6px 12px; border-radius: 4px;
+            background: rgba(255,255,255,0.5); backdrop-filter: blur(5px);
         }
+        .status-dot { width: 6px; height: 6px; background: #ccc; border-radius: 50%; display: inline-block; }
+        .status-dot.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
 
-        .layer-main { color: #000; z-index: 10; transform: translateZ(0); }
-        .layer-red { color: var(--magenta); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-20px); }
-        .layer-cyan { color: var(--cyan); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-40px); }
-
-        .badge {
-            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-            background: var(--white); border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
-            font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        /* --- STAGE --- */
+        /* --- STAGE (REACTOR) --- */
         .stage { 
-            position: relative; width: 300px; height: 300px; 
+            position: relative; width: 320px; height: 320px; 
             display: flex; align-items: center; justify-content: center; 
-            perspective: 1000px; 
+            /* Perspetiva para dar profundidade ao mecanismo */
+            perspective: 1000px;
         }
 
-        .wheel-container {
+        /* Container que segura tudo */
+        .reactor-container {
             position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d; 
-        }
-
-        .static-shadow { position: absolute; width: 90%; height: 90%; top: 5%; left: 5%; border-radius: 50%; background: transparent; box-shadow: 0 40px 80px rgba(0,0,0,0.15); z-index: 0; pointer-events: none; transform: translateZ(-50px); }
-
-        .wheel {
-            position: relative; width: 100%; height: 100%; border-radius: 50%;
-            border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; 
             transform-style: preserve-3d;
-            /* Fundo subtil para dar corpo à roda */
-            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.03) 100%);
+            cursor: grab;
         }
-        .wheel:active { cursor: grabbing; border-color: #000; }
+        .reactor-container:active { cursor: grabbing; }
 
-        /* --- OBSTÁCULO (AGORA É A BOLA/ESFERA) --- */
-        .orb-anchor {
-            position: absolute; top: 45px; left: 50%;
-            width: 36px; height: 36px; margin-left: -18px;
-            transform-style: preserve-3d; z-index: 4;
+        /* Sombra estática no chão */
+        .shadow-floor {
+            position: absolute; width: 80%; height: 80%; top: 10%; left: 10%;
+            border-radius: 50%; background: transparent;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.2);
+            transform: translateZ(-100px); pointer-events: none;
         }
 
-        .static-orb {
+        /* --- ANÉIS DA TURBINA --- */
+        .ring {
+            position: absolute; border-radius: 50%;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            pointer-events: none;
+            will-change: transform, border-color, box-shadow;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* Anel Externo (Pega) */
+        .ring-outer {
             width: 100%; height: 100%;
-            background: radial-gradient(circle at 30% 30%, #444, #000);
-            border-radius: 50%; /* Esfera perfeita */
-            transition: transform 0.1s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.1s;
-            will-change: transform;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-        }
-
-        /* Efeito de Impacto na Esfera */
-        .static-orb::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--cyan), var(--magenta));
-            transform: translateZ(-2px) scale(0.9); 
-            opacity: 0; transition: opacity 0.1s;
-            box-shadow: 0 0 30px var(--cyan), 0 0 50px var(--magenta);
-            filter: blur(5px);
-        }
-        
-        .static-orb.hit::before { opacity: 1; transform: translateZ(-10px) scale(1.6); }
-        .static-orb.hit { filter: brightness(1.3); }
-
-        /* --- OBJETO LIVRE (AGORA É O QUADRADO) --- */
-        .moving-square {
-            position: absolute; width: 32px; height: 32px;
-            background-color: var(--accent-color);
-            border-radius: 4px; /* Cantos ligeiramente curvos para design moderno */
+            border: 16px solid #1a1a1a; /* Borda grossa */
+            /* Textura de "Pega" */
+            background: repeating-conic-gradient(
+                from 0deg, 
+                transparent 0deg 2deg, 
+                rgba(255,255,255,0.05) 2deg 4deg
+            );
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
             z-index: 10;
-            box-shadow: 0 6px 15px rgba(255, 69, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.2);
-            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
-            pointer-events: none; will-change: transform;
-            transform: translateZ(20px); 
         }
 
-        /* --- LINKS (ESTILO MINIMALISTA ORIGINAL) --- */
+        /* Anel Médio (Detalhes Técnicos) */
+        .ring-mid {
+            width: 82%; height: 82%;
+            border: 2px dashed #999;
+            z-index: 5;
+        }
+
+        /* Anel Interno (O Núcleo) */
+        .ring-inner {
+            width: 65%; height: 65%;
+            border: 4px solid #ddd;
+            border-left-color: transparent; border-right-color: transparent; /* Aberturas */
+            z-index: 6;
+        }
+
+        /* --- INTERFACE DE DADOS CENTRAL --- */
+        .core-display {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) translateZ(20px);
+            text-align: center; pointer-events: none; z-index: 20;
+        }
+
+        .rpm-value {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900; font-size: 2.5rem;
+            font-feature-settings: "tnum"; /* Números tabulares para não saltar */
+            color: var(--text);
+            line-height: 1;
+            transition: color 0.1s;
+        }
+
+        .rpm-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; color: #888;
+            letter-spacing: 0.2em; margin-top: 5px;
+        }
+
+        /* --- ESTADOS DE ENERGIA (Ativados via JS) --- */
+        /* Nível 1: Ativo */
+        .reactor-container.active .ring-mid { border-color: #555; }
+        
+        /* Nível 2: Alta Velocidade (Laranja) */
+        .reactor-container.hot .ring-outer { border-color: #333; }
+        .reactor-container.hot .ring-inner { border-color: var(--accent); box-shadow: 0 0 15px rgba(255, 51, 0, 0.4); }
+        .reactor-container.hot .rpm-value { color: var(--accent); }
+
+        /* Nível 3: Velocidade Máxima (Branco/Plasma) */
+        .reactor-container.super .ring-outer { border-color: #000; }
+        .reactor-container.super .ring-inner { 
+            border-color: #fff; box-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent); 
+            background: rgba(255, 51, 0, 0.1);
+        }
+        .reactor-container.super .rpm-value { color: #fff; text-shadow: 0 0 20px var(--accent); }
+
+
+        /* --- LINKS MINIMALISTAS (Estilo Aprovado) --- */
         .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 20; transform: translateZ(50px); }
         
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px; /* Cantos arredondados suaves */
+            background: var(--white); padding: 18px 25px; border-radius: 18px;
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text); font-weight: 600;
             transition: all 0.2s ease-out; 
             border: 1px solid rgba(0,0,0,0.04); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03); /* Sombra difusa elegante */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
         
         .card-left { display: flex; align-items: center; gap: 14px; }
         .card-icon { width: 22px; height: 22px; fill: currentColor; }
         
         .card:active { transform: scale(0.98); background: #fafafa; }
-        
-        /* Hover apenas em desktop */
         @media(hover: hover) {
             .card:hover {
                 transform: translateY(-2px);
@@ -164,33 +181,34 @@
             }
         }
 
-        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 20px; font-weight: 600;}
-        #sound-hint { position: absolute; top: 125px; font-size: 0.65rem; font-weight: 600; color: #bbb; opacity: 0; letter-spacing: 0.1em; }
+        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600; margin-top: 10px;}
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="title-wrapper">
-            <h1 class="title-layer layer-cyan" id="title-cyan">ELOI SILVA</h1>
-            <h1 class="title-layer layer-red" id="title-red">ELOI SILVA</h1>
-            <h1 class="title-layer layer-main" id="title-main">ELOI SILVA</h1>
-            <h1 style="visibility:hidden;">ELOI SILVA</h1>
+        <h1>ELOI SILVA</h1>
+        <div class="status-bar">
+            <span>SYSTEM</span>
+            <span class="status-dot" id="dot-audio"></span>
+            <span>READY</span>
         </div>
-        <div class="badge">Visual & Interaction</div>
-        <div id="sound-hint">AUDIO ACTIVE</div>
     </header>
 
     <div class="stage">
-        <div class="wheel-container">
-            <div class="static-shadow"></div>
-            <div class="wheel" id="wheel">
-                <div class="orb-anchor">
-                    <div class="static-orb" id="obstacle"></div>
-                </div>
+        <div class="reactor-container" id="reactor">
+            <div class="shadow-floor"></div>
+            
+            <div class="ring ring-outer" id="ring-outer"></div>
+            
+            <div class="ring ring-mid" id="ring-mid"></div>
+            <div class="ring ring-inner" id="ring-inner"></div>
+
+            <div class="core-display">
+                <div class="rpm-value" id="rpm-text">0</div>
+                <div class="rpm-label">RPM</div>
             </div>
-            <div class="moving-square" id="free-obj"></div>
         </div>
     </div>
 
@@ -206,196 +224,164 @@
         </a>
     </nav>
 
-    <footer>Portugal MMXXVI</footer>
+    <footer>PT MMXXVI</footer>
 
     <script>
-        const wheel = document.getElementById('wheel');
-        const freeObj = document.getElementById('free-obj'); // QUADRADO
-        const obstacle = document.getElementById('obstacle'); // ESFERA
-        
-        const titleMain = document.getElementById('title-main');
-        const titleRed = document.getElementById('title-red');
-        const titleCyan = document.getElementById('title-cyan');
+        const reactor = document.getElementById('reactor');
+        const ringOuter = document.getElementById('ring-outer');
+        const ringMid = document.getElementById('ring-mid');
+        const ringInner = document.getElementById('ring-inner');
+        const rpmText = document.getElementById('rpm-text');
+        const dotAudio = document.getElementById('dot-audio');
 
-        // AUDIO
+        // AUDIO ENGINE (Turbine Sound)
         let audioCtx = null;
+        let humOsc = null;
+        let humGain = null;
+
         function initAudio() {
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const hint = document.getElementById('sound-hint');
-            hint.style.opacity = 1; setTimeout(() => hint.style.opacity = 0, 3000);
+            dotAudio.classList.add('active'); // Visual feedback de som ativo
+            
+            // Setup Hum continuo
+            humOsc = audioCtx.createOscillator();
+            humGain = audioCtx.createGain();
+            
+            humOsc.connect(humGain);
+            humGain.connect(audioCtx.destination);
+            
+            humOsc.type = 'sawtooth'; // Som mais mecânico/motor
+            // Frequência base baixa (idle)
+            humOsc.frequency.value = 40; 
+            // Volume base muito baixo
+            humGain.gain.value = 0; 
+            
+            humOsc.start();
         }
-        function playRatchet(velocity) {
+
+        function updateAudio(speed) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            const speed = Math.min(Math.abs(velocity), 50);
-            osc.frequency.setValueAtTime(100 + (speed * 5), audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        }
-        function playClack(force) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(250 - (force*2), audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.12);
-            gain.gain.setValueAtTime(Math.min(0.1 + force*0.01, 0.4), audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.12);
-            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+            
+            // Mapear velocidade (0-100) para Frequência (40Hz - 200Hz)
+            const targetFreq = 40 + (speed * 4);
+            const targetVol = Math.min(speed * 0.005, 0.1); // Volume sobe com velocidade
+            
+            // Transições suaves para não haver cliques no audio
+            humOsc.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
+            humGain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.1);
         }
 
-        // --- TITULO VOLUMÉTRICO ---
-        function updateVolumetricTitle(velocity) {
-            const speed = Math.abs(velocity);
-            const zDepth = Math.min(speed * 2, 100);
-            const blur = Math.min(speed * 0.3, 8);
-            const opacity = Math.min(speed * 0.03, 0.8);
+        // FÍSICA INOVADORA (FLYWHEEL)
+        let angle = 0;
+        let velocity = 0;
+        let isDragging = false;
+        let startAngle = 0;
+        let currentRPM = 0;
 
-            if (speed > 1) {
-                titleRed.style.transform = `translateZ(-${zDepth*1.5}px) scale(0.95)`;
-                titleRed.style.filter = `blur(${blur}px)`;
-                titleRed.style.opacity = opacity;
-                titleCyan.style.transform = `translateZ(-${zDepth*3}px) scale(0.9)`;
-                titleCyan.style.filter = `blur(${blur*1.5}px)`;
-                titleCyan.style.opacity = opacity;
-                titleMain.style.transform = `translateZ(${zDepth*0.2}px)`;
-            } else {
-                titleRed.style.transform = 'translateZ(-20px)'; titleRed.style.filter = 'none'; titleRed.style.opacity = 0;
-                titleCyan.style.transform = 'translateZ(-40px)'; titleCyan.style.filter = 'none'; titleCyan.style.opacity = 0;
-                titleMain.style.transform = 'translateZ(0)';
-            }
-        }
+        // Anéis internos rodam a velocidades diferentes (Parallax/Mechanism feel)
+        let angleMid = 0;
+        let angleInner = 0;
 
-        // --- FÍSICA 3D REATIVA DO OBSTÁCULO (AGORA ESFERA) ---
-        let obsImpactForce = 0;
-        let impactNX = 0; let impactNY = 0; 
-
-        function apply3DImpact() {
-            if (obsImpactForce > 0.5) {
-                // Rotação 3D baseada no impacto
-                const rotateY = -impactNX * obsImpactForce * 2.5;
-                const rotateX = impactNY * obsImpactForce * 2.5;
-                const pushZ = -obsImpactForce * 3; 
-
-                obstacle.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${pushZ}px)`;
-                obstacle.classList.add('hit');
-                obsImpactForce *= 0.85; 
-            } else {
-                obstacle.style.transform = 'rotateX(0) rotateY(0) translateZ(0)';
-                obstacle.classList.remove('hit');
-                obsImpactForce = 0;
-            }
-        }
-
-        // FÍSICA CORE (Invertida: Quadrado Livre, Esfera Presa)
-        let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
-        let sqX = 0, sqY = 0, sqVX = 0, sqVY = 0; // Coordenadas do Quadrado (Square)
-        
-        const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
-        const LIMIT = 115; // Raio interno da roda
-        const OBS_RADIUS = 105; // Raio onde a esfera está presa
-        const COLLISION_DIST = 32; // Distância de colisão (Raio esfera 18px + Meio lado quadrado 16px ~= 34px)
-
-        function getA(x, y) {
-            const r = wheel.getBoundingClientRect();
-            return Math.atan2(y - (r.top + r.height/2), x - (r.left + r.width/2)) * 180 / Math.PI;
+        function getAngle(x, y) {
+            const rect = reactor.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            return Math.atan2(y - cy, x - cx) * 180 / Math.PI;
         }
 
         function start(e) {
-            initAudio(); isDrag = true; wVel = 0;
+            initAudio();
+            isDragging = true;
+            // Se já estiver a rodar, mantemos a velocidade, mas permitimos adicionar mais
             const cx = e.clientX || e.touches[0].clientX;
             const cy = e.clientY || e.touches[0].clientY;
-            sAngle = getA(cx, cy) - wAngle;
+            startAngle = getAngle(cx, cy) - angle;
+            
+            // Efeito visual de "agarra"
+            reactor.style.transform = `scale(0.98)`;
         }
 
         function move(e) {
-            if (!isDrag) return;
+            if (!isDragging) return;
             e.preventDefault();
             const cx = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const cy = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            const a = getA(cx, cy);
-            let d = (a - sAngle) - wAngle;
-            if (d > 180) d -= 360; if (d < -180) d += 360;
-            wVel = d; wAngle += d;
-            wheel.style.transform = `rotate(${wAngle}deg)`;
-            if (Math.abs(wAngle - lastTick) > 15) { playRatchet(wVel); lastTick = wAngle; }
+            
+            const newAngle = getAngle(cx, cy);
+            let delta = (newAngle - startAngle) - angle;
+            
+            // Normalizar rotação
+            if (delta > 180) delta -= 360;
+            if (delta < -180) delta += 360;
+            
+            // Adicionar energia à roda (Input direto)
+            velocity = delta; 
+            angle += velocity;
         }
 
-        function end() { isDrag = false; }
+        function end() {
+            isDragging = false;
+            reactor.style.transform = `scale(1)`;
+        }
 
         function loop() {
-            if (!isDrag) {
-                wVel *= 0.985; wAngle += wVel;
-                wheel.style.transform = `rotate(${wAngle}deg)`;
-                if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
-            }
-            
-            updateVolumetricTitle(wVel);
-            apply3DImpact();
-
-            // FÍSICA DO QUADRADO (SQUARE)
-            sqVY += GRAVITY; sqX += sqVX; sqY += sqVY;
-
-            // CALCULAR POSIÇÃO DA ESFERA NO MUNDO
-            const rad = (wAngle - 90) * (Math.PI / 180);
-            const obsX = Math.cos(rad) * OBS_RADIUS;
-            const obsY = Math.sin(rad) * OBS_RADIUS;
-            
-            // Distância Quadrado <-> Esfera
-            const dx = sqX - obsX;
-            const dy = sqY - obsY;
-            const distObs = Math.sqrt(dx*dx + dy*dy);
-
-            // COLISÃO: Quadrado bate na Esfera
-            if (distObs < COLLISION_DIST) {
-                const nx = dx / distObs; const ny = dy / distObs;
-                const overlap = COLLISION_DIST - distObs;
-                sqX += nx * overlap; sqY += ny * overlap; 
-                
-                const dot = sqVX * nx + sqVY * ny;
-                sqVX -= 2 * dot * nx; sqVY -= 2 * dot * ny;
-                
-                const spinForce = wVel * 1.5;
-                sqVX += -ny * spinForce; sqVY += nx * spinForce;
-
-                // CALCULAR IMPACTO 3D NA ESFERA
-                const totalForce = Math.sqrt(sqVX*sqVX + sqVY*sqVY) + Math.abs(spinForce);
-                playClack(totalForce);
-                
-                impactNX = nx; impactNY = ny;
-                obsImpactForce = Math.min(totalForce * 2, 50); 
+            // Física de Inércia (Baixa fricção para longos spins)
+            if (!isDragging) {
+                velocity *= 0.992; // Fricção muito baixa (High Precision Bearing)
+                angle += velocity;
             }
 
-            // COLISÃO: Quadrado bate na Parede
-            const d = Math.sqrt(sqX*sqX + sqY*sqY);
-            if (d > LIMIT) {
-                const nx = sqX/d, ny = sqY/d;
-                sqX = nx*LIMIT; sqY = ny*LIMIT;
-                const dot = sqVX*nx + sqVY*ny;
-                sqVX -= 2*dot*nx; sqVY -= 2*dot*ny;
-                sqVX *= BOUNCE; sqVY *= BOUNCE;
-                const s = wVel * 1.2; sqVX += -ny*s; sqVY += nx*s;
-            }
-            sqVX *= FRICTION; sqVY *= FRICTION;
+            // Calcular RPM aproximado (Velocidade por frame * 60 frames * fator)
+            const targetRPM = Math.abs(velocity * 100);
+            // Suavizar leitura do RPM
+            currentRPM += (targetRPM - currentRPM) * 0.1;
+            rpmText.innerText = Math.round(currentRPM);
+
+            // Atualizar Audio
+            updateAudio(Math.abs(currentRPM));
+
+            // Rotação dos Anéis (Mecanismo complexo)
+            // Outer: Segue a física direta
+            ringOuter.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
             
-            // Render Quadrado (com rotação suave baseada na velocidade)
-            const rotSq = sqVX * 2;
-            freeObj.style.transform = `translate3d(${sqX}px, ${sqY}px, 20px) rotate(${rotSq}deg)`;
+            // Mid: Roda um pouco mais devagar (Drag)
+            angleMid += velocity * 0.8;
+            ringMid.style.transform = `translate(-50%, -50%) rotate(${angleMid}deg)`;
+            
+            // Inner: Contra-rotação ou rotação rápida (Turbine)
+            angleInner += velocity * 1.5; // Mais rápido
+            ringInner.style.transform = `translate(-50%, -50%) rotate(${angleInner}deg)`;
+
+            // GESTÃO DE ESTADOS DE ENERGIA (Cor e Brilho)
+            // Limpar classes
+            reactor.classList.remove('active', 'hot', 'super');
+
+            if (currentRPM > 10) {
+                reactor.classList.add('active');
+            }
+            if (currentRPM > 300) {
+                reactor.classList.add('hot');
+            }
+            if (currentRPM > 800) {
+                reactor.classList.add('super');
+                // Vibração no dispositivo se suportado (apenas em alta velocidade)
+                if (navigator.vibrate && Math.random() > 0.8) navigator.vibrate(5);
+            }
 
             requestAnimationFrame(loop);
         }
 
+        // Listeners
         const p = {passive: false};
-        wheel.addEventListener('mousedown', start);
+        reactor.addEventListener('mousedown', start);
         window.addEventListener('mousemove', move);
         window.addEventListener('mouseup', end);
-        wheel.addEventListener('touchstart', start, p);
+        reactor.addEventListener('touchstart', start, p);
         window.addEventListener('touchmove', move, p);
         window.addEventListener('touchend', end);
 
-        sqY = 50; loop();
+        loop();
     </script>
 </body>
 </html>
