@@ -54,7 +54,8 @@
             line-height: 1;
             margin: 0;
             white-space: nowrap;
-            /* Performance */
+            /* Transição suave para voltar ao normal quando para */
+            transition: transform 0.1s, filter 0.1s;
             will-change: transform, filter;
             grid-area: 1 / 1; 
         }
@@ -199,49 +200,46 @@
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        // --- EFEITO REATIVO À BOLA (Follow + Chaos) ---
+        // --- EFEITO REATIVO: VELOCIDADE + POSIÇÃO ---
         function updateGlitchEffect(ballX, ballY, velocity) {
-            // 1. Normalizar posição da bola (-1 a 1)
-            // LIMIT é 117, então dividimos para ter um ratio
-            const ratioX = ballX / 117;
-            const ratioY = ballY / 117;
-            
-            // 2. Definir intensidade do glitch baseado na distância ao centro
-            // Quanto mais na borda, mais glitch
-            const distFromCenter = Math.sqrt(ratioX*ratioX + ratioY*ratioY); // 0 a 1
-            const baseShift = distFromCenter * 20; // Até 20px de deslocamento só pela posição
-
-            // 3. Adicionar componente de velocidade (Caos)
             const speed = Math.abs(velocity);
-            const chaos = Math.min(speed * 1.5, 30); // Extra shift pela velocidade
             
-            // Random Jitter se estiver rápido
-            const jitterX = (speed > 5) ? (Math.random() - 0.5) * chaos : 0;
-            const jitterY = (speed > 5) ? (Math.random() - 0.5) * chaos : 0;
-
-            const totalShiftX = (ratioX * (baseShift + chaos)) + jitterX;
-            const totalShiftY = (ratioY * (baseShift + chaos)) + jitterY;
-            
-            // Aplicar às camadas (RGB Split na direção da bola)
-            if (Math.abs(totalShiftX) > 0.5 || Math.abs(totalShiftY) > 0.5) {
-                // Ciano segue a bola
-                txtCyan.style.transform = `translate(${totalShiftX}px, ${totalShiftY}px)`;
-                // Magenta vai oposto (efeito profundidade/split)
-                txtMagenta.style.transform = `translate(${-totalShiftX}px, ${-totalShiftY}px)`;
-                // Amarelo gira ligeiramente
-                txtYellow.style.transform = `translate(${jitterY}px, ${jitterX}px) rotate(${speed * 0.5}deg)`;
-                
-                // Blur baseado na velocidade
-                const blur = Math.min(speed * 0.5 + distFromCenter * 2, 10);
-                txtCyan.style.filter = `blur(${blur}px)`;
-                txtMagenta.style.filter = `blur(${blur}px)`;
-            } else {
-                // Reset
+            // CONDIÇÃO DE PARAGEM: Se a velocidade for muito baixa, RESET
+            if (speed < 0.5) {
                 const reset = 'translate(0,0)';
                 txtCyan.style.transform = reset; txtCyan.style.filter = 'none';
                 txtMagenta.style.transform = reset; txtMagenta.style.filter = 'none';
-                txtYellow.style.transform = reset;
+                txtYellow.style.transform = reset; txtYellow.style.filter = 'none';
+                return; // Sai da função, mantendo tudo limpo
             }
+
+            // --- SE ESTIVER A RODAR ---
+            
+            // 1. Normalizar posição da bola (-1 a 1) para saber a DIREÇÃO
+            const ratioX = ballX / 117; 
+            const ratioY = ballY / 117; 
+            
+            // 2. Definir intensidade baseada EXCLUSIVAMENTE na VELOCIDADE
+            // Quanto mais rápido, maior o efeito
+            const shiftIntensity = Math.min(speed * 1.5, 40); // Max 40px
+            const blurIntensity = Math.min(speed * 0.4, 8);   // Max 8px
+
+            // 3. Calcular deslocamento final (Direção * Intensidade)
+            const shiftX = ratioX * shiftIntensity;
+            const shiftY = ratioY * shiftIntensity;
+
+            // 4. Aplicar às camadas
+            // Ciano segue a bola
+            txtCyan.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            txtCyan.style.filter = `blur(${blurIntensity}px)`;
+            
+            // Magenta vai ao contrário (para criar o split RGB)
+            txtMagenta.style.transform = `translate(${-shiftX}px, ${-shiftY}px)`;
+            txtMagenta.style.filter = `blur(${blurIntensity}px)`;
+            
+            // Amarelo fica no meio com um pouco de escala
+            txtYellow.style.transform = `translate(${shiftX*0.2}px, ${shiftY*0.2}px) scale(${1 + speed/200})`;
+            txtYellow.style.filter = `blur(${blurIntensity * 1.5}px)`;
         }
 
         // FÍSICA
@@ -285,9 +283,6 @@
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
             
-            // ATUALIZAR EFEITO COM POSIÇÃO DA BOLA (bX, bY) + VELOCIDADE
-            updateGlitchEffect(bX, bY, wVel);
-
             // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
@@ -301,6 +296,9 @@
             }
             bVX *= FRICTION; bVY *= FRICTION;
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
+
+            // ATUALIZAR EFEITO DO TÍTULO (Depois de calcular a posição da bola)
+            updateGlitchEffect(bX, bY, wVel);
 
             requestAnimationFrame(loop);
         }
