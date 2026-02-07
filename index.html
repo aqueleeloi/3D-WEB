@@ -3,385 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Kinetic Reactor</title>
+    <title>Eloi Silva | The Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #EAEAEB;
-            --text: #111111;
-            --white: #FFFFFF;
-            --accent: #FF3300; /* Laranja Internacional */
-            --glow: #FF5500;
+            --bg: #0A0A0A;
+            --surface: #161616;
+            --text: #FFFFFF;
+            --accent: #00FF66; /* Verde Hacker */
+            --hot: #FF3300;
+            --locked: #333;
         }
 
-        /* RESET & LOCK SCROLL */
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; }
 
         body {
             background-color: var(--bg);
-            /* Grelha técnica subtil no fundo */
-            background-image: 
-                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
             font-family: 'Inter', sans-serif;
             color: var(--text);
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 40px 24px 30px 24px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* --- HEADER TÉCNICO --- */
-        header { 
-            text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        /* --- UI ELEMENTS --- */
+        .game-ui {
+            position: absolute; top: 40px; text-align: center;
+            width: 100%; pointer-events: none; z-index: 20;
+            transition: opacity 0.5s;
         }
 
-        h1 {
-            font-size: 3rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: -0.05em; line-height: 0.9; margin: 0;
-            color: var(--text);
-        }
-
-        .status-bar {
-            display: flex; gap: 15px; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.65rem; color: #888; letter-spacing: 0.1em;
-            border: 1px solid rgba(0,0,0,0.1); padding: 6px 12px; border-radius: 4px;
-            background: rgba(255,255,255,0.5); backdrop-filter: blur(5px);
-        }
-        .status-dot { width: 6px; height: 6px; background: #ccc; border-radius: 50%; display: inline-block; }
-        .status-dot.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
-
-        /* --- STAGE (REACTOR) --- */
-        .stage { 
-            position: relative; width: 320px; height: 320px; 
-            display: flex; align-items: center; justify-content: center; 
-            /* Perspetiva para dar profundidade ao mecanismo */
-            perspective: 1000px;
-        }
-
-        /* Container que segura tudo */
-        .reactor-container {
-            position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            cursor: grab;
-        }
-        .reactor-container:active { cursor: grabbing; }
-
-        /* Sombra estática no chão */
-        .shadow-floor {
-            position: absolute; width: 80%; height: 80%; top: 10%; left: 10%;
-            border-radius: 50%; background: transparent;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.2);
-            transform: translateZ(-100px); pointer-events: none;
-        }
-
-        /* --- ANÉIS DA TURBINA --- */
-        .ring {
-            position: absolute; border-radius: 50%;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            pointer-events: none;
-            will-change: transform, border-color, box-shadow;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        /* Anel Externo (Pega) */
-        .ring-outer {
-            width: 100%; height: 100%;
-            border: 16px solid #1a1a1a; /* Borda grossa */
-            /* Textura de "Pega" */
-            background: repeating-conic-gradient(
-                from 0deg, 
-                transparent 0deg 2deg, 
-                rgba(255,255,255,0.05) 2deg 4deg
-            );
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            z-index: 10;
-        }
-
-        /* Anel Médio (Detalhes Técnicos) */
-        .ring-mid {
-            width: 82%; height: 82%;
-            border: 2px dashed #999;
-            z-index: 5;
-        }
-
-        /* Anel Interno (O Núcleo) */
-        .ring-inner {
-            width: 65%; height: 65%;
-            border: 4px solid #ddd;
-            border-left-color: transparent; border-right-color: transparent; /* Aberturas */
-            z-index: 6;
-        }
-
-        /* --- INTERFACE DE DADOS CENTRAL --- */
-        .core-display {
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%) translateZ(20px);
-            text-align: center; pointer-events: none; z-index: 20;
-        }
-
-        .rpm-value {
-            font-family: 'Inter', sans-serif;
-            font-weight: 900; font-size: 2.5rem;
-            font-feature-settings: "tnum"; /* Números tabulares para não saltar */
-            color: var(--text);
-            line-height: 1;
-            transition: color 0.1s;
-        }
-
-        .rpm-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem; color: #888;
-            letter-spacing: 0.2em; margin-top: 5px;
-        }
-
-        /* --- ESTADOS DE ENERGIA (Ativados via JS) --- */
-        /* Nível 1: Ativo */
-        .reactor-container.active .ring-mid { border-color: #555; }
+        h1 { font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; color: #666; margin-bottom: 10px; }
         
-        /* Nível 2: Alta Velocidade (Laranja) */
-        .reactor-container.hot .ring-outer { border-color: #333; }
-        .reactor-container.hot .ring-inner { border-color: var(--accent); box-shadow: 0 0 15px rgba(255, 51, 0, 0.4); }
-        .reactor-container.hot .rpm-value { color: var(--accent); }
+        .progress-dots { display: flex; justify-content: center; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: #333; border: 1px solid #555; transition: all 0.3s; }
+        .dot.active { background: var(--text); box-shadow: 0 0 10px var(--text); }
+        .dot.unlocked { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
 
-        /* Nível 3: Velocidade Máxima (Branco/Plasma) */
-        .reactor-container.super .ring-outer { border-color: #000; }
-        .reactor-container.super .ring-inner { 
-            border-color: #fff; box-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent); 
-            background: rgba(255, 51, 0, 0.1);
+        #hint-text {
+            margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); opacity: 0;
         }
-        .reactor-container.super .rpm-value { color: #fff; text-shadow: 0 0 20px var(--accent); }
 
+        /* --- THE VAULT WHEEL --- */
+        .stage { position: relative; width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; }
 
-        /* --- LINKS MINIMALISTAS (Estilo Aprovado) --- */
-        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 20; transform: translateZ(50px); }
+        .wheel-container {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.5s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.5s;
+        }
+
+        /* Anel de Feedback (Brilho) */
+        .glow-ring {
+            position: absolute; top: -5%; left: -5%; width: 110%; height: 110%;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 60%, var(--locked) 100%);
+            opacity: 0; transition: opacity 0.1s; pointer-events: none;
+        }
+
+        /* A Roda Física */
+        .wheel {
+            position: relative; width: 100%; height: 100%; border-radius: 50%;
+            background: var(--surface);
+            border: 4px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.8);
+            cursor: grab; z-index: 10;
+        }
+        .wheel:active { cursor: grabbing; }
+
+        /* Ticks do Cofre */
+        .tick-mark {
+            position: absolute; width: 2px; height: 10px; background: #444;
+            left: 50%; top: 10px; transform-origin: center 150px; /* Raio - 10 */
+        }
+        .tick-mark.major { height: 15px; background: #888; width: 3px; }
+
+        /* Marcador Principal (Topo) */
+        .indicator {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; 
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-top: 15px solid var(--accent);
+            z-index: 15; filter: drop-shadow(0 0 5px var(--accent));
+        }
+
+        /* Centro do Cofre */
+        .center-knob {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 120px; height: 120px; background: #000; border-radius: 50%;
+            border: 2px solid #333;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 11;
+        }
+
+        .lock-icon { width: 40px; height: 40px; fill: #555; transition: all 0.3s; }
+        .wheel-container.success .lock-icon { fill: var(--accent); transform: scale(1.2); }
+
+        /* --- TELA DE VITÓRIA (LINKS) --- */
+        .reward-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            pointer-events: none; opacity: 0; transform: scale(0.8);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 50;
+        }
+        .reward-screen.show { pointer-events: auto; opacity: 1; transform: scale(1); }
+
+        .reward-title { 
+            font-size: 3rem; font-weight: 900; color: var(--text); margin-bottom: 30px; 
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 320px; }
         
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px;
+            background: var(--white); padding: 20px; border-radius: 12px;
             display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); font-weight: 600;
-            transition: all 0.2s ease-out; 
-            border: 1px solid rgba(0,0,0,0.04); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            text-decoration: none; color: #000; font-weight: 800; text-transform: uppercase;
+            transform: translateY(50px); opacity: 0; /* Animacao de entrada */
+            transition: transform 0.1s, box-shadow 0.1s;
         }
+        .card-left { display: flex; align-items: center; gap: 15px; }
+        .card-icon { width: 24px; height: 24px; fill: #000; }
         
-        .card-left { display: flex; align-items: center; gap: 14px; }
-        .card-icon { width: 22px; height: 22px; fill: currentColor; }
-        
-        .card:active { transform: scale(0.98); background: #fafafa; }
-        @media(hover: hover) {
-            .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-                color: #000;
-            }
-        }
+        .reward-screen.show .card { animation: popIn 0.5s forwards; }
+        .reward-screen.show .card:nth-child(1) { animation-delay: 0.1s; }
+        .reward-screen.show .card:nth-child(2) { animation-delay: 0.2s; }
+        .reward-screen.show .card:nth-child(3) { animation-delay: 0.3s; }
 
-        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600; margin-top: 10px;}
+        @keyframes popIn { to { opacity: 1; transform: translateY(0); } }
+        
+        .card:active { transform: scale(0.95); background: #ccc; }
+
+        #start-hint { position: absolute; bottom: 50px; color: #444; font-size: 0.7rem; letter-spacing: 2px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>ELOI SILVA</h1>
-        <div class="status-bar">
-            <span>SYSTEM</span>
-            <span class="status-dot" id="dot-audio"></span>
-            <span>READY</span>
+    <div class="game-ui" id="game-ui">
+        <h1>CRACK THE CODE</h1>
+        <div class="progress-dots">
+            <div class="dot" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
         </div>
-    </header>
+        <div id="hint-text">UNLOCKED</div>
+    </div>
+
+    <div class="indicator"></div>
 
     <div class="stage">
-        <div class="reactor-container" id="reactor">
-            <div class="shadow-floor"></div>
-            
-            <div class="ring ring-outer" id="ring-outer"></div>
-            
-            <div class="ring ring-mid" id="ring-mid"></div>
-            <div class="ring ring-inner" id="ring-inner"></div>
-
-            <div class="core-display">
-                <div class="rpm-value" id="rpm-text">0</div>
-                <div class="rpm-label">RPM</div>
+        <div class="wheel-container" id="vault">
+            <div class="glow-ring" id="glow"></div>
+            <div class="wheel" id="wheel">
+                <div class="center-knob">
+                    <svg class="lock-icon" id="lock-icon" viewBox="0 0 24 24"><path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/></svg>
+                </div>
             </div>
+        </div>
+
+        <div class="reward-screen" id="reward-screen">
+            <div class="reward-title">OPEN.</div>
+            <nav class="menu">
+                <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
+                    <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div>
+                </a>
+                <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
+                    <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div>
+                </a>
+                <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
+                    <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div>
+                </a>
+            </nav>
         </div>
     </div>
 
-    <nav class="menu">
-        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div><span>→</span>
-        </a>
-        <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div><span>→</span>
-        </a>
-        <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div><span>→</span>
-        </a>
-    </nav>
-
-    <footer>PT MMXXVI</footer>
+    <div id="start-hint">ROTATE TO UNLOCK</div>
 
     <script>
-        const reactor = document.getElementById('reactor');
-        const ringOuter = document.getElementById('ring-outer');
-        const ringMid = document.getElementById('ring-mid');
-        const ringInner = document.getElementById('ring-inner');
-        const rpmText = document.getElementById('rpm-text');
-        const dotAudio = document.getElementById('dot-audio');
+        // --- GAME CONFIG ---
+        const LEVELS = 3;
+        const TOLERANCE = 8; // Graus de tolerância para acertar
+        let targets = []; // Serão gerados aleatoriamente
+        let currentLevel = 0;
+        let isGameWon = false;
 
-        // AUDIO ENGINE (Turbine Sound)
+        const wheel = document.getElementById('wheel');
+        const glow = document.getElementById('glow');
+        const lockIcon = document.getElementById('lock-icon');
+        const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+        const vaultContainer = document.getElementById('vault');
+        const rewardScreen = document.getElementById('reward-screen');
+        const gameUI = document.getElementById('game-ui');
+        const startHint = document.getElementById('start-hint');
+
+        // GERAR VISUAL DA RODA
+        for(let i=0; i<60; i++){
+            const tick = document.createElement('div');
+            tick.className = (i%5===0) ? 'tick-mark major' : 'tick-mark';
+            tick.style.transform = `rotate(${i*6}deg)`;
+            wheel.appendChild(tick);
+        }
+
+        // GERAR ALVOS ALEATÓRIOS
+        function generateTargets() {
+            targets = [];
+            for(let i=0; i<LEVELS; i++) {
+                // Evita alvos muito perto do 0 ou uns dos outros
+                let t = Math.floor(Math.random() * 300) + 30; 
+                targets.push(t);
+            }
+            console.log("Targets:", targets);
+        }
+        generateTargets();
+
+        // --- AUDIO ENGINE (Safe Cracking) ---
         let audioCtx = null;
-        let humOsc = null;
-        let humGain = null;
-
+        
         function initAudio() {
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            dotAudio.classList.add('active'); // Visual feedback de som ativo
-            
-            // Setup Hum continuo
-            humOsc = audioCtx.createOscillator();
-            humGain = audioCtx.createGain();
-            
-            humOsc.connect(humGain);
-            humGain.connect(audioCtx.destination);
-            
-            humOsc.type = 'sawtooth'; // Som mais mecânico/motor
-            // Frequência base baixa (idle)
-            humOsc.frequency.value = 40; 
-            // Volume base muito baixo
-            humGain.gain.value = 0; 
-            
-            humOsc.start();
+            // Start Music or Drone
+            startHint.style.display = 'none';
         }
 
-        function updateAudio(speed) {
+        function playClick(isTarget) {
             if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
             
-            // Mapear velocidade (0-100) para Frequência (40Hz - 200Hz)
-            const targetFreq = 40 + (speed * 4);
-            const targetVol = Math.min(speed * 0.005, 0.1); // Volume sobe com velocidade
+            if (isTarget) {
+                // Som de "Click" mecânico forte (Acertou)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                if(navigator.vibrate) navigator.vibrate(20);
+            } else {
+                // Som suave de rolamento
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                if(navigator.vibrate) navigator.vibrate(2);
+            }
             
-            // Transições suaves para não haver cliques no audio
-            humOsc.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
-            humGain.gain.setTargetAtTime(targetVol, audioCtx.currentTime, 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
         }
 
-        // FÍSICA INOVADORA (FLYWHEEL)
+        function playUnlock() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            // Som de sucesso
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // --- LOGICA DO JOGO ---
         let angle = 0;
-        let velocity = 0;
+        let lastAngle = 0;
         let isDragging = false;
-        let startAngle = 0;
-        let currentRPM = 0;
-
-        // Anéis internos rodam a velocidades diferentes (Parallax/Mechanism feel)
-        let angleMid = 0;
-        let angleInner = 0;
-
+        let startRotation = 0;
+        let startX = 0, startY = 0;
+        
         function getAngle(x, y) {
-            const rect = reactor.getBoundingClientRect();
+            const rect = wheel.getBoundingClientRect();
             const cx = rect.left + rect.width/2;
             const cy = rect.top + rect.height/2;
             return Math.atan2(y - cy, x - cx) * 180 / Math.PI;
         }
 
+        function normalize(a) {
+            return (a % 360 + 360) % 360;
+        }
+
+        function updateGame() {
+            if(isGameWon) return;
+
+            const normAngle = normalize(angle); // 0 a 360
+            // O indicador está no topo (ângulo 270 visualmente, mas vamos considerar 0 a 360 relativo)
+            // Ajuste: A rotação visual do CSS roda o elemento. Se rodarmos 10deg, o tick 350 está no topo.
+            // Precisamos saber qual "número" (grau) está no topo.
+            const currentVal = normalize(360 - normAngle); 
+
+            const target = targets[currentLevel];
+            const dist = Math.abs(currentVal - target);
+            const close = Math.min(dist, 360 - dist); // Distância mais curta
+
+            // Feedback Visual (Hot/Cold)
+            if (close < 40) {
+                // Brilha mais forte quanto mais perto
+                const intensity = 1 - (close / 40);
+                glow.style.opacity = intensity;
+                glow.style.background = `radial-gradient(circle, transparent 50%, ${close < TOLERANCE ? 'var(--accent)' : 'var(--hot)'} 100%)`;
+            } else {
+                glow.style.opacity = 0;
+            }
+
+            // Verificar se parou no alvo
+            if (close < TOLERANCE && !isDragging) {
+                unlockLevel();
+            }
+        }
+
+        function unlockLevel() {
+            playUnlock();
+            dots[currentLevel].classList.add('unlocked');
+            
+            // Visual Pop
+            vaultContainer.classList.add('success');
+            setTimeout(() => vaultContainer.classList.remove('success'), 200);
+
+            currentLevel++;
+
+            if (currentLevel >= LEVELS) {
+                winGame();
+            } else {
+                dots[currentLevel].classList.add('active');
+            }
+        }
+
+        function winGame() {
+            isGameWon = true;
+            // Animação de Vitória
+            setTimeout(() => {
+                vaultContainer.style.transform = "scale(5)";
+                vaultContainer.style.opacity = "0";
+                gameUI.style.opacity = "0";
+                
+                setTimeout(() => {
+                    vaultContainer.style.display = "none";
+                    rewardScreen.classList.add('show');
+                }, 500);
+            }, 500);
+        }
+
+        // --- CONTROLES ---
         function start(e) {
+            if(isGameWon) return;
             initAudio();
             isDragging = true;
-            // Se já estiver a rodar, mantemos a velocidade, mas permitimos adicionar mais
             const cx = e.clientX || e.touches[0].clientX;
             const cy = e.clientY || e.touches[0].clientY;
-            startAngle = getAngle(cx, cy) - angle;
-            
-            // Efeito visual de "agarra"
-            reactor.style.transform = `scale(0.98)`;
+            startRotation = getAngle(cx, cy) - angle;
+            dots[currentLevel].classList.add('active');
         }
 
         function move(e) {
-            if (!isDragging) return;
+            if (!isDragging || isGameWon) return;
             e.preventDefault();
             const cx = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const cy = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             
-            const newAngle = getAngle(cx, cy);
-            let delta = (newAngle - startAngle) - angle;
+            angle = getAngle(cx, cy) - startRotation;
+            wheel.style.transform = `rotate(${angle}deg)`;
+
+            // Haptic Ticks (a cada 10 graus)
+            if (Math.abs(angle - lastAngle) > 10) {
+                playClick(false);
+                lastAngle = angle;
+            }
             
-            // Normalizar rotação
-            if (delta > 180) delta -= 360;
-            if (delta < -180) delta += 360;
-            
-            // Adicionar energia à roda (Input direto)
-            velocity = delta; 
-            angle += velocity;
+            // Verificar "Hot zone"
+            updateGame();
         }
 
         function end() {
             isDragging = false;
-            reactor.style.transform = `scale(1)`;
+            // Verificar se parou no sitio certo ao largar
+            updateGame();
         }
 
-        function loop() {
-            // Física de Inércia (Baixa fricção para longos spins)
-            if (!isDragging) {
-                velocity *= 0.992; // Fricção muito baixa (High Precision Bearing)
-                angle += velocity;
-            }
-
-            // Calcular RPM aproximado (Velocidade por frame * 60 frames * fator)
-            const targetRPM = Math.abs(velocity * 100);
-            // Suavizar leitura do RPM
-            currentRPM += (targetRPM - currentRPM) * 0.1;
-            rpmText.innerText = Math.round(currentRPM);
-
-            // Atualizar Audio
-            updateAudio(Math.abs(currentRPM));
-
-            // Rotação dos Anéis (Mecanismo complexo)
-            // Outer: Segue a física direta
-            ringOuter.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-            
-            // Mid: Roda um pouco mais devagar (Drag)
-            angleMid += velocity * 0.8;
-            ringMid.style.transform = `translate(-50%, -50%) rotate(${angleMid}deg)`;
-            
-            // Inner: Contra-rotação ou rotação rápida (Turbine)
-            angleInner += velocity * 1.5; // Mais rápido
-            ringInner.style.transform = `translate(-50%, -50%) rotate(${angleInner}deg)`;
-
-            // GESTÃO DE ESTADOS DE ENERGIA (Cor e Brilho)
-            // Limpar classes
-            reactor.classList.remove('active', 'hot', 'super');
-
-            if (currentRPM > 10) {
-                reactor.classList.add('active');
-            }
-            if (currentRPM > 300) {
-                reactor.classList.add('hot');
-            }
-            if (currentRPM > 800) {
-                reactor.classList.add('super');
-                // Vibração no dispositivo se suportado (apenas em alta velocidade)
-                if (navigator.vibrate && Math.random() > 0.8) navigator.vibrate(5);
-            }
-
-            requestAnimationFrame(loop);
-        }
-
-        // Listeners
         const p = {passive: false};
-        reactor.addEventListener('mousedown', start);
+        wheel.addEventListener('mousedown', start);
         window.addEventListener('mousemove', move);
         window.addEventListener('mouseup', end);
-        reactor.addEventListener('touchstart', start, p);
+        wheel.addEventListener('touchstart', start, p);
         window.addEventListener('touchmove', move, p);
         window.addEventListener('touchend', end);
 
-        loop();
     </script>
 </body>
 </html>
