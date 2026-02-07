@@ -10,11 +10,11 @@
     
     <style>
         :root {
-            --bg: #F2F2F4;
-            --text: #050505;
+            --bg: #F2F2F4;       
+            --text: #000000;     /* Preto Puro */
             --white: #FFFFFF;
             --wheel-border: #000000;
-            --ball-color: #FF4500;
+            --ball-color: #FF4500; 
         }
 
         /* --- RESET --- */
@@ -29,23 +29,23 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- CABEÇALHO COM EFEITO "AURORA/BUZZ" REAL --- */
+        /* --- CABEÇALHO --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            height: 120px; /* Altura para o efeito não cortar */
+            height: 120px; 
             display: flex; align-items: center; justify-content: center;
             position: relative;
         }
 
-        /* Contentor do Efeito */
+        /* Wrapper do Texto */
         .buzz-wrapper {
             position: relative;
-            display: inline-block;
-            /* Isolamento para o blend-mode funcionar corretamente sobre o fundo */
+            display: grid; /* Grid garante sobreposição perfeita */
+            place-items: center;
             isolation: isolate; 
         }
 
-        /* Estilo Base das Letras */
+        /* Estilo Base Tipografia */
         .buzz-text {
             font-size: 3.8rem;
             font-weight: 900;
@@ -53,43 +53,51 @@
             letter-spacing: -0.04em;
             line-height: 1;
             margin: 0;
-            /* Importante: Absolute para sobrepor as camadas perfeitamente */
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
             white-space: nowrap;
             will-change: transform, filter, opacity;
+            grid-area: 1 / 1; /* Todos ocupam a mesma célula */
         }
 
-        /* 1. Camada Principal (Preta - Fica no topo) */
+        /* O Espaçador (Invisível mas ocupa espaço) */
+        .buzz-spacer {
+            font-size: 3.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 1;
+            visibility: hidden; /* Garante que não se vê */
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- CAMADAS DO EFEITO --- */
+        
+        /* 1. Camada Principal (PRETO PURO e no topo) */
         .layer-main {
-            color: #000;
-            z-index: 10;
-            position: relative; /* Para ocupar espaço no fluxo se necessário, ou manter absolute se wrapper tiver tamanho */
+            color: #000000; 
+            z-index: 20; /* Fica acima de tudo */
+            position: absolute;
         }
 
-        /* 2. Camada Ciano (Desvio para a Esquerda) */
+        /* 2. Camadas de Cor (Atrás do preto) */
         .layer-cyan {
-            color: #00FFFF; /* Ciano Puro */
-            mix-blend-mode: multiply; /* Mistura para criar cores escuras onde sobrepõe */
+            color: #00FFFF; 
+            mix-blend-mode: multiply; 
             z-index: 5;
-            opacity: 0.8;
+            position: absolute;
+            opacity: 0.9;
         }
 
-        /* 3. Camada Magenta (Desvio para a Direita) */
         .layer-magenta {
-            color: #FF00FF; /* Magenta Puro */
+            color: #FF00FF; 
             mix-blend-mode: multiply;
             z-index: 6;
-            opacity: 0.8;
+            position: absolute;
+            opacity: 0.9;
         }
 
-        /* 4. Camada Amarela (Centro/Brilho) */
         .layer-yellow {
             color: #FFFF00;
             mix-blend-mode: multiply;
             z-index: 4;
-            opacity: 0.6;
+            position: absolute;
+            opacity: 0.8;
         }
 
         .badge {
@@ -148,13 +156,13 @@
 
     <header>
         <div class="buzz-wrapper">
+            <div class="buzz-spacer">ELOI SILVA</div>
+
             <h1 class="buzz-text layer-cyan" id="txt-cyan">ELOI SILVA</h1>
             <h1 class="buzz-text layer-magenta" id="txt-magenta">ELOI SILVA</h1>
             <h1 class="buzz-text layer-yellow" id="txt-yellow">ELOI SILVA</h1>
             
             <h1 class="buzz-text layer-main" id="txt-main">ELOI SILVA</h1>
-            
-            <h1 style="font-size: 3.8rem; font-weight: 900; letter-spacing: -0.04em; text-transform: uppercase; visibility: hidden;">ELOI SILVA</h1>
         </div>
         
         <div class="badge">Visual & Interaction</div>
@@ -215,43 +223,43 @@
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        // --- LÓGICA DO EFEITO "BUZZ" ---
+        // --- LÓGICA DO EFEITO "BUZZ" (AGORA PERFEITA) ---
         function updateBuzzEffect(velocity) {
             const speed = Math.abs(velocity);
             
-            // Cálculos para o efeito (Escala 0 a 100)
-            const shift = Math.min(speed * 1.5, 40); // Separação horizontal das cores
-            const blur = Math.min(speed * 0.5, 8);   // Desfoque de movimento
-            const skew = -velocity * 0.2;            // Inclinação ligeira
+            // Cálculos mais agressivos para o efeito ser visível logo
+            const shift = Math.min(speed * 2.0, 50); // Separação horizontal
+            const blur = Math.min(speed * 0.5, 10);  // Desfoque
+            const skew = -velocity * 0.2;            // Inclinação
 
             if (shift > 0.5) {
-                // Mover Ciano para a esquerda, Magenta para a direita
-                // Translate(-50%, -50%) é necessário porque os elementos estão centrados via absolute
-                
-                txtCyan.style.transform = `translate(calc(-50% - ${shift}px), -50%) skewX(${skew}deg)`;
+                // Mover Ciano para a ESQUERDA
+                txtCyan.style.transform = `translateX(-${shift}px) skewX(${skew}deg)`;
                 txtCyan.style.filter = `blur(${blur}px)`;
                 
-                txtMagenta.style.transform = `translate(calc(-50% + ${shift}px), -50%) skewX(${skew}deg)`;
+                // Mover Magenta para a DIREITA
+                txtMagenta.style.transform = `translateX(${shift}px) skewX(${skew}deg)`;
                 txtMagenta.style.filter = `blur(${blur}px)`;
                 
-                txtYellow.style.transform = `translate(-50%, -50%) scale(${1 + shift/200})`;
+                // Mover Amarelo para Centro/Fundo
+                txtYellow.style.transform = `scale(${1 + shift/100}) skewX(${skew}deg)`;
                 txtYellow.style.filter = `blur(${blur * 1.5}px)`;
                 
-                // Texto principal fica nítido, mas inclina
-                txtMain.style.transform = `translate(-50%, -50%) skewX(${skew}deg)`;
+                // Texto Preto Principal (Apenas inclina, mantém nitidez)
+                txtMain.style.transform = `skewX(${skew}deg)`;
             } else {
-                // Reset
-                const resetTransform = `translate(-50%, -50%)`;
-                txtCyan.style.transform = resetTransform;
+                // Reset (Posição Original)
+                const reset = `translate(0, 0)`;
+                txtCyan.style.transform = reset;
                 txtCyan.style.filter = 'none';
                 
-                txtMagenta.style.transform = resetTransform;
+                txtMagenta.style.transform = reset;
                 txtMagenta.style.filter = 'none';
                 
-                txtYellow.style.transform = resetTransform;
+                txtYellow.style.transform = reset;
                 txtYellow.style.filter = 'none';
                 
-                txtMain.style.transform = resetTransform;
+                txtMain.style.transform = reset;
             }
         }
 
@@ -296,9 +304,10 @@
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
             
-            // ATUALIZAR EFEITO DE TEXTO
+            // ATUALIZAR O EFEITO DO TÍTULO
             updateBuzzEffect(wVel);
 
+            // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
