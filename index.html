@@ -14,6 +14,7 @@
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
+            --ball-color: #FF4500; /* Cor da bola e do 'hit' */
         }
 
         /* --- CONFIGURAÇÕES IOS & RESET --- */
@@ -33,17 +34,14 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- CABEÇALHO COM EFEITO RGB (REFERENCE IMAGE) --- */
+        /* --- CABEÇALHO --- */
         header { 
             text-align: center; 
             z-index: 10; 
             pointer-events: none;
-            /* Garante que o efeito de sombra não é cortado */
             width: 100%;
-            perspective: 500px;
         }
 
-        /* O Título Principal */
         h1 { 
             font-size: 3.5rem; 
             font-weight: 900; 
@@ -52,10 +50,7 @@
             line-height: 0.9;
             margin-bottom: 5px;
             color: #000;
-            
-            /* Otimização para o efeito não travar */
-            will-change: text-shadow, transform, letter-spacing;
-            transition: letter-spacing 0.2s ease;
+            will-change: text-shadow, transform;
         }
 
         .badge {
@@ -71,7 +66,6 @@
             touch-action: none;
         }
 
-        /* Sombra de fundo */
         .static-shadow {
             position: absolute; width: 92%; height: 92%; border-radius: 50%;
             background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
@@ -82,7 +76,6 @@
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
-            /* Borda grossa preta como pedido */
             border: 14px solid var(--wheel-border);
             cursor: grab; z-index: 2;
             display: flex; align-items: center; justify-content: center;
@@ -90,27 +83,33 @@
         }
         .wheel:active { cursor: grabbing; }
 
-        /* Marcadores Setas */
-        .arrow-marker {
-            position: absolute; width: 0; height: 0;
-            border-left: 8px solid transparent; border-right: 8px solid transparent;
-            border-bottom: 12px solid var(--wheel-border);
-            left: 50%; top: 2px; transform: translateX(-50%); pointer-events: none;
+        /* NOVO MARCADOR QUADRADO */
+        .square-marker {
+            position: absolute;
+            width: 16px; height: 16px;
+            background-color: var(--wheel-border);
+            top: -8px; /* Posicionado na borda */
+            left: 50%;
+            transform: translateX(-50%);
+            transition: background-color 0.1s ease, transform 0.1s ease;
+        }
+        
+        /* Estado de 'Hit' do quadrado */
+        .square-marker.hit {
+            background-color: var(--ball-color);
+            transform: translateX(-50%) scale(1.2);
+            box-shadow: 0 0 10px var(--ball-color);
         }
 
-        /* --- BOLA COM EFEITO "ORB GLOW" (REFERENCE IMAGE) --- */
+        /* --- BOLA SIMPLES (SEM EFEITO GLOW) --- */
         .ball {
             position: absolute; width: 32px; height: 32px;
             border-radius: 50%; z-index: 5;
-            
-            /* Estado Inicial: Laranja Sólido */
-            background: #FF4500;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            
+            background: var(--ball-color); /* Cor sólida */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
             pointer-events: none;
-            will-change: transform, box-shadow, background;
-            transition: box-shadow 0.1s, background 0.1s;
+            will-change: transform;
         }
 
         /* --- LINKS MINIMALISTAS --- */
@@ -151,11 +150,7 @@
     <div class="stage">
         <div class="static-shadow"></div>
         <div class="wheel" id="wheel">
-            <div class="arrow-marker" style="transform: translateX(-50%) rotate(0deg) translateY(-2px);"></div>
-            <div class="arrow-marker" style="transform: translateX(-50%) rotate(90deg) translateY(-2px);"></div>
-            <div class="arrow-marker" style="transform: translateX(-50%) rotate(180deg) translateY(-2px);"></div>
-            <div class="arrow-marker" style="transform: translateX(-50%) rotate(270deg) translateY(-2px);"></div>
-            
+            <div class="square-marker" id="target-square"></div>
             <div style="width: 100%; height: 100%; border-radius: 50%;"></div>
         </div>
         <div class="ball" id="ball"></div>
@@ -164,7 +159,7 @@
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
             <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
+                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
             <span>→</span>
@@ -191,8 +186,9 @@
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
         const title = document.getElementById('dynamic-title');
+        const targetSquare = document.getElementById('target-square');
 
-        // --- SISTEMA DE AUDIO (PHANTOM HAPTICS) ---
+        // --- SISTEMA DE AUDIO ---
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -200,64 +196,55 @@
             const hint = document.getElementById('sound-hint');
             hint.style.opacity = 1; setTimeout(() => hint.style.opacity = 0, 3000);
         }
+        // Som de "Tick" da roda
         function playTick() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(180, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.03);
-            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.03);
             osc.start(); osc.stop(audioCtx.currentTime + 0.03);
         }
+        // Som de "Hit" no quadrado
+        function playHit() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            // Som mais agudo e curto para o impacto
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
+            osc.type = 'square'; // Som mais "digital"
+            osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+        }
 
-        // --- EFEITO ESPETACULAR (TEXTO & BOLA) ---
-        function updateVisualEffects(velocity, ballSpeed) {
+        // --- EFEITO DE TEXTO (Apenas RGB Split) ---
+        function updateTextEffect(velocity) {
             const speed = Math.abs(velocity);
-            
-            // 1. EFEITO DE TEXTO RGB (BASEADO NA IMAGEM GLOW)
-            // Quanto mais rápido, maior a separação das cores
-            const shift = Math.min(speed * 0.8, 15); // Limite de 15px
+            const shift = Math.min(speed * 0.8, 15);
             
             if (shift > 0.5) {
-                // Vermelho para um lado, Ciano/Azul para o outro, Verde no meio
-                // Isto recria o efeito de aberração cromática da imagem
                 title.style.textShadow = `
                     ${shift}px 0 rgba(255, 0, 0, 0.7), 
                     -${shift}px 0 rgba(0, 255, 255, 0.7),
                     0px 0px ${shift}px rgba(0, 255, 0, 0.3)
                 `;
-                // Ligeira distorção (Skew) para dar sensação de velocidade
                 title.style.transform = `skewX(${-velocity * 0.5}deg)`;
             } else {
                 title.style.textShadow = 'none';
                 title.style.transform = 'none';
             }
-
-            // 2. EFEITO DE BOLA GLOW (BASEADO NA IMAGEM ORB)
-            const totalBallSpeed = Math.min(ballSpeed, 30); // Cap de 30
-            if (totalBallSpeed > 5) {
-                // Transforma a bola laranja sólida numa bola de energia brilhante
-                // Centro Branco/Amarelo, Borda Azul/Ciano (como na imagem)
-                ball.style.background = `radial-gradient(circle, #FFFF00 20%, #FF4500 50%, #0000FF 100%)`;
-                ball.style.boxShadow = `
-                    0 0 ${totalBallSpeed * 2}px rgba(0, 100, 255, 0.8), 
-                    0 0 ${totalBallSpeed}px rgba(255, 100, 0, 0.8)
-                `;
-                ball.style.transform += ` scale(${1 + totalBallSpeed/100})`;
-            } else {
-                // Volta ao normal
-                ball.style.background = '#FF4500';
-                ball.style.boxShadow = '0 5px 15px rgba(255, 69, 0, 0.4)';
-            }
         }
 
-        // --- FÍSICA ---
+        // --- FÍSICA & INTERAÇÃO ---
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
-        const LIMIT = 117; 
+        const LIMIT = 117; // Limite interno da roda
+        let isHit = false; // Estado de colisão
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -287,15 +274,20 @@
         function end() { isDrag = false; }
 
         function loop() {
+            // RODA
             if (!isDrag) {
                 wVel *= 0.985; wAngle += wVel;
                 wheel.style.transform = `rotate(${wAngle}deg)`;
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
-            
-            // FÍSICA BOLA
+            // Efeito do Texto
+            updateTextEffect(wVel);
+
+            // BOLA FÍSICA
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
+            
+            // Colisão com a borda
             if (d > LIMIT) {
                 const nx = bX/d, ny = bY/d;
                 bX = nx*LIMIT; bY = ny*LIMIT;
@@ -306,15 +298,36 @@
                 bVX += -ny*s; bVY += nx*s;
             }
             bVX *= FRICTION; bVY *= FRICTION;
-            
-            // Aplicar posição e manter efeitos visuais
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
+
+            // --- DETECÇÃO DE INTERAÇÃO (BOLA x QUADRADO) ---
+            // O quadrado está no topo (ângulo -90 deg visualmente, mas 0 no nosso sistema de rotação local)
+            // Normalizamos o ângulo da roda para [0, 360)
+            let normWheelAngle = (wAngle % 360 + 360) % 360;
+            // O quadrado está sempre em 'normWheelAngle' no espaço global.
             
-            // Calcular velocidade total da bola para o efeito Glow
-            const ballSpeed = Math.sqrt(bVX*bVX + bVY*bVY);
-            
-            // ATUALIZAR EFEITOS ESPECIAIS
-            updateVisualEffects(wVel, ballSpeed);
+            // Ângulo da bola
+            let ballAngle = Math.atan2(bY, bX) * 180 / Math.PI;
+            // Ajustar para o sistema da roda (topo é 0, rotação horária)
+            ballAngle = (ballAngle + 90 + 360) % 360; 
+
+            // Diferença angular mínima
+            let angleDiff = Math.abs(normWheelAngle - ballAngle);
+            if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+            // Se a bola está perto da borda E perto do ângulo do quadrado
+            if (d > LIMIT - 10 && angleDiff < 15) {
+                if (!isHit) {
+                    isHit = true;
+                    targetSquare.classList.add('hit');
+                    playHit();
+                    // Remover o estado de hit após um curto período
+                    setTimeout(() => {
+                        targetSquare.classList.remove('hit');
+                        isHit = false;
+                    }, 150);
+                }
+            }
 
             requestAnimationFrame(loop);
         }
@@ -326,7 +339,7 @@
         window.addEventListener('touchmove', move, {passive: false});
         window.addEventListener('touchend', end);
 
-        bY = -40; loop();
+        bY = 50; loop(); // Bola começa em baixo
     </script>
 </body>
 </html>
