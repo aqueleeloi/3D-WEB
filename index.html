@@ -6,18 +6,17 @@
     <title>Eloi Silva | Visual Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F2F2F4;
+            --bg: #F5F5F7;
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
-            --ball-color: #FF4500;
         }
 
-        /* --- RESET & IOS OPTIMIZATION --- */
+        /* --- CONFIGURAÇÕES IOS & RESET --- */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -34,142 +33,119 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- TITULO COM EFEITO CROMÁTICO (GLITCH) --- */
+        /* --- CABEÇALHO COM EFEITO RGB (REFERENCE IMAGE) --- */
         header { 
             text-align: center; 
             z-index: 10; 
             pointer-events: none;
+            /* Garante que o efeito de sombra não é cortado */
             width: 100%;
-            /* Garante que o efeito não corta nas bordas */
-            overflow: visible; 
+            perspective: 500px;
         }
 
-        .brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Transição suave para quando o efeito para */
-            transition: transform 0.1s;
-        }
-
-        /* O texto principal que vai sofrer a aberração */
-        .glitch-text {
-            display: block;
-            /* Aceleração de hardware para o efeito não travar */
-            will-change: text-shadow, transform; 
-        }
-
-        .first-name {
-            font-size: 4.5rem; 
-            font-weight: 900;
+        /* O Título Principal */
+        h1 { 
+            font-size: 3.5rem; 
+            font-weight: 900; 
             text-transform: uppercase;
-            letter-spacing: -0.08em;
-            line-height: 0.7;
-            margin-left: -10px;
-            color: var(--text);
-        }
-
-        .last-name {
-            font-size: 2.2rem;
-            font-weight: 200; 
-            text-transform: uppercase;
-            letter-spacing: 0.4em; 
-            line-height: 1.5;
-            color: #444;
-            margin-right: -0.4em;
+            letter-spacing: -0.06em; 
+            line-height: 0.9;
+            margin-bottom: 5px;
+            color: #000;
+            
+            /* Otimização para o efeito não travar */
+            will-change: text-shadow, transform, letter-spacing;
+            transition: letter-spacing 0.2s ease;
         }
 
         .badge {
-            margin-top: 15px;
-            display: inline-block;
-            background: var(--text);
-            color: var(--white);
-            padding: 4px 12px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            margin-top: 15px; display: inline-block; background: var(--white);
+            border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
+            font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
 
-        /* --- STAGE RODA --- */
+        /* --- STAGE DA RODA --- */
         .stage {
-            position: relative; width: 280px; height: 280px;
+            position: relative; width: 290px; height: 290px;
             display: flex; align-items: center; justify-content: center;
             touch-action: none;
         }
 
+        /* Sombra de fundo */
         .static-shadow {
-            position: absolute; width: 90%; height: 90%; border-radius: 50%;
-            box-shadow: 0 35px 90px rgba(0,0,0,0.14); z-index: 0;
+            position: absolute; width: 92%; height: 92%; border-radius: 50%;
+            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+            z-index: 0; pointer-events: none;
         }
 
+        /* --- RODA BOLD --- */
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
-            border: 12px solid var(--wheel-border);
+            /* Borda grossa preta como pedido */
+            border: 14px solid var(--wheel-border);
             cursor: grab; z-index: 2;
             display: flex; align-items: center; justify-content: center;
             transform: translateZ(0);
         }
+        .wheel:active { cursor: grabbing; }
 
+        /* Marcadores Setas */
         .arrow-marker {
             position: absolute; width: 0; height: 0;
-            border-left: 7px solid transparent; border-right: 7px solid transparent;
-            border-bottom: 11px solid var(--wheel-border);
-            left: 50%; top: 2px; transform: translateX(-50%);
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--wheel-border);
+            left: 50%; top: 2px; transform: translateX(-50%); pointer-events: none;
         }
 
+        /* --- BOLA COM EFEITO "ORB GLOW" (REFERENCE IMAGE) --- */
         .ball {
-            position: absolute; width: 28px; height: 28px;
-            background-color: var(--ball-color);
+            position: absolute; width: 32px; height: 32px;
             border-radius: 50%; z-index: 5;
-            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
-            top: 50%; left: 50%; margin-top: -14px; margin-left: -14px;
-            will-change: transform;
+            
+            /* Estado Inicial: Laranja Sólido */
+            background: #FF4500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            
+            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
+            pointer-events: none;
+            will-change: transform, box-shadow, background;
+            transition: box-shadow 0.1s, background 0.1s;
         }
 
-        /* --- LINKS --- */
+        /* --- LINKS MINIMALISTAS --- */
         .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
         
         .card {
-            background: var(--white); 
-            padding: 18px 25px; 
-            border-radius: 20px; 
+            background: var(--white); padding: 18px 25px; border-radius: 18px;
             display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); 
-            font-weight: 600;
+            text-decoration: none; color: var(--text); font-weight: 600;
             transition: all 0.2s cubic-bezier(0.2, 1, 0.3, 1);
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         
-        .card-left { display: flex; align-items: center; gap: 12px; }
+        .card-left { display: flex; align-items: center; gap: 14px; }
         .card-icon { width: 20px; height: 20px; fill: currentColor; }
 
-        .card:active { transform: scale(0.96); background: #f9f9f9; }
-        
+        .card:active { transform: scale(0.97); background: #f9f9f9; }
         @media(hover: hover) {
             .card:hover {
-                background: var(--text);
-                color: var(--white);
-                transform: translateY(-2px);
-                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+                background: var(--text); color: var(--white);
+                transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             }
         }
 
-        footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.2em; }
-        #sound-hint { position: absolute; opacity: 0; }
+        footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.1em; }
+        #sound-hint { position: absolute; top: 110px; opacity: 0; font-size: 0.7rem; color: #999;}
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">
-            <span class="first-name glitch-text" id="title-name">Eloi</span>
-            <span class="last-name glitch-text" id="title-surname">Silva</span>
-        </div>
-        <div class="badge">Visual Interaction</div>
+        <h1 id="dynamic-title">ELOI SILVA</h1>
+        <div class="badge">Visual & Interaction</div>
+        <div id="sound-hint">Sound Active</div>
     </header>
 
     <div class="stage">
@@ -179,6 +155,7 @@
             <div class="arrow-marker" style="transform: translateX(-50%) rotate(90deg) translateY(-2px);"></div>
             <div class="arrow-marker" style="transform: translateX(-50%) rotate(180deg) translateY(-2px);"></div>
             <div class="arrow-marker" style="transform: translateX(-50%) rotate(270deg) translateY(-2px);"></div>
+            
             <div style="width: 100%; height: 100%; border-radius: 50%;"></div>
         </div>
         <div class="ball" id="ball"></div>
@@ -187,7 +164,7 @@
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
             <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
+                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
             <span>→</span>
@@ -213,15 +190,15 @@
     <script>
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
-        // Elementos de Texto para o efeito
-        const titleName = document.getElementById('title-name');
-        const titleSurname = document.getElementById('title-surname');
+        const title = document.getElementById('dynamic-title');
 
-        // AUDIO
+        // --- SISTEMA DE AUDIO (PHANTOM HAPTICS) ---
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const hint = document.getElementById('sound-hint');
+            hint.style.opacity = 1; setTimeout(() => hint.style.opacity = 0, 3000);
         }
         function playTick() {
             if (!audioCtx) return;
@@ -235,48 +212,48 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.03);
         }
 
-        // --- EFEITO GLITCH/CHROMATIC ABERRATION ---
-        function updateTextEffect(velocity) {
-            // Valor absoluto da velocidade (para funcionar nos dois sentidos)
+        // --- EFEITO ESPETACULAR (TEXTO & BOLA) ---
+        function updateVisualEffects(velocity, ballSpeed) {
             const speed = Math.abs(velocity);
             
-            // Limitador para o efeito não explodir
-            // maxOffset: o quão longe as cores se separam
-            const maxOffset = 15; 
-            // Calcular o offset baseado na velocidade (suavizado)
-            const offset = Math.min(speed * 0.8, maxOffset);
+            // 1. EFEITO DE TEXTO RGB (BASEADO NA IMAGEM GLOW)
+            // Quanto mais rápido, maior a separação das cores
+            const shift = Math.min(speed * 0.8, 15); // Limite de 15px
             
-            // Blur também aumenta com a velocidade
-            const blur = Math.min(speed * 0.2, 4);
-
-            if (offset > 0.5) {
-                // Cores Vivas (Ciano e Vermelho/Laranja e Azul) - Efeito espectral
-                // O formato é: x-offset y-offset blur color
-                const shadow = `
-                    ${offset}px 0px ${blur}px rgba(255, 0, 0, 0.7), 
-                    -${offset}px 0px ${blur}px rgba(0, 255, 255, 0.7),
-                    0px 0px ${offset * 1.5}px rgba(255, 255, 0, 0.3)
+            if (shift > 0.5) {
+                // Vermelho para um lado, Ciano/Azul para o outro, Verde no meio
+                // Isto recria o efeito de aberração cromática da imagem
+                title.style.textShadow = `
+                    ${shift}px 0 rgba(255, 0, 0, 0.7), 
+                    -${shift}px 0 rgba(0, 255, 255, 0.7),
+                    0px 0px ${shift}px rgba(0, 255, 0, 0.3)
                 `;
-                
-                titleName.style.textShadow = shadow;
-                titleSurname.style.textShadow = shadow;
-                
-                // Pequeno shake/tremor se for muito rápido
-                if (speed > 15) {
-                    const shake = (Math.random() - 0.5) * 2;
-                    titleName.style.transform = `translateX(${shake}px)`;
-                } else {
-                    titleName.style.transform = `none`;
-                }
-
+                // Ligeira distorção (Skew) para dar sensação de velocidade
+                title.style.transform = `skewX(${-velocity * 0.5}deg)`;
             } else {
-                titleName.style.textShadow = 'none';
-                titleSurname.style.textShadow = 'none';
-                titleName.style.transform = `none`;
+                title.style.textShadow = 'none';
+                title.style.transform = 'none';
+            }
+
+            // 2. EFEITO DE BOLA GLOW (BASEADO NA IMAGEM ORB)
+            const totalBallSpeed = Math.min(ballSpeed, 30); // Cap de 30
+            if (totalBallSpeed > 5) {
+                // Transforma a bola laranja sólida numa bola de energia brilhante
+                // Centro Branco/Amarelo, Borda Azul/Ciano (como na imagem)
+                ball.style.background = `radial-gradient(circle, #FFFF00 20%, #FF4500 50%, #0000FF 100%)`;
+                ball.style.boxShadow = `
+                    0 0 ${totalBallSpeed * 2}px rgba(0, 100, 255, 0.8), 
+                    0 0 ${totalBallSpeed}px rgba(255, 100, 0, 0.8)
+                `;
+                ball.style.transform += ` scale(${1 + totalBallSpeed/100})`;
+            } else {
+                // Volta ao normal
+                ball.style.background = '#FF4500';
+                ball.style.boxShadow = '0 5px 15px rgba(255, 69, 0, 0.4)';
             }
         }
 
-        // PHYSICS
+        // --- FÍSICA ---
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
@@ -305,9 +282,6 @@
             wVel = d; wAngle += d;
             wheel.style.transform = `rotate(${wAngle}deg)`;
             if (Math.abs(wAngle - lastTick) > 30) { playTick(); lastTick = wAngle; }
-            
-            // Atualizar efeito do texto durante o drag
-            updateTextEffect(wVel);
         }
 
         function end() { isDrag = false; }
@@ -317,11 +291,9 @@
                 wVel *= 0.985; wAngle += wVel;
                 wheel.style.transform = `rotate(${wAngle}deg)`;
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
-                
-                // Atualizar efeito do texto durante a inércia
-                updateTextEffect(wVel);
             }
             
+            // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
@@ -334,7 +306,16 @@
                 bVX += -ny*s; bVY += nx*s;
             }
             bVX *= FRICTION; bVY *= FRICTION;
+            
+            // Aplicar posição e manter efeitos visuais
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
+            
+            // Calcular velocidade total da bola para o efeito Glow
+            const ballSpeed = Math.sqrt(bVX*bVX + bVY*bVY);
+            
+            // ATUALIZAR EFEITOS ESPECIAIS
+            updateVisualEffects(wVel, ballSpeed);
+
             requestAnimationFrame(loop);
         }
 
@@ -345,7 +326,7 @@
         window.addEventListener('touchmove', move, {passive: false});
         window.addEventListener('touchend', end);
 
-        bY = -50; loop();
+        bY = -40; loop();
     </script>
 </body>
 </html>
