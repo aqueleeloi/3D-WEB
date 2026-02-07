@@ -10,14 +10,13 @@
     
     <style>
         :root {
-            --bg: #F0F0F2; /* Fundo claro de volta */
+            --bg: #F0F0F2; /* Fundo Claro Original */
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
             --ball-color: #FF4500;
         }
 
-        /* RESET & IOS */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -34,25 +33,77 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- SVG FILTERS (Escondidos visualmente) --- */
-        .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
+        /* --- SISTEMA DE TITULO AURORA/BUZZ --- */
+        header { 
+            text-align: center; 
+            z-index: 10; 
+            pointer-events: none; 
+            width: 100%;
+            position: relative;
+            height: 100px; /* Espaço reservado para o efeito */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        /* --- CABEÇALHO --- */
-        header { text-align: center; z-index: 10; pointer-events: none; width: 100%; }
+        /* Contentor do título para alinhar as camadas */
+        .title-wrapper {
+            position: relative;
+            display: inline-block;
+        }
 
-        h1 { 
-            font-size: 4rem;
-            font-weight: 900; text-transform: uppercase;
-            letter-spacing: -0.02em; line-height: 0.9; margin-bottom: 5px; 
-            color: #000; /* Texto preto */
-            /* Aplica o filtro SVG definido abaixo */
-            filter: url(#chromatic-motion);
-            /* Otimização crucial para performance do filtro dinâmico */
-            will-change: filter;
+        /* Estilo Base do Texto */
+        h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.04em;
+            line-height: 0.9;
+            margin: 0;
+            padding: 0;
+            color: transparent; /* Oculta o texto base, mostraremos as camadas */
+        }
+
+        /* Camadas do Texto (Main, Red, Cyan) */
+        .title-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            will-change: transform, filter, opacity;
+        }
+
+        /* Camada Principal (Preta e Nítida) */
+        .layer-main {
+            color: #000;
+            z-index: 3;
+            /* Pequena distorção (skew) baseada na velocidade */
+            transform-origin: center bottom;
+        }
+
+        /* Camada de Efeito 1 (Vermelho/Magenta) */
+        .layer-red {
+            color: #FF0055;
+            z-index: 2;
+            opacity: 0.8;
+            mix-blend-mode: multiply; /* Mistura realista no fundo claro */
+        }
+
+        /* Camada de Efeito 2 (Ciano/Azul) */
+        .layer-cyan {
+            color: #00CCFF;
+            z-index: 1;
+            opacity: 0.8;
+            mix-blend-mode: multiply;
         }
 
         .badge {
-            margin-top: 15px; display: inline-block; background: var(--white);
+            position: absolute;
+            bottom: -20px; left: 50%; transform: translateX(-50%);
+            display: inline-block; background: var(--white);
             border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
@@ -70,28 +121,27 @@
             z-index: 0; pointer-events: none;
         }
 
-        /* --- RODA BOLD --- */
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
-            border: 12px solid var(--wheel-border);
+            border: 14px solid var(--wheel-border);
             cursor: grab; z-index: 2;
             transform: translateZ(0);
         }
         .wheel:active { cursor: grabbing; }
 
-        /* --- QUADRADO --- */
+        /* OBSTÁCULO COM GLITCH */
         .obstacle {
             position: absolute;
             width: 24px; height: 24px;
             background-color: var(--wheel-border);
             top: 40px; left: 50%; margin-left: -12px;
             border-radius: 2px;
-            transition: transform 0.05s, filter 0.05s, box-shadow 0.05s;
-            will-change: box-shadow, transform, background-color, filter;
+            transition: transform 0.05s;
+            will-change: transform, box-shadow, filter;
         }
 
-        /* --- BOLA SÓLIDA --- */
+        /* BOLA SÓLIDA */
         .ball {
             position: absolute; width: 32px; height: 32px;
             background-color: var(--ball-color);
@@ -115,36 +165,21 @@
         .card:active { transform: scale(0.97); background: #f9f9f9; }
 
         footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.1em; }
-        #sound-hint { position: absolute; top: 110px; opacity: 0; font-size: 0.7rem; color: #999;}
+        #sound-hint { position: absolute; top: 120px; font-size: 0.6rem; color: #999; opacity: 0; }
 
     </style>
 </head>
 <body>
 
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="svg-filters">
-        <defs>
-            <filter id="chromatic-motion" x="-50%" y="-20%" width="200%" height="140%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="red"/>
-                <feOffset in="red" dx="0" dy="0" result="red_shifted" id="svg-red-offset"/>
-                
-                <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="green"/>
-                
-                <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic" result="blue"/>
-                <feOffset in="blue" dx="0" dy="0" result="blue_shifted" id="svg-blue-offset"/>
-                
-                <feMerge result="merged">
-                    <feMergeNode in="red_shifted"/>
-                    <feMergeNode in="green"/>
-                    <feMergeNode in="blue_shifted"/>
-                </feMerge>
-                
-                <feGaussianBlur in="merged" stdDeviation="0, 0" result="blurred" id="svg-motion-blur"/>
-            </filter>
-        </defs>
-    </svg>
-
     <header>
-        <h1 id="dynamic-title">ELOI SILVA</h1>
+        <div class="title-wrapper">
+            <h1 class="title-layer layer-cyan" id="title-cyan">ELOI SILVA</h1>
+            <h1 class="title-layer layer-red" id="title-red">ELOI SILVA</h1>
+            <h1 class="title-layer layer-main" id="title-main">ELOI SILVA</h1>
+            
+            <h1 style="position:relative; visibility:hidden;">ELOI SILVA</h1>
+        </div>
+        
         <div class="badge">Visual & Interaction</div>
         <div id="sound-hint">Sound Active</div>
     </header>
@@ -187,12 +222,11 @@
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
         const obstacle = document.getElementById('obstacle');
-        const title = document.getElementById('dynamic-title');
-
-        // Referências aos elementos do Filtro SVG
-        const svgRedOffset = document.getElementById('svg-red-offset');
-        const svgBlueOffset = document.getElementById('svg-blue-offset');
-        const svgMotionBlur = document.getElementById('svg-motion-blur');
+        
+        // Elementos do Título
+        const titleMain = document.getElementById('title-main');
+        const titleRed = document.getElementById('title-red');
+        const titleCyan = document.getElementById('title-cyan');
 
         // AUDIO
         let audioCtx = null;
@@ -223,34 +257,58 @@
             osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.08);
         }
 
-        // --- NOVA FUNÇÃO GLITCH USANDO FILTRO SVG ---
-        function updateSvgGlitch(velocity) {
+        // --- EFEITO MOTION BLUR CROMÁTICO (BUZZ/AURORA STYLE) ---
+        function updateAuroraEffect(velocity) {
             const speed = Math.abs(velocity);
-            // Define o quão longe as cores se separam e o quanto desfoca baseado na velocidade
-            // Multiplicadores ajustados para o efeito das imagens de referência
-            const shiftAmount = Math.min(speed * 2.5, 50); // Máximo 50px de separação
-            const blurAmount = Math.min(speed * 0.8, 15);  // Máximo 15px de motion blur horizontal
+            
+            // Definições do Efeito
+            // Quanto maior a velocidade, maior o offset e o blur
+            // Multiplicadores ajustados para parecer a imagem
+            const offset = Math.min(speed * 2.5, 40); // Separação horizontal
+            const blur = Math.min(speed * 0.8, 12);   // Blur horizontal
+            const skew = -velocity * 0.5;             // Distorção de velocidade
 
-            // Atualiza os atributos do filtro SVG em tempo real
-            // Vermelho move para a esquerda (negativo), Azul para a direita (positivo)
-            svgRedOffset.setAttribute('dx', -shiftAmount);
-            svgBlueOffset.setAttribute('dx', shiftAmount);
-            // Define o desfoque apenas na horizontal (X, Y=0)
-            svgMotionBlur.setAttribute('stdDeviation', `${blurAmount}, 0`);
+            if (offset > 0.5) {
+                // Mover Red para a Esquerda
+                titleRed.style.transform = `translateX(-${offset}px) skewX(${skew}deg)`;
+                titleRed.style.filter = `blur(${blur}px)`;
+                
+                // Mover Cyan para a Direita
+                titleCyan.style.transform = `translateX(${offset}px) skewX(${skew}deg)`;
+                titleCyan.style.filter = `blur(${blur}px)`;
+                
+                // Manter o Main nítido, mas com skew
+                titleMain.style.transform = `skewX(${skew}deg)`;
+                
+                // Ajustar opacidade para efeito de "rasto"
+                const opacity = Math.min(0.8 + (speed * 0.01), 1);
+                titleRed.style.opacity = opacity;
+                titleCyan.style.opacity = opacity;
+
+            } else {
+                // Reset
+                titleRed.style.transform = 'none';
+                titleRed.style.filter = 'none';
+                titleCyan.style.transform = 'none';
+                titleCyan.style.filter = 'none';
+                titleMain.style.transform = 'none';
+            }
         }
 
-        // --- FUNÇÃO GLITCH CSS PARA O OBSTÁCULO ---
+        // --- GLITCH OBSTACULO ---
+        let obsGlitchIntensity = 0;
         function applyObstacleGlitch(intensity) {
-            const shift = Math.min(intensity * 0.8, 25);
-            const blur = Math.min(intensity * 0.3, 8);
-            if (shift > 2) {
+            const shift = Math.min(intensity * 0.8, 20);
+            const blur = Math.min(intensity * 0.3, 6);
+            if (shift > 1) {
                 obstacle.style.backgroundColor = '#000';
+                // Sombra de cor sólida (Hard light style)
                 obstacle.style.boxShadow = `
-                    ${shift}px 0 ${blur}px rgba(255, 0, 0, 0.9), 
-                    -${shift}px 0 ${blur}px rgba(0, 255, 255, 0.9)
+                    ${shift}px 0 0 rgba(255, 0, 85, 0.8), 
+                    -${shift}px 0 0 rgba(0, 204, 255, 0.8)
                 `;
-                obstacle.style.filter = `blur(${blur*0.5}px)`;
-                obstacle.style.transform = `scale(1.3) rotate(${Math.random()*10 - 5}deg)`;
+                obstacle.style.filter = `blur(${blur}px)`;
+                obstacle.style.transform = `scale(1.2) rotate(${Math.random()*10 - 5}deg)`;
             } else {
                 obstacle.style.boxShadow = 'none';
                 obstacle.style.filter = 'none';
@@ -258,8 +316,7 @@
             }
         }
 
-        // VARIAVEIS
-        let obsGlitchIntensity = 0;
+        // FÍSICA
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
@@ -301,10 +358,10 @@
                 if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             
-            // ATUALIZAR O FILTRO SVG DO TÍTULO COM A VELOCIDADE ATUAL
-            updateSvgGlitch(wVel);
+            // ATUALIZAR EFEITO DO TITULO
+            updateAuroraEffect(wVel);
 
-            // APLICAR GLITCH OBSTÁCULO (CSS)
+            // GLITCH OBSTACULO
             if (obsGlitchIntensity > 0) {
                 applyObstacleGlitch(obsGlitchIntensity);
                 obsGlitchIntensity *= 0.85; 
@@ -315,10 +372,9 @@
                 obstacle.style.transform = 'none';
             }
 
-            // FÍSICA BOLA
+            // BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
 
-            // Colisão Quadrado
             const rad = (wAngle - 90) * (Math.PI / 180);
             const obsX = Math.cos(rad) * OBS_RADIUS;
             const obsY = Math.sin(rad) * OBS_RADIUS;
@@ -330,10 +386,8 @@
                 const nx = dx / distObs; const ny = dy / distObs;
                 const overlap = OBS_HIT_RAD - distObs;
                 bX += nx * overlap; bY += ny * overlap; 
-                
                 const dot = bVX * nx + bVY * ny;
                 bVX -= 2 * dot * nx; bVY -= 2 * dot * ny;
-                
                 const spinForce = wVel * 1.5;
                 bVX += -ny * spinForce; bVY += nx * spinForce;
 
@@ -342,18 +396,15 @@
                 obsGlitchIntensity = Math.min(impactForce * 3, 40);
             }
 
-            // Colisão Parede
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
                 const nx = bX/d, ny = bY/d;
                 bX = nx*LIMIT; bY = ny*LIMIT;
-                
                 const dot = bVX*nx + bVY*ny;
                 bVX -= 2*dot*nx; bVY -= 2*dot*ny;
                 bVX *= BOUNCE; bVY *= BOUNCE;
                 const s = wVel * 1.2; bVX += -ny*s; bVY += nx*s;
             }
-            
             bVX *= FRICTION; bVY *= FRICTION;
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
 
