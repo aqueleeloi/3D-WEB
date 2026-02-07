@@ -32,16 +32,22 @@
             height: 100dvh; width: 100%; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             padding: 40px 24px 30px 24px;
+            /* Fundo mais escuro para destacar o efeito de brilho, como na imagem */
+            background-color: #1a1a1a; 
         }
 
         /* --- CABEÇALHO --- */
         header { text-align: center; z-index: 10; pointer-events: none; width: 100%; }
 
         h1 { 
-            font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: -0.06em; line-height: 0.9; margin-bottom: 5px; color: #000;
+            font-size: 4rem; /* Tamanho maior para impacto */
+            font-weight: 900; text-transform: uppercase;
+            letter-spacing: -0.02em; line-height: 0.9; margin-bottom: 5px; color: #FFF; /* Texto branco */
             /* Otimização para os efeitos pesados */
-            will-change: text-shadow, transform;
+            will-change: text-shadow, transform, filter;
+            /* Perspetiva para o efeito de curvatura */
+            transform-style: preserve-3d;
+            perspective: 500px;
         }
 
         .badge {
@@ -59,7 +65,7 @@
 
         .static-shadow {
             position: absolute; width: 92%; height: 92%; border-radius: 50%;
-            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.3);
             z-index: 0; pointer-events: none;
         }
 
@@ -70,19 +76,20 @@
             border: 12px solid var(--wheel-border);
             cursor: grab; z-index: 2;
             transform: translateZ(0);
+            border-color: #333; /* Borda mais escura */
         }
         .wheel:active { cursor: grabbing; }
 
-        /* --- QUADRADO (COM EFEITO GLITCH ULTRA) --- */
+        /* --- QUADRADO --- */
         .obstacle {
             position: absolute;
             width: 24px; height: 24px;
             background-color: var(--wheel-border);
             top: 40px; left: 50%; margin-left: -12px;
             border-radius: 2px;
-            /* Transição super rápida para ser agressivo */
             transition: transform 0.05s, filter 0.05s;
             will-change: box-shadow, transform, background-color, filter;
+            background-color: #333;
         }
 
         /* --- BOLA SÓLIDA --- */
@@ -190,44 +197,41 @@
             osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.08);
         }
 
-        // --- NOVA FUNÇÃO GLITCH "ULTIMATE" ---
+        // --- NOVA FUNÇÃO GLITCH "MOTION BLUR" (Baseada na imagem) ---
         function applyGlitch(element, intensity) {
-            const shift = Math.min(intensity * 0.6, 20); // Limite de deslocamento maior
-            const blur = Math.min(intensity * 0.2, 5);   // Limite de blur
-            
-            // Introduz aleatoriedade (Jitter) para todas as direções
-            const jitterX = (Math.random() - 0.5) * intensity * 0.5;
-            const jitterY = (Math.random() - 0.5) * intensity * 0.5;
+            const shift = Math.min(intensity * 1.2, 30); // Deslocamento horizontal grande
+            const blur = Math.min(intensity * 0.5, 10);   // Blur forte para efeito de movimento
+            const curve = Math.min(intensity * 0.5, 15);  // Curvatura (rotação Y)
 
-            if (shift > 1) {
-                // Efeito para o Título (Text-Shadow Multidirecional + Blur)
+            if (shift > 2) {
+                // Efeito para o Título (Text-Shadow com Blur e Curvatura)
                 if (element === title) {
-                    // Vermelho desvia para um lado, Ciano para o outro, ambos com jitter Y e blur
+                    // Vermelho para a esquerda, Ciano para a direita, com muito blur
                     element.style.textShadow = `
-                        ${shift + jitterX}px ${jitterY}px ${blur}px rgba(255, 0, 0, 0.8), 
-                        -${shift + jitterX}px -${jitterY}px ${blur}px rgba(0, 255, 255, 0.8),
-                        0px ${shift*0.5}px ${blur*1.5}px rgba(0, 255, 0, 0.4)
+                        -${shift}px 0 ${blur}px rgba(255, 0, 0, 0.9), 
+                        ${shift}px 0 ${blur}px rgba(0, 255, 255, 0.9),
+                        0 0 ${blur*1.5}px rgba(255, 255, 255, 0.5)
                     `;
-                    // Tremor físico no elemento
-                    element.style.transform = `translate(${jitterX*0.2}px, ${jitterY*0.2}px) skewX(${-intensity * 0.2}deg)`;
+                    // Efeito de curvatura e filtro de blur para o texto principal
+                    element.style.transform = `perspective(500px) rotateY(${curve * (Math.random() > 0.5 ? 1 : -1)}deg) scale(1.05)`;
+                    element.style.filter = `blur(${blur*0.3}px)`;
                 } 
-                // Efeito para o Obstáculo (Box-Shadow + Filter Blur + Transform Caótico)
+                // Efeito para o Obstáculo
                 else {
                     element.style.backgroundColor = '#000';
-                    // Box shadow multidirecional com blur
                     element.style.boxShadow = `
-                        ${shift}px ${shift/2}px ${blur}px rgba(255, 0, 0, 0.9), 
-                        -${shift}px -${shift/2}px ${blur}px rgba(0, 255, 255, 0.9)
+                        -${shift*0.8}px 0 ${blur}px rgba(255, 0, 0, 0.9), 
+                        ${shift*0.8}px 0 ${blur}px rgba(0, 255, 255, 0.9)
                     `;
-                    // Blur real no elemento e transformação caótica
                     element.style.filter = `blur(${blur*0.5}px)`;
-                    element.style.transform = `scale(1.3) rotate(${Math.random()*10 - 5}deg) translate(${jitterX}px, ${jitterY}px)`;
+                    element.style.transform = `scale(1.3) rotate(${Math.random()*10 - 5}deg)`;
                 }
             } else {
                 // Reset
                 if (element === title) {
                     element.style.textShadow = 'none'; 
                     element.style.transform = 'none';
+                    element.style.filter = 'none';
                 } else {
                     element.style.boxShadow = 'none'; 
                     element.style.filter = 'none';
@@ -279,7 +283,7 @@
                 if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             
-            // APLICAR GLITCH TÍTULO
+            // APLICAR GLITCH TÍTULO (Baseado na velocidade da roda)
             applyGlitch(title, Math.abs(wVel));
 
             // APLICAR GLITCH OBSTÁCULO (Decaimento)
@@ -315,6 +319,7 @@
                 const spinForce = wVel * 1.5;
                 bVX += -ny * spinForce; bVY += nx * spinForce;
 
+                // INTERAÇÃO NO IMPACTO
                 playClack();
                 // Intensidade do impacto define o glitch do quadrado
                 const impactForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
