@@ -10,21 +10,15 @@
     
     <style>
         :root {
-            --bg: #F2F2F4;       /* Cinza muito claro e limpo */
-            --text: #050505;     /* Preto profundo */
+            --bg: #F2F2F4;
+            --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
-            --ball-color: #FF4500; /* Laranja Internacional */
+            --ball-color: #FF4500;
         }
 
-        /* --- RESET & OTIMIZAÇÃO IOS --- */
-        * {
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; outline: none;
-            -webkit-user-select: none; user-select: none;
-            touch-action: manipulation;
-        }
-
+        /* --- RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
         html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; }
 
         body {
@@ -35,56 +29,88 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* FILTROS SVG (Invisíveis no layout, usados no efeito) */
-        .svg-filters { position: absolute; width: 0; height: 0; pointer-events: none; }
-
-        /* --- CABEÇALHO DESIGN --- */
+        /* --- CABEÇALHO COM EFEITO "AURORA/BUZZ" REAL --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            margin-bottom: 20px;
+            height: 120px; /* Altura para o efeito não cortar */
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
         }
 
-        h1 { 
-            font-size: 3.8rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: -0.04em; line-height: 0.9; margin-bottom: 8px; 
-            color: var(--text);
-            /* O EFEITO MÁGICO: Filtro SVG Dinâmico - Estilo "AURORA/BUZZ" */
-            filter: url(#chromatic-motion-blur);
-            will-change: filter; /* Otimização de performance */
+        /* Contentor do Efeito */
+        .buzz-wrapper {
+            position: relative;
+            display: inline-block;
+            /* Isolamento para o blend-mode funcionar corretamente sobre o fundo */
+            isolation: isolate; 
+        }
+
+        /* Estilo Base das Letras */
+        .buzz-text {
+            font-size: 3.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin: 0;
+            /* Importante: Absolute para sobrepor as camadas perfeitamente */
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            will-change: transform, filter, opacity;
+        }
+
+        /* 1. Camada Principal (Preta - Fica no topo) */
+        .layer-main {
+            color: #000;
+            z-index: 10;
+            position: relative; /* Para ocupar espaço no fluxo se necessário, ou manter absolute se wrapper tiver tamanho */
+        }
+
+        /* 2. Camada Ciano (Desvio para a Esquerda) */
+        .layer-cyan {
+            color: #00FFFF; /* Ciano Puro */
+            mix-blend-mode: multiply; /* Mistura para criar cores escuras onde sobrepõe */
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        /* 3. Camada Magenta (Desvio para a Direita) */
+        .layer-magenta {
+            color: #FF00FF; /* Magenta Puro */
+            mix-blend-mode: multiply;
+            z-index: 6;
+            opacity: 0.8;
+        }
+
+        /* 4. Camada Amarela (Centro/Brilho) */
+        .layer-yellow {
+            color: #FFFF00;
+            mix-blend-mode: multiply;
+            z-index: 4;
+            opacity: 0.6;
         }
 
         .badge {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
             display: inline-block; background: var(--white);
             border: 1px solid rgba(0,0,0,0.06); padding: 6px 16px; border-radius: 100px;
             font-size: 0.7rem; font-weight: 600; color: #666; letter-spacing: 0.05em;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
 
-        /* --- STAGE (A RODA) --- */
-        .stage {
-            position: relative; width: 290px; height: 290px;
-            display: flex; align-items: center; justify-content: center;
-            touch-action: none;
-        }
+        /* --- STAGE --- */
+        .stage { position: relative; width: 290px; height: 290px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        .static-shadow { position: absolute; width: 92%; height: 92%; border-radius: 50%; background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12); z-index: 0; pointer-events: none; }
 
-        .static-shadow {
-            position: absolute; width: 92%; height: 92%; border-radius: 50%;
-            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
-            z-index: 0; pointer-events: none;
-        }
-
-        /* Roda Minimalista Bold */
         .wheel {
-            position: relative; width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 14px solid var(--wheel-border); /* Borda Grossa */
-            cursor: grab; z-index: 2;
-            transform: translateZ(0);
-            background: rgba(255,255,255,0.01); /* Área de toque */
+            position: relative; width: 100%; height: 100%; border-radius: 50%;
+            border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; transform: translateZ(0);
+            background: rgba(255,255,255,0.01);
         }
         .wheel:active { cursor: grabbing; }
 
-        /* Setas de Orientação */
         .arrow-marker {
             position: absolute; width: 0; height: 0;
             border-left: 7px solid transparent; border-right: 7px solid transparent;
@@ -92,86 +118,45 @@
             left: 50%; top: 2px; transform: translateX(-50%); pointer-events: none;
         }
 
-        /* Bola Física */
         .ball {
-            position: absolute; width: 32px; height: 32px;
-            background-color: var(--ball-color);
-            border-radius: 50%; z-index: 5;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute; width: 32px; height: 32px; background-color: var(--ball-color);
+            border-radius: 50%; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
             pointer-events: none; will-change: transform;
         }
 
-        /* --- LINKS (ESTILO CLEAN & PREMIUM) --- */
-        .menu { 
-            width: 100%; max-width: 400px; 
-            display: flex; flex-direction: column; gap: 12px; 
-            z-index: 10; 
-        }
-        
+        /* --- LINKS --- */
+        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
         .card {
             background: var(--white); padding: 18px 25px; border-radius: 16px;
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text); font-weight: 600;
             transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer;
         }
-        
         .card-left { display: flex; align-items: center; gap: 14px; }
         .card-icon { width: 22px; height: 22px; fill: currentColor; }
-        
         .card:active { transform: scale(0.97); background: #f5f5f5; }
-        
-        /* Hover Desktop */
-        @media(hover: hover) {
-            .card:hover {
-                background: var(--text); color: var(--white);
-                transform: translateY(-2px);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            }
-        }
+        @media(hover: hover) { .card:hover { background: var(--text); color: var(--white); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); } }
 
-        footer { 
-            font-size: 0.7rem; color: #999; text-transform: uppercase; 
-            letter-spacing: 0.1em; margin-top: 10px; 
-        }
-        
-        #sound-hint { 
-            position: absolute; top: 120px; font-size: 0.65rem; color: #BBB; 
-            opacity: 0; transition: opacity 1s; 
-        }
+        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 10px; }
+        #sound-hint { position: absolute; top: 130px; font-size: 0.65rem; color: #BBB; opacity: 0; transition: opacity 1s; }
 
     </style>
 </head>
 <body>
 
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="svg-filters">
-        <defs>
-            <filter id="chromatic-motion-blur" x="-50%" y="-20%" width="200%" height="140%">
-                <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="red"/>
-                <feOffset in="red" dx="0" dy="0" result="red_shifted" id="svg-red-offset"/>
-                
-                <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="green"/>
-                <feOffset in="green" dx="0" dy="0" result="green_shifted" id="svg-green-offset"/>
-
-                <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic" result="blue"/>
-                <feOffset in="blue" dx="0" dy="0" result="blue_shifted" id="svg-blue-offset"/>
-                
-                <feMerge result="merged">
-                    <feMergeNode in="red_shifted"/>
-                    <feMergeNode in="green_shifted"/>
-                    <feMergeNode in="blue_shifted"/>
-                </feMerge>
-                
-                <feGaussianBlur in="merged" stdDeviation="0, 0" result="blurred" id="svg-blur"/>
-            </filter>
-        </defs>
-    </svg>
-
     <header>
-        <h1>Eloi Silva</h1>
+        <div class="buzz-wrapper">
+            <h1 class="buzz-text layer-cyan" id="txt-cyan">ELOI SILVA</h1>
+            <h1 class="buzz-text layer-magenta" id="txt-magenta">ELOI SILVA</h1>
+            <h1 class="buzz-text layer-yellow" id="txt-yellow">ELOI SILVA</h1>
+            
+            <h1 class="buzz-text layer-main" id="txt-main">ELOI SILVA</h1>
+            
+            <h1 style="font-size: 3.8rem; font-weight: 900; letter-spacing: -0.04em; text-transform: uppercase; visibility: hidden;">ELOI SILVA</h1>
+        </div>
+        
         <div class="badge">Visual & Interaction</div>
         <div id="sound-hint">Sound On</div>
     </header>
@@ -189,25 +174,13 @@
 
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
-                Instagram
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div><span>→</span>
         </a>
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
-                Behance
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div><span>→</span>
         </a>
         <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-                WhatsApp
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div><span>→</span>
         </a>
     </nav>
 
@@ -217,11 +190,11 @@
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
         
-        // Elementos SVG para manipular
-        const svgRed = document.getElementById('svg-red-offset');
-        const svgGreen = document.getElementById('svg-green-offset');
-        const svgBlue = document.getElementById('svg-blue-offset');
-        const svgBlur = document.getElementById('svg-blur');
+        // Elementos de Texto para o Efeito
+        const txtCyan = document.getElementById('txt-cyan');
+        const txtMagenta = document.getElementById('txt-magenta');
+        const txtYellow = document.getElementById('txt-yellow');
+        const txtMain = document.getElementById('txt-main');
 
         // AUDIO
         let audioCtx = null;
@@ -242,26 +215,47 @@
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        // --- ATUALIZAR EFEITO DO TÍTULO (ESTILO AURORA/BUZZ) ---
-        function updateTitleEffect(velocity) {
+        // --- LÓGICA DO EFEITO "BUZZ" ---
+        function updateBuzzEffect(velocity) {
             const speed = Math.abs(velocity);
             
-            // Intensidade do efeito baseada na velocidade
-            // Multiplicadores maiores para o efeito dramático das imagens
-            const shift = Math.min(speed * 3.5, 60); // Deslocamento de cor grande
-            const blur = Math.min(speed * 1.5, 20);   // Motion Blur horizontal intenso
-            
-            // Atualizar atributos SVG em tempo real
-            // Vermelho para a esquerda, Azul para a direita
-            svgRed.setAttribute('dx', -shift);
-            svgBlue.setAttribute('dx', shift);
-            // Verde desloca-se menos para manter o centro legível
-            svgGreen.setAttribute('dx', shift * 0.2);
-            // Blur apenas horizontal (X, Y=0)
-            svgBlur.setAttribute('stdDeviation', `${blur}, 0`);
+            // Cálculos para o efeito (Escala 0 a 100)
+            const shift = Math.min(speed * 1.5, 40); // Separação horizontal das cores
+            const blur = Math.min(speed * 0.5, 8);   // Desfoque de movimento
+            const skew = -velocity * 0.2;            // Inclinação ligeira
+
+            if (shift > 0.5) {
+                // Mover Ciano para a esquerda, Magenta para a direita
+                // Translate(-50%, -50%) é necessário porque os elementos estão centrados via absolute
+                
+                txtCyan.style.transform = `translate(calc(-50% - ${shift}px), -50%) skewX(${skew}deg)`;
+                txtCyan.style.filter = `blur(${blur}px)`;
+                
+                txtMagenta.style.transform = `translate(calc(-50% + ${shift}px), -50%) skewX(${skew}deg)`;
+                txtMagenta.style.filter = `blur(${blur}px)`;
+                
+                txtYellow.style.transform = `translate(-50%, -50%) scale(${1 + shift/200})`;
+                txtYellow.style.filter = `blur(${blur * 1.5}px)`;
+                
+                // Texto principal fica nítido, mas inclina
+                txtMain.style.transform = `translate(-50%, -50%) skewX(${skew}deg)`;
+            } else {
+                // Reset
+                const resetTransform = `translate(-50%, -50%)`;
+                txtCyan.style.transform = resetTransform;
+                txtCyan.style.filter = 'none';
+                
+                txtMagenta.style.transform = resetTransform;
+                txtMagenta.style.filter = 'none';
+                
+                txtYellow.style.transform = resetTransform;
+                txtYellow.style.filter = 'none';
+                
+                txtMain.style.transform = resetTransform;
+            }
         }
 
-        // FÍSICA DA RODA E BOLA
+        // FÍSICA
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.65;
@@ -302,10 +296,9 @@
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
             
-            // Atualizar o efeito SVG do título com a velocidade atual
-            updateTitleEffect(wVel);
+            // ATUALIZAR EFEITO DE TEXTO
+            updateBuzzEffect(wVel);
 
-            // Física Bola
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
