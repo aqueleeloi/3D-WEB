@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Interaction</title>
+    <title>Eloi Silva | Visual Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -17,6 +17,7 @@
             --ball-color: #FF4500;
         }
 
+        /* RESET & IOS */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -33,6 +34,7 @@
             padding: 40px 24px 30px 24px;
         }
 
+        /* HEADER */
         header { text-align: center; z-index: 10; pointer-events: none; width: 100%; }
 
         h1 { 
@@ -47,6 +49,7 @@
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
 
+        /* STAGE */
         .stage {
             position: relative; width: 290px; height: 290px;
             display: flex; align-items: center; justify-content: center;
@@ -59,6 +62,7 @@
             z-index: 0; pointer-events: none;
         }
 
+        /* RODA BOLD */
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
@@ -68,35 +72,30 @@
         }
         .wheel:active { cursor: grabbing; }
 
-        /* QUADRADO PEQUENO E SÓLIDO */
+        /* QUADRADO PEQUENO */
         .obstacle {
             position: absolute;
-            width: 24px; height: 24px; /* Mais pequeno */
+            width: 24px; height: 24px;
             background-color: var(--wheel-border);
-            top: 40px; /* Mais longe do centro */
-            left: 50%; 
-            margin-left: -12px;
-            border-radius: 2px;
-            transition: background-color 0.05s, transform 0.05s;
+            top: 40px; left: 50%; margin-left: -12px;
+            border-radius: 3px;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.1s;
         }
         
         .obstacle.hit {
             background-color: var(--ball-color);
-            box-shadow: 0 0 15px var(--ball-color);
+            transform: scale(1.4) rotate(15deg);
+            box-shadow: 0 0 20px var(--ball-color);
         }
 
-        /* BOLA SOFT BODY */
+        /* BOLA JELLY (Sem transições CSS, controlado 100% via JS para fluidez) */
         .ball {
-            position: absolute; width: 30px; height: 30px;
+            position: absolute; width: 32px; height: 32px;
             background-color: var(--ball-color);
             border-radius: 50%; z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            /* Centrada para o transform funcionar bem */
-            top: 50%; left: 50%; 
-            margin-top: -15px; margin-left: -15px;
-            pointer-events: none; 
-            /* Importante para a performance do Soft Body */
-            will-change: transform;
+            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
+            pointer-events: none; will-change: transform;
         }
 
         /* LINKS */
@@ -165,7 +164,7 @@
         const obstacle = document.getElementById('obstacle');
         const title = document.getElementById('dynamic-title');
 
-        // AUDIO
+        // --- SISTEMA DE AUDIO ---
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -188,10 +187,10 @@
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.15);
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.15);
         }
 
         // TEXT GLITCH
@@ -206,19 +205,28 @@
             }
         }
 
-        // FÍSICA & SOFT BODY
+        // --- MOTOR DE FÍSICA ---
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
-        const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
+        const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
         const LIMIT = 117; 
         
-        // Configuração Obstáculo (Mais longe do centro)
-        const OBS_RADIUS = 105; // ~70% do raio
+        // OBSTÁCULO
+        const OBS_RADIUS = 105; 
         const OBS_SIZE = 24; 
-        const OBS_HIT_RAD = 27; // 15px bola + 12px quadrado
+        const OBS_HIT_RAD = 27; 
 
-        // Variáveis de Soft Body
-        let squashX = 1, squashY = 1, squashAngle = 0;
+        // --- JELLY PHYSICS (SPRING MASS SYSTEM) ---
+        // scaleX e scaleY controlam a deformação
+        let jellyScaleX = 1;
+        let jellyScaleY = 1;
+        let jellyAngle = 0;
+        
+        // Variáveis da Mola
+        let springVel = 0; // Velocidade da oscilação
+        let springTarget = 1; // O alvo é sempre voltar a 1 (forma original)
+        const springStiffness = 0.15; // Rigidez da mola (quão rápido volta)
+        const springDamping = 0.85; // Amortecimento (quão rápido para de tremer)
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -247,18 +255,16 @@
 
         function end() { isDrag = false; }
 
-        // Função de "Amassar"
-        function triggerSquash(nx, ny, intensity) {
-            // Calcular ângulo da normal para rodar o squash
-            squashAngle = Math.atan2(ny, nx);
+        // Função para deformar a bola (Jelly Impact)
+        function triggerJelly(nx, ny, impactForce) {
+            // Rodar a bola para alinhar com a normal do impacto
+            jellyAngle = Math.atan2(ny, nx);
             
-            // Intensidade baseada na força do impacto (limitada)
-            const force = Math.min(intensity * 0.05, 0.4); 
-            
-            // Esmagar no eixo de impacto (X no sistema local), esticar no outro (Y)
-            // Como vamos rodar, 'squashX' é o eixo do impacto
-            squashX = 1 - force; 
-            squashY = 1 + force;
+            // Força do impacto define o quanto amassa
+            // Amassa no eixo X (direção do impacto), estica no Y
+            const squeeze = Math.min(impactForce * 0.04, 0.5); 
+            jellyScaleX = 1 - squeeze; // Fica fina no impacto
+            jellyScaleY = 1 + squeeze; // Fica alta
         }
 
         function loop() {
@@ -269,11 +275,33 @@
             }
             updateTextEffect(wVel);
 
-            // Recuperação do Soft Body (Mola)
-            squashX += (1 - squashX) * 0.15;
-            squashY += (1 - squashY) * 0.15;
+            // --- JELLY SPRING UPDATE ---
+            // Calcular velocidade total da bola para esticar quando viaja
+            const velocityMag = Math.sqrt(bVX*bVX + bVY*bVY);
+            
+            // Se não houver impacto recente (estamos perto de 1), esticar com a velocidade
+            // A força da mola puxa sempre de volta para 1
+            const displacement = jellyScaleX - 1; // Quão longe estamos do normal
+            const springForce = -springStiffness * displacement;
+            
+            springVel += springForce;
+            springVel *= springDamping;
+            
+            jellyScaleX += springVel;
+            // Preservar volume: se X encolhe, Y cresce
+            jellyScaleY = 1 / jellyScaleX;
 
-            // Física Bola
+            // Se estiver a voar rápido e a mola estiver calma, esticar na direção do movimento
+            if (Math.abs(displacement) < 0.05 && velocityMag > 5) {
+                // Alinhar rotação com velocidade
+                jellyAngle = Math.atan2(bVY, bVX);
+                // Esticar um pouco (Lagrima)
+                const stretch = 1 + (velocityMag * 0.01);
+                jellyScaleX = stretch;
+                jellyScaleY = 1/stretch;
+            }
+
+            // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
 
             // COLISÃO QUADRADO
@@ -288,9 +316,8 @@
                 const nx = dx / distObs;
                 const ny = dy / distObs;
                 const overlap = OBS_HIT_RAD - distObs;
-                bX += nx * overlap; bY += ny * overlap; // Correção imediata
+                bX += nx * overlap; bY += ny * overlap; 
                 
-                const velocityMag = Math.sqrt(bVX*bVX + bVY*bVY);
                 const dot = bVX * nx + bVY * ny;
                 bVX -= 2 * dot * nx; bVY -= 2 * dot * ny;
                 
@@ -301,8 +328,8 @@
                 obstacle.classList.add('hit');
                 setTimeout(() => obstacle.classList.remove('hit'), 100);
                 
-                // Trigger Soft Body Effect
-                triggerSquash(nx, ny, velocityMag + Math.abs(spinForce));
+                // TRIGGER JELLY
+                triggerJelly(nx, ny, velocityMag + Math.abs(spinForce));
             }
 
             // COLISÃO PAREDE
@@ -311,24 +338,22 @@
                 const nx = bX/d, ny = bY/d;
                 bX = nx*LIMIT; bY = ny*LIMIT;
                 
-                const velocityMag = Math.sqrt(bVX*bVX + bVY*bVY);
                 const dot = bVX*nx + bVY*ny;
                 bVX -= 2*dot*nx; bVY -= 2*dot*ny;
                 bVX *= BOUNCE; bVY *= BOUNCE;
                 const s = wVel * 1.2; bVX += -ny*s; bVY += nx*s;
                 
-                // Trigger Soft Body Effect (Impacto Parede)
-                if (velocityMag > 5) triggerSquash(nx, ny, velocityMag);
+                // TRIGGER JELLY
+                if (velocityMag > 2) triggerJelly(nx, ny, velocityMag);
             }
             
             bVX *= FRICTION; bVY *= FRICTION;
             
-            // Aplicar posição e deformação
-            // A ordem do transform é crucial: Translate -> Rotate -> Scale
+            // RENDERIZAR
             ball.style.transform = `
                 translate3d(${bX}px, ${bY}px, 0) 
-                rotate(${squashAngle}rad) 
-                scale(${squashX}, ${squashY})
+                rotate(${jellyAngle}rad) 
+                scale(${jellyScaleX}, ${jellyScaleY})
             `;
 
             requestAnimationFrame(loop);
