@@ -10,19 +10,14 @@
     
     <style>
         :root {
-            --bg: #F0F0F2; /* Fundo Claro Original */
+            --bg: #F0F0F2;
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
             --ball-color: #FF4500;
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; outline: none;
-            -webkit-user-select: none; user-select: none;
-            touch-action: manipulation;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 
         body {
             background-color: var(--bg);
@@ -33,119 +28,61 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- SISTEMA DE TITULO AURORA/BUZZ --- */
+        /* --- TITULO AURORA STYLE --- */
         header { 
-            text-align: center; 
-            z-index: 10; 
-            pointer-events: none; 
-            width: 100%;
-            position: relative;
-            height: 100px; /* Espaço reservado para o efeito */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center; z-index: 10; pointer-events: none; width: 100%;
+            position: relative; height: 100px; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Contentor do título para alinhar as camadas */
-        .title-wrapper {
-            position: relative;
-            display: inline-block;
-        }
+        .title-wrapper { position: relative; display: inline-block; }
 
-        /* Estilo Base do Texto */
         h1 {
-            font-size: 3.8rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.04em;
-            line-height: 0.9;
-            margin: 0;
-            padding: 0;
-            color: transparent; /* Oculta o texto base, mostraremos as camadas */
+            font-size: 3.8rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: -0.04em; line-height: 0.9; margin: 0; padding: 0;
+            color: transparent; 
         }
 
-        /* Camadas do Texto (Main, Red, Cyan) */
         .title-layer {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            will-change: transform, filter, opacity;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            white-space: nowrap; will-change: transform, filter, opacity;
         }
 
-        /* Camada Principal (Preta e Nítida) */
-        .layer-main {
-            color: #000;
-            z-index: 3;
-            /* Pequena distorção (skew) baseada na velocidade */
-            transform-origin: center bottom;
-        }
-
-        /* Camada de Efeito 1 (Vermelho/Magenta) */
-        .layer-red {
-            color: #FF0055;
-            z-index: 2;
-            opacity: 0.8;
-            mix-blend-mode: multiply; /* Mistura realista no fundo claro */
-        }
-
-        /* Camada de Efeito 2 (Ciano/Azul) */
-        .layer-cyan {
-            color: #00CCFF;
-            z-index: 1;
-            opacity: 0.8;
-            mix-blend-mode: multiply;
-        }
+        .layer-main { color: #000; z-index: 3; transform-origin: center bottom; }
+        .layer-red { color: #FF0055; z-index: 2; opacity: 0.8; mix-blend-mode: multiply; }
+        .layer-cyan { color: #00CCFF; z-index: 1; opacity: 0.8; mix-blend-mode: multiply; }
 
         .badge {
-            position: absolute;
-            bottom: -20px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
             display: inline-block; background: var(--white);
             border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
 
         /* --- STAGE --- */
-        .stage {
-            position: relative; width: 290px; height: 290px;
-            display: flex; align-items: center; justify-content: center;
-            touch-action: none;
-        }
-
-        .static-shadow {
-            position: absolute; width: 92%; height: 92%; border-radius: 50%;
-            background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12);
-            z-index: 0; pointer-events: none;
-        }
+        .stage { position: relative; width: 290px; height: 290px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        .static-shadow { position: absolute; width: 92%; height: 92%; border-radius: 50%; background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12); z-index: 0; pointer-events: none; }
 
         .wheel {
-            position: relative; width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 14px solid var(--wheel-border);
-            cursor: grab; z-index: 2;
-            transform: translateZ(0);
+            position: relative; width: 100%; height: 100%; border-radius: 50%;
+            border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; transform: translateZ(0);
         }
         .wheel:active { cursor: grabbing; }
 
-        /* OBSTÁCULO COM GLITCH */
+        /* OBSTÁCULO (Glitch Direcional) */
         .obstacle {
-            position: absolute;
-            width: 24px; height: 24px;
+            position: absolute; width: 24px; height: 24px;
             background-color: var(--wheel-border);
             top: 40px; left: 50%; margin-left: -12px;
             border-radius: 2px;
-            transition: transform 0.05s;
+            /* Sem transição suave no transform para o impacto ser imediato e "glitchy" */
             will-change: transform, box-shadow, filter;
         }
 
-        /* BOLA SÓLIDA */
+        /* BOLA */
         .ball {
             position: absolute; width: 32px; height: 32px;
-            background-color: var(--ball-color);
-            border-radius: 50%; z-index: 5;
+            background-color: var(--ball-color); border-radius: 50%; z-index: 5;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(0,0,0,0.2);
             top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
             pointer-events: none; will-change: transform;
@@ -176,10 +113,8 @@
             <h1 class="title-layer layer-cyan" id="title-cyan">ELOI SILVA</h1>
             <h1 class="title-layer layer-red" id="title-red">ELOI SILVA</h1>
             <h1 class="title-layer layer-main" id="title-main">ELOI SILVA</h1>
-            
             <h1 style="position:relative; visibility:hidden;">ELOI SILVA</h1>
         </div>
-        
         <div class="badge">Visual & Interaction</div>
         <div id="sound-hint">Sound Active</div>
     </header>
@@ -223,7 +158,6 @@
         const ball = document.getElementById('ball');
         const obstacle = document.getElementById('obstacle');
         
-        // Elementos do Título
         const titleMain = document.getElementById('title-main');
         const titleRed = document.getElementById('title-red');
         const titleCyan = document.getElementById('title-cyan');
@@ -257,62 +191,64 @@
             osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.08);
         }
 
-        // --- EFEITO MOTION BLUR CROMÁTICO (BUZZ/AURORA STYLE) ---
+        // --- EFEITO TITULO AURORA ---
         function updateAuroraEffect(velocity) {
             const speed = Math.abs(velocity);
-            
-            // Definições do Efeito
-            // Quanto maior a velocidade, maior o offset e o blur
-            // Multiplicadores ajustados para parecer a imagem
-            const offset = Math.min(speed * 2.5, 40); // Separação horizontal
-            const blur = Math.min(speed * 0.8, 12);   // Blur horizontal
-            const skew = -velocity * 0.5;             // Distorção de velocidade
+            const offset = Math.min(speed * 2.5, 40);
+            const blur = Math.min(speed * 0.8, 12);
+            const skew = -velocity * 0.5;
 
             if (offset > 0.5) {
-                // Mover Red para a Esquerda
                 titleRed.style.transform = `translateX(-${offset}px) skewX(${skew}deg)`;
                 titleRed.style.filter = `blur(${blur}px)`;
-                
-                // Mover Cyan para a Direita
                 titleCyan.style.transform = `translateX(${offset}px) skewX(${skew}deg)`;
                 titleCyan.style.filter = `blur(${blur}px)`;
-                
-                // Manter o Main nítido, mas com skew
                 titleMain.style.transform = `skewX(${skew}deg)`;
-                
-                // Ajustar opacidade para efeito de "rasto"
                 const opacity = Math.min(0.8 + (speed * 0.01), 1);
                 titleRed.style.opacity = opacity;
                 titleCyan.style.opacity = opacity;
-
             } else {
-                // Reset
-                titleRed.style.transform = 'none';
-                titleRed.style.filter = 'none';
-                titleCyan.style.transform = 'none';
-                titleCyan.style.filter = 'none';
+                titleRed.style.transform = 'none'; titleRed.style.filter = 'none';
+                titleCyan.style.transform = 'none'; titleCyan.style.filter = 'none';
                 titleMain.style.transform = 'none';
             }
         }
 
-        // --- GLITCH OBSTACULO ---
+        // --- GLITCH DIRECIONAL DO OBSTÁCULO ---
         let obsGlitchIntensity = 0;
-        function applyObstacleGlitch(intensity) {
-            const shift = Math.min(intensity * 0.8, 20);
-            const blur = Math.min(intensity * 0.3, 6);
-            if (shift > 1) {
+        let obsImpactX = 0;
+        let obsImpactY = 0;
+
+        function applyDirectionalGlitch() {
+            if (obsGlitchIntensity > 1) {
+                // Calcular deslocamento baseado no vetor de impacto
+                // O efeito "viaja" na direção do impacto
+                const shift = Math.min(obsGlitchIntensity * 0.8, 20);
+                const shiftX = obsImpactX * shift;
+                const shiftY = obsImpactY * shift;
+                
+                const blur = Math.min(obsGlitchIntensity * 0.2, 5);
+
                 obstacle.style.backgroundColor = '#000';
-                // Sombra de cor sólida (Hard light style)
+                
+                // Box shadow Vermelho para um lado do vetor, Ciano para o outro
+                // Vermelho na direção do impacto, Ciano oposto (rasto)
                 obstacle.style.boxShadow = `
-                    ${shift}px 0 0 rgba(255, 0, 85, 0.8), 
-                    -${shift}px 0 0 rgba(0, 204, 255, 0.8)
+                    ${shiftX}px ${shiftY}px ${blur}px rgba(255, 0, 85, 0.8), 
+                    ${-shiftX}px ${-shiftY}px ${blur}px rgba(0, 204, 255, 0.8)
                 `;
-                obstacle.style.filter = `blur(${blur}px)`;
-                obstacle.style.transform = `scale(1.2) rotate(${Math.random()*10 - 5}deg)`;
+                
+                // Deslocar o próprio elemento na direção do impacto (Knockback)
+                obstacle.style.transform = `translate(${shiftX * 0.5}px, ${shiftY * 0.5}px) scale(${1 + obsGlitchIntensity/100})`;
+                obstacle.style.filter = `blur(${blur * 0.5}px)`;
+
+                // Decaimento
+                obsGlitchIntensity *= 0.85;
             } else {
                 obstacle.style.boxShadow = 'none';
                 obstacle.style.filter = 'none';
-                if(!obstacle.classList.contains('hit')) obstacle.style.transform = 'none';
+                obstacle.style.transform = 'none';
+                obsGlitchIntensity = 0;
             }
         }
 
@@ -358,23 +294,13 @@
                 if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             
-            // ATUALIZAR EFEITO DO TITULO
             updateAuroraEffect(wVel);
+            applyDirectionalGlitch();
 
-            // GLITCH OBSTACULO
-            if (obsGlitchIntensity > 0) {
-                applyObstacleGlitch(obsGlitchIntensity);
-                obsGlitchIntensity *= 0.85; 
-                if(obsGlitchIntensity < 1) obsGlitchIntensity = 0;
-            } else {
-                obstacle.style.boxShadow = 'none';
-                obstacle.style.filter = 'none';
-                obstacle.style.transform = 'none';
-            }
-
-            // BOLA
+            // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
 
+            // COLISÃO QUADRADO
             const rad = (wAngle - 90) * (Math.PI / 180);
             const obsX = Math.cos(rad) * OBS_RADIUS;
             const obsY = Math.sin(rad) * OBS_RADIUS;
@@ -386,14 +312,25 @@
                 const nx = dx / distObs; const ny = dy / distObs;
                 const overlap = OBS_HIT_RAD - distObs;
                 bX += nx * overlap; bY += ny * overlap; 
+                
                 const dot = bVX * nx + bVY * ny;
                 bVX -= 2 * dot * nx; bVY -= 2 * dot * ny;
+                
                 const spinForce = wVel * 1.5;
                 bVX += -ny * spinForce; bVY += nx * spinForce;
 
+                // --- CALCULAR IMPACTO PARA O GLITCH ---
                 playClack();
                 const impactForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
-                obsGlitchIntensity = Math.min(impactForce * 3, 40);
+                
+                // Guardar a direção NORMALIZADA do impacto (nx, ny apontam da caixa para a bola)
+                // Queremos que o glitch vá na direção da força recebida, ou seja, contrário à normal
+                // Mas visualmente, "empurrar" o glitch na direção que a bola vinha (ou para onde ela empurra)
+                // Usaremos a direção Inversa da Normal (-nx, -ny) para simular que a caixa foi empurrada
+                obsImpactX = -nx; 
+                obsImpactY = -ny;
+                
+                obsGlitchIntensity = Math.min(impactForce * 4, 50); // Intensidade alta
             }
 
             const d = Math.sqrt(bX*bX + bY*bY);
