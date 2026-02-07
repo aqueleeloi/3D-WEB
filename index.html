@@ -3,39 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Quantum Interaction</title>
+    <title>Eloi Silva | Interaction</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #ECECF0; /* Fundo ligeiramente mais técnico */
+            --bg: #F0F0F2;
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #1a1a1a;
-            --ball-color: #FF3300; /* Laranja mais agressivo */
-            --neon-cyan: #00FFFF;
-            --neon-pink: #FF0055;
+            --accent-color: #FF4500; /* Laranja Néon */
+            --cyan: #00FFFF;
+            --magenta: #FF0055;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; touch-action: manipulation; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; height: 100dvh; width: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 24px 30px 24px; }
+        /* --- RESET & NO SCROLL --- */
+        * {
+            margin: 0; padding: 0; box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; outline: none;
+            -webkit-user-select: none; user-select: none;
+            touch-action: manipulation;
+        }
 
-        /* --- TITULO VOLUMÉTRICO 3D --- */
+        html, body {
+            height: 100%; width: 100%; overflow: hidden; /* BLOQUEAR SCROLL */
+            position: fixed; /* Fixar layout no iOS */
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 40px 24px 30px 24px;
+        }
+
+        /* --- TITULO 3D (Quantum Style) --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            height: 110px; display: flex; align-items: center; justify-content: center;
-            perspective: 800px; /* Perspetiva profunda */
+            height: 100px; display: flex; align-items: center; justify-content: center;
+            perspective: 800px;
         }
 
-        .title-wrapper { 
-            position: relative; display: inline-block; 
-            transform-style: preserve-3d; /* Permite elementos 3D filhos */
-        }
+        .title-wrapper { position: relative; display: inline-block; transform-style: preserve-3d; }
 
         h1 {
-            font-size: 3.8rem; font-weight: 900; text-transform: uppercase;
+            font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
             letter-spacing: -0.04em; line-height: 0.9; margin: 0; padding: 0;
             color: transparent; 
         }
@@ -44,31 +59,29 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             white-space: nowrap; will-change: transform, filter, opacity;
-            backface-visibility: hidden;
         }
 
-        /* Camadas dispostas em profundidade Z */
         .layer-main { color: #000; z-index: 10; transform: translateZ(0); }
-        .layer-red { color: var(--neon-pink); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-20px); }
-        .layer-cyan { color: var(--neon-cyan); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-40px); }
+        .layer-red { color: var(--magenta); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-20px); }
+        .layer-cyan { color: var(--cyan); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-40px); }
 
         .badge {
-            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
             background: var(--white); border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* --- STAGE 3D --- */
+        /* --- STAGE --- */
         .stage { 
             position: relative; width: 300px; height: 300px; 
             display: flex; align-items: center; justify-content: center; 
-            perspective: 1000px; /* Perspetiva global para o 3D */
+            perspective: 1000px; 
         }
 
         .wheel-container {
             position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d; /* Crucial para o obstáculo 3D */
+            transform-style: preserve-3d; 
         }
 
         .static-shadow { position: absolute; width: 90%; height: 90%; top: 5%; left: 5%; border-radius: 50%; background: transparent; box-shadow: 0 40px 80px rgba(0,0,0,0.15); z-index: 0; pointer-events: none; transform: translateZ(-50px); }
@@ -76,73 +89,83 @@
         .wheel {
             position: relative; width: 100%; height: 100%; border-radius: 50%;
             border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; 
-            background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.02) 100%);
             transform-style: preserve-3d;
+            /* Fundo subtil para dar corpo à roda */
+            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.03) 100%);
         }
         .wheel:active { cursor: grabbing; border-color: #000; }
 
-        /* --- OBSTÁCULO 3D QUANTUM --- */
-        .obstacle-anchor {
+        /* --- OBSTÁCULO (AGORA É A BOLA/ESFERA) --- */
+        .orb-anchor {
             position: absolute; top: 45px; left: 50%;
-            width: 26px; height: 26px; margin-left: -13px;
-            transform-style: preserve-3d; /* Permite rotação 3D real */
-            z-index: 4;
+            width: 36px; height: 36px; margin-left: -18px;
+            transform-style: preserve-3d; z-index: 4;
         }
 
-        .obstacle {
+        .static-orb {
             width: 100%; height: 100%;
-            background-color: #0a0a0a; /* Material escuro */
-            border-radius: 3px;
-            /* Transição super rápida para impacto físico */
-            transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.08s, filter 0.05s;
+            background: radial-gradient(circle at 30% 30%, #444, #000);
+            border-radius: 50%; /* Esfera perfeita */
+            transition: transform 0.1s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.1s;
             will-change: transform;
-            /* Borda subtil metálica */
-            border: 1px solid #333;
             position: relative;
-            transform-origin: center center -13px; /* Roda em torno do seu centro 3D */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        /* O NÚCLEO DE ENERGIA (Escondido atrás) */
-        .obstacle::before {
+        /* Efeito de Impacto na Esfera */
+        .static-orb::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-            transform: translateZ(-2px) scale(0.9); /* Ligeiramente atrás e menor */
-            opacity: 0; transition: all 0.1s;
-            box-shadow: 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-pink);
-            border-radius: 3px;
-            filter: blur(4px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            transform: translateZ(-2px) scale(0.9); 
+            opacity: 0; transition: opacity 0.1s;
+            box-shadow: 0 0 30px var(--cyan), 0 0 50px var(--magenta);
+            filter: blur(5px);
         }
         
-        /* Estado de Impacto */
-        .obstacle.hit::before {
-            opacity: 1;
-            transform: translateZ(-15px) scale(1.8); /* Explode para trás e cresce */
-        }
-        .obstacle.hit {
-            filter: brightness(1.5); /* Flash de luz no impacto */
-        }
+        .static-orb.hit::before { opacity: 1; transform: translateZ(-10px) scale(1.6); }
+        .static-orb.hit { filter: brightness(1.3); }
 
-
-        /* BOLA FÍSICA */
-        .ball {
-            position: absolute; width: 34px; height: 34px;
-            background: radial-gradient(circle at 30% 30%, #ff8a66, var(--ball-color));
-            border-radius: 50%; z-index: 10;
-            box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3), inset 0 -2px 5px rgba(0,0,0,0.2);
-            top: 50%; left: 50%; margin-top: -17px; margin-left: -17px;
+        /* --- OBJETO LIVRE (AGORA É O QUADRADO) --- */
+        .moving-square {
+            position: absolute; width: 32px; height: 32px;
+            background-color: var(--accent-color);
+            border-radius: 4px; /* Cantos ligeiramente curvos para design moderno */
+            z-index: 10;
+            box-shadow: 0 6px 15px rgba(255, 69, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.2);
+            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
             pointer-events: none; will-change: transform;
-            transform: translateZ(20px); /* Bola flutua acima da roda */
+            transform: translateZ(20px); 
         }
 
-        /* LINKS */
+        /* --- LINKS (ESTILO MINIMALISTA ORIGINAL) --- */
         .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 20; transform: translateZ(50px); }
+        
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text); font-weight: 700; transition: all 0.2s; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            background: var(--white); padding: 18px 25px; border-radius: 18px; /* Cantos arredondados suaves */
+            display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: var(--text); font-weight: 600;
+            transition: all 0.2s ease-out; 
+            border: 1px solid rgba(0,0,0,0.04); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03); /* Sombra difusa elegante */
         }
-        .card-left { display: flex; align-items: center; gap: 14px; } .card-icon { width: 22px; height: 22px; fill: currentColor; }
-        .card:active { transform: scale(0.98); background: #f5f5f5; }
-        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 20px; font-weight: 700;}
-        #sound-hint { position: absolute; top: 125px; font-size: 0.65rem; font-weight: 700; color: #aaa; opacity: 0; letter-spacing: 0.1em; }
+        
+        .card-left { display: flex; align-items: center; gap: 14px; }
+        .card-icon { width: 22px; height: 22px; fill: currentColor; }
+        
+        .card:active { transform: scale(0.98); background: #fafafa; }
+        
+        /* Hover apenas em desktop */
+        @media(hover: hover) {
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+                color: #000;
+            }
+        }
+
+        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 20px; font-weight: 600;}
+        #sound-hint { position: absolute; top: 125px; font-size: 0.65rem; font-weight: 600; color: #bbb; opacity: 0; letter-spacing: 0.1em; }
 
     </style>
 </head>
@@ -155,31 +178,31 @@
             <h1 class="title-layer layer-main" id="title-main">ELOI SILVA</h1>
             <h1 style="visibility:hidden;">ELOI SILVA</h1>
         </div>
-        <div class="badge">QUANTUM INTERACTION</div>
-        <div id="sound-hint">AUDIO SYSTEM ACTIVE</div>
+        <div class="badge">Visual & Interaction</div>
+        <div id="sound-hint">AUDIO ACTIVE</div>
     </header>
 
     <div class="stage">
         <div class="wheel-container">
             <div class="static-shadow"></div>
             <div class="wheel" id="wheel">
-                <div class="obstacle-anchor">
-                    <div class="obstacle" id="obstacle"></div>
+                <div class="orb-anchor">
+                    <div class="static-orb" id="obstacle"></div>
                 </div>
             </div>
-            <div class="ball" id="ball"></div>
+            <div class="moving-square" id="free-obj"></div>
         </div>
     </div>
 
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div><span>↗</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div><span>→</span>
         </a>
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div><span>↗</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div><span>→</span>
         </a>
         <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
-            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div><span>↗</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div><span>→</span>
         </a>
     </nav>
 
@@ -187,8 +210,8 @@
 
     <script>
         const wheel = document.getElementById('wheel');
-        const ball = document.getElementById('ball');
-        const obstacle = document.getElementById('obstacle');
+        const freeObj = document.getElementById('free-obj'); // QUADRADO
+        const obstacle = document.getElementById('obstacle'); // ESFERA
         
         const titleMain = document.getElementById('title-main');
         const titleRed = document.getElementById('title-red');
@@ -216,7 +239,6 @@
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            // Som mais grave e forte com o impacto
             osc.frequency.setValueAtTime(250 - (force*2), audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.12);
             gain.gain.setValueAtTime(Math.min(0.1 + force*0.01, 0.4), audioCtx.currentTime);
@@ -224,25 +246,20 @@
             osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.12);
         }
 
-        // --- EFEITO TÍTULO VOLUMÉTRICO ---
+        // --- TITULO VOLUMÉTRICO ---
         function updateVolumetricTitle(velocity) {
             const speed = Math.abs(velocity);
-            // Quanto mais rápido, mais as camadas se afastam em Z e desfocam
-            const zDepth = Math.min(speed * 2, 100); // Profundidade Z
+            const zDepth = Math.min(speed * 2, 100);
             const blur = Math.min(speed * 0.3, 8);
             const opacity = Math.min(speed * 0.03, 0.8);
 
             if (speed > 1) {
-                // Camadas traseiras afastam-se e desfocam
                 titleRed.style.transform = `translateZ(-${zDepth*1.5}px) scale(0.95)`;
                 titleRed.style.filter = `blur(${blur}px)`;
                 titleRed.style.opacity = opacity;
-                
                 titleCyan.style.transform = `translateZ(-${zDepth*3}px) scale(0.9)`;
                 titleCyan.style.filter = `blur(${blur*1.5}px)`;
                 titleCyan.style.opacity = opacity;
-                
-                // Camada principal aproxima-se ligeiramente
                 titleMain.style.transform = `translateZ(${zDepth*0.2}px)`;
             } else {
                 titleRed.style.transform = 'translateZ(-20px)'; titleRed.style.filter = 'none'; titleRed.style.opacity = 0;
@@ -251,30 +268,20 @@
             }
         }
 
-        // --- FÍSICA 3D REATIVA DO OBSTÁCULO ---
+        // --- FÍSICA 3D REATIVA DO OBSTÁCULO (AGORA ESFERA) ---
         let obsImpactForce = 0;
-        let impactNX = 0; let impactNY = 0; // Normal do impacto
+        let impactNX = 0; let impactNY = 0; 
 
         function apply3DImpact() {
             if (obsImpactForce > 0.5) {
-                // Rotação 3D baseada na direção do impacto
-                // Se bater da esquerda (nx < 0), roda no eixo Y positivo.
-                const rotateY = -impactNX * obsImpactForce * 2.5; // Rotação horizontal
-                const rotateX = impactNY * obsImpactForce * 2.5;  // Rotação vertical
-                
-                // Empurrão para trás em Z (Profundidade)
-                const pushZ = -obsImpactForce * 3; // Empurra até -150px
+                // Rotação 3D baseada no impacto
+                const rotateY = -impactNX * obsImpactForce * 2.5;
+                const rotateX = impactNY * obsImpactForce * 2.5;
+                const pushZ = -obsImpactForce * 3; 
 
-                obstacle.style.transform = `
-                    rotateX(${rotateX}deg) 
-                    rotateY(${rotateY}deg) 
-                    translateZ(${pushZ}px)
-                `;
-                
-                // Ativa o núcleo de energia
+                obstacle.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${pushZ}px)`;
                 obstacle.classList.add('hit');
-
-                obsImpactForce *= 0.85; // Decaimento rápido
+                obsImpactForce *= 0.85; 
             } else {
                 obstacle.style.transform = 'rotateX(0) rotateY(0) translateZ(0)';
                 obstacle.classList.remove('hit');
@@ -282,13 +289,14 @@
             }
         }
 
-        // FÍSICA CORE
+        // FÍSICA CORE (Invertida: Quadrado Livre, Esfera Presa)
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
-        let bX = 0, bY = 0, bVX = 0, bVY = 0;
+        let sqX = 0, sqY = 0, sqVX = 0, sqVY = 0; // Coordenadas do Quadrado (Square)
+        
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
-        const LIMIT = 115; 
-        const OBS_RADIUS = 105; 
-        const OBS_HIT_RAD = 30; 
+        const LIMIT = 115; // Raio interno da roda
+        const OBS_RADIUS = 105; // Raio onde a esfera está presa
+        const COLLISION_DIST = 32; // Distância de colisão (Raio esfera 18px + Meio lado quadrado 16px ~= 34px)
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -327,48 +335,54 @@
             updateVolumetricTitle(wVel);
             apply3DImpact();
 
-            // FÍSICA BOLA
-            bVY += GRAVITY; bX += bVX; bY += bVY;
+            // FÍSICA DO QUADRADO (SQUARE)
+            sqVY += GRAVITY; sqX += sqVX; sqY += sqVY;
 
+            // CALCULAR POSIÇÃO DA ESFERA NO MUNDO
             const rad = (wAngle - 90) * (Math.PI / 180);
             const obsX = Math.cos(rad) * OBS_RADIUS;
             const obsY = Math.sin(rad) * OBS_RADIUS;
-            const dx = bX - obsX;
-            const dy = bY - obsY;
+            
+            // Distância Quadrado <-> Esfera
+            const dx = sqX - obsX;
+            const dy = sqY - obsY;
             const distObs = Math.sqrt(dx*dx + dy*dy);
 
-            if (distObs < OBS_HIT_RAD) {
+            // COLISÃO: Quadrado bate na Esfera
+            if (distObs < COLLISION_DIST) {
                 const nx = dx / distObs; const ny = dy / distObs;
-                const overlap = OBS_HIT_RAD - distObs;
-                bX += nx * overlap; bY += ny * overlap; 
+                const overlap = COLLISION_DIST - distObs;
+                sqX += nx * overlap; sqY += ny * overlap; 
                 
-                const dot = bVX * nx + bVY * ny;
-                bVX -= 2 * dot * nx; bVY -= 2 * dot * ny;
+                const dot = sqVX * nx + sqVY * ny;
+                sqVX -= 2 * dot * nx; sqVY -= 2 * dot * ny;
                 
                 const spinForce = wVel * 1.5;
-                bVX += -ny * spinForce; bVY += nx * spinForce;
+                sqVX += -ny * spinForce; sqVY += nx * spinForce;
 
-                // CALCULAR IMPACTO 3D
-                const totalForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
+                // CALCULAR IMPACTO 3D NA ESFERA
+                const totalForce = Math.sqrt(sqVX*sqVX + sqVY*sqVY) + Math.abs(spinForce);
                 playClack(totalForce);
                 
-                impactNX = nx; // Guardar a normal do impacto para a rotação
-                impactNY = ny;
-                obsImpactForce = Math.min(totalForce * 2, 50); // Força máxima do impacto
+                impactNX = nx; impactNY = ny;
+                obsImpactForce = Math.min(totalForce * 2, 50); 
             }
 
-            const d = Math.sqrt(bX*bX + bY*bY);
+            // COLISÃO: Quadrado bate na Parede
+            const d = Math.sqrt(sqX*sqX + sqY*sqY);
             if (d > LIMIT) {
-                const nx = bX/d, ny = bY/d;
-                bX = nx*LIMIT; bY = ny*LIMIT;
-                const dot = bVX*nx + bVY*ny;
-                bVX -= 2*dot*nx; bVY -= 2*dot*ny;
-                bVX *= BOUNCE; bVY *= BOUNCE;
-                const s = wVel * 1.2; bVX += -ny*s; bVY += nx*s;
+                const nx = sqX/d, ny = sqY/d;
+                sqX = nx*LIMIT; sqY = ny*LIMIT;
+                const dot = sqVX*nx + sqVY*ny;
+                sqVX -= 2*dot*nx; sqVY -= 2*dot*ny;
+                sqVX *= BOUNCE; sqVY *= BOUNCE;
+                const s = wVel * 1.2; sqVX += -ny*s; sqVY += nx*s;
             }
-            bVX *= FRICTION; bVY *= FRICTION;
-            // A bola também se move em Z para dar profundidade
-            ball.style.transform = `translate3d(${bX}px, ${bY}px, 20px)`;
+            sqVX *= FRICTION; sqVY *= FRICTION;
+            
+            // Render Quadrado (com rotação suave baseada na velocidade)
+            const rotSq = sqVX * 2;
+            freeObj.style.transform = `translate3d(${sqX}px, ${sqY}px, 20px) rotate(${rotSq}deg)`;
 
             requestAnimationFrame(loop);
         }
@@ -381,7 +395,7 @@
         window.addEventListener('touchmove', move, p);
         window.addEventListener('touchend', end);
 
-        bY = 50; loop();
+        sqY = 50; loop();
     </script>
 </body>
 </html>
