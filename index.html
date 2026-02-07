@@ -6,12 +6,12 @@
     <title>Eloi Silva | Visual Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,400;0,900;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --bg: #F2F2F4;
-            --text: #000000;
+            --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
             --ball-color: #FF4500;
@@ -34,39 +34,48 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- TITULO COM EFEITO DINÂMICO --- */
+        /* --- TITULO COM EFEITO CROMÁTICO (GLITCH) --- */
         header { 
             text-align: center; 
             z-index: 10; 
             pointer-events: none;
             width: 100%;
+            /* Garante que o efeito não corta nas bordas */
+            overflow: visible; 
         }
 
         .brand {
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Aplicamos o filtro aqui */
-            filter: url(#motionBlur); 
-            will-change: filter;
+            /* Transição suave para quando o efeito para */
+            transition: transform 0.1s;
+        }
+
+        /* O texto principal que vai sofrer a aberração */
+        .glitch-text {
+            display: block;
+            /* Aceleração de hardware para o efeito não travar */
+            will-change: text-shadow, transform; 
         }
 
         .first-name {
-            font-size: 4.5rem;
+            font-size: 4.5rem; 
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: -0.08em;
             line-height: 0.7;
             margin-left: -10px;
+            color: var(--text);
         }
 
         .last-name {
             font-size: 2.2rem;
-            font-weight: 100;
+            font-weight: 200; 
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.4em; 
             line-height: 1.5;
-            color: #555;
+            color: #444;
             margin-right: -0.4em;
         }
 
@@ -129,13 +138,14 @@
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text); 
             font-weight: 600;
-            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            transition: all 0.2s cubic-bezier(0.2, 1, 0.3, 1);
             border: 1px solid rgba(0,0,0,0.03);
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         
         .card-left { display: flex; align-items: center; gap: 12px; }
         .card-icon { width: 20px; height: 20px; fill: currentColor; }
+
         .card:active { transform: scale(0.96); background: #f9f9f9; }
         
         @media(hover: hover) {
@@ -148,38 +158,16 @@
         }
 
         footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.2em; }
-        
-        /* Ocultar o SVG do filtro mas mantê-lo funcional */
-        .svg-filters { position: absolute; width: 0; height: 0; visibility: hidden; }
+        #sound-hint { position: absolute; opacity: 0; }
 
     </style>
 </head>
 <body>
 
-    <svg class="svg-filters">
-        <defs>
-            <filter id="motionBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur id="blurFilter" in="SourceGraphic" stdDeviation="0,0" />
-                
-                <feOffset id="offsetBlue" in="blurFilter" dx="0" dy="0" result="blueGhost" />
-                <feColorMatrix in="blueGhost" type="matrix" values="0 0 0 0 0  0 0 0 0 0.5  0 0 0 0 1  0 0 0 1 0" result="blueGlow"/>
-                
-                <feOffset id="offsetOrange" in="blurFilter" dx="0" dy="0" result="orangeGhost" />
-                <feColorMatrix in="orangeGhost" type="matrix" values="1 0 0 0 1  0 0.4 0 0 0.2  0 0 0 0 0  0 0 0 1 0" result="orangeGlow"/>
-                
-                <feMerge>
-                    <feMergeNode in="blueGlow" />
-                    <feMergeNode in="orangeGlow" />
-                    <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
-        </defs>
-    </svg>
-
     <header>
-        <div class="brand" id="brand-container">
-            <span class="first-name">Eloi</span>
-            <span class="last-name">Silva</span>
+        <div class="brand">
+            <span class="first-name glitch-text" id="title-name">Eloi</span>
+            <span class="last-name glitch-text" id="title-surname">Silva</span>
         </div>
         <div class="badge">Visual Interaction</div>
     </header>
@@ -225,9 +213,68 @@
     <script>
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
-        const blurFilter = document.getElementById('blurFilter');
-        const offsetBlue = document.getElementById('offsetBlue');
-        const offsetOrange = document.getElementById('offsetOrange');
+        // Elementos de Texto para o efeito
+        const titleName = document.getElementById('title-name');
+        const titleSurname = document.getElementById('title-surname');
+
+        // AUDIO
+        let audioCtx = null;
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        function playTick() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.03);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.03);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+        }
+
+        // --- EFEITO GLITCH/CHROMATIC ABERRATION ---
+        function updateTextEffect(velocity) {
+            // Valor absoluto da velocidade (para funcionar nos dois sentidos)
+            const speed = Math.abs(velocity);
+            
+            // Limitador para o efeito não explodir
+            // maxOffset: o quão longe as cores se separam
+            const maxOffset = 15; 
+            // Calcular o offset baseado na velocidade (suavizado)
+            const offset = Math.min(speed * 0.8, maxOffset);
+            
+            // Blur também aumenta com a velocidade
+            const blur = Math.min(speed * 0.2, 4);
+
+            if (offset > 0.5) {
+                // Cores Vivas (Ciano e Vermelho/Laranja e Azul) - Efeito espectral
+                // O formato é: x-offset y-offset blur color
+                const shadow = `
+                    ${offset}px 0px ${blur}px rgba(255, 0, 0, 0.7), 
+                    -${offset}px 0px ${blur}px rgba(0, 255, 255, 0.7),
+                    0px 0px ${offset * 1.5}px rgba(255, 255, 0, 0.3)
+                `;
+                
+                titleName.style.textShadow = shadow;
+                titleSurname.style.textShadow = shadow;
+                
+                // Pequeno shake/tremor se for muito rápido
+                if (speed > 15) {
+                    const shake = (Math.random() - 0.5) * 2;
+                    titleName.style.transform = `translateX(${shake}px)`;
+                } else {
+                    titleName.style.transform = `none`;
+                }
+
+            } else {
+                titleName.style.textShadow = 'none';
+                titleSurname.style.textShadow = 'none';
+                titleName.style.transform = `none`;
+            }
+        }
 
         // PHYSICS
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
@@ -241,31 +288,10 @@
         }
 
         function start(e) {
-            isDrag = true; wVel = 0;
+            initAudio(); isDrag = true; wVel = 0;
             const cx = e.clientX || e.touches[0].clientX;
             const cy = e.clientY || e.touches[0].clientY;
             sAngle = getA(cx, cy) - wAngle;
-        }
-
-        // Função para atualizar o efeito visual nas letras
-        function updateTextEffect(velocity) {
-            const speed = Math.abs(velocity);
-            
-            // Intensidade do blur e offsets baseada na velocidade
-            // Só ativa se a velocidade for relevante
-            if (speed > 0.5) {
-                const blurValue = Math.min(speed * 0.8, 15);
-                const offsetValue = speed * 1.2;
-
-                blurFilter.setAttribute('stdDeviation', `${blurValue}, 0`);
-                offsetBlue.setAttribute('dx', `${offsetValue}`);
-                offsetOrange.setAttribute('dx', `-${offsetValue}`);
-            } else {
-                // Reset quando parado
-                blurFilter.setAttribute('stdDeviation', '0, 0');
-                offsetBlue.setAttribute('dx', '0');
-                offsetOrange.setAttribute('dx', '0');
-            }
         }
 
         function move(e) {
@@ -278,7 +304,9 @@
             if (d > 180) d -= 360; if (d < -180) d += 360;
             wVel = d; wAngle += d;
             wheel.style.transform = `rotate(${wAngle}deg)`;
+            if (Math.abs(wAngle - lastTick) > 30) { playTick(); lastTick = wAngle; }
             
+            // Atualizar efeito do texto durante o drag
             updateTextEffect(wVel);
         }
 
@@ -288,11 +316,12 @@
             if (!isDrag) {
                 wVel *= 0.985; wAngle += wVel;
                 wheel.style.transform = `rotate(${wAngle}deg)`;
+                if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
                 
-                // Aplicar efeito também durante a inércia
+                // Atualizar efeito do texto durante a inércia
                 updateTextEffect(wVel);
             }
-
+            
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
