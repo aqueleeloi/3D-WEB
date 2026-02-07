@@ -40,6 +40,7 @@
         h1 { 
             font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
             letter-spacing: -0.06em; line-height: 0.9; margin-bottom: 5px; color: #000;
+            /* Otimização para os efeitos pesados */
             will-change: text-shadow, transform;
         }
 
@@ -72,16 +73,16 @@
         }
         .wheel:active { cursor: grabbing; }
 
-        /* --- QUADRADO (COM EFEITO GLITCH) --- */
+        /* --- QUADRADO (COM EFEITO GLITCH ULTRA) --- */
         .obstacle {
             position: absolute;
             width: 24px; height: 24px;
             background-color: var(--wheel-border);
             top: 40px; left: 50%; margin-left: -12px;
             border-radius: 2px;
-            /* Transição rápida para recuperação */
-            transition: transform 0.1s;
-            will-change: box-shadow, transform, background-color;
+            /* Transição super rápida para ser agressivo */
+            transition: transform 0.05s, filter 0.05s;
+            will-change: box-shadow, transform, background-color, filter;
         }
 
         /* --- BOLA SÓLIDA --- */
@@ -89,7 +90,6 @@
             position: absolute; width: 32px; height: 32px;
             background-color: var(--ball-color);
             border-radius: 50%; z-index: 5;
-            /* Sombra mais marcada para parecer sólida */
             box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(0,0,0,0.2);
             top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
             pointer-events: none; will-change: transform;
@@ -132,7 +132,7 @@
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
             <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
+                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
             <span>→</span>
@@ -185,48 +185,63 @@
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(400, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
             osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.08);
         }
 
-        // --- GLITCH EFFECT HELPERS ---
+        // --- NOVA FUNÇÃO GLITCH "ULTIMATE" ---
         function applyGlitch(element, intensity) {
-            const shift = Math.min(intensity * 0.8, 15);
-            if (shift > 0.5) {
-                // Sombra de Texto para o Titulo
+            const shift = Math.min(intensity * 0.6, 20); // Limite de deslocamento maior
+            const blur = Math.min(intensity * 0.2, 5);   // Limite de blur
+            
+            // Introduz aleatoriedade (Jitter) para todas as direções
+            const jitterX = (Math.random() - 0.5) * intensity * 0.5;
+            const jitterY = (Math.random() - 0.5) * intensity * 0.5;
+
+            if (shift > 1) {
+                // Efeito para o Título (Text-Shadow Multidirecional + Blur)
                 if (element === title) {
-                    element.style.textShadow = `${shift}px 0 rgba(255, 0, 0, 0.7), -${shift}px 0 rgba(0, 255, 255, 0.7)`;
-                    element.style.transform = `skewX(${-intensity * 0.3}deg)`;
+                    // Vermelho desvia para um lado, Ciano para o outro, ambos com jitter Y e blur
+                    element.style.textShadow = `
+                        ${shift + jitterX}px ${jitterY}px ${blur}px rgba(255, 0, 0, 0.8), 
+                        -${shift + jitterX}px -${jitterY}px ${blur}px rgba(0, 255, 255, 0.8),
+                        0px ${shift*0.5}px ${blur*1.5}px rgba(0, 255, 0, 0.4)
+                    `;
+                    // Tremor físico no elemento
+                    element.style.transform = `translate(${jitterX*0.2}px, ${jitterY*0.2}px) skewX(${-intensity * 0.2}deg)`;
                 } 
-                // Sombra de Caixa para o Obstáculo (Quadrado)
+                // Efeito para o Obstáculo (Box-Shadow + Filter Blur + Transform Caótico)
                 else {
-                    element.style.backgroundColor = '#000'; // Mantém preto base
-                    // Box shadow simula o RGB split
-                    element.style.boxShadow = `${shift}px 0 0 rgba(255, 0, 0, 0.8), -${shift}px 0 0 rgba(0, 255, 255, 0.8)`;
-                    // Skew agressivo no impacto
-                    element.style.transform = `scale(1.2) skewX(${-intensity * 2}deg)`;
+                    element.style.backgroundColor = '#000';
+                    // Box shadow multidirecional com blur
+                    element.style.boxShadow = `
+                        ${shift}px ${shift/2}px ${blur}px rgba(255, 0, 0, 0.9), 
+                        -${shift}px -${shift/2}px ${blur}px rgba(0, 255, 255, 0.9)
+                    `;
+                    // Blur real no elemento e transformação caótica
+                    element.style.filter = `blur(${blur*0.5}px)`;
+                    element.style.transform = `scale(1.3) rotate(${Math.random()*10 - 5}deg) translate(${jitterX}px, ${jitterY}px)`;
                 }
             } else {
+                // Reset
                 if (element === title) {
-                    element.style.textShadow = 'none'; element.style.transform = 'none';
+                    element.style.textShadow = 'none'; 
+                    element.style.transform = 'none';
                 } else {
                     element.style.boxShadow = 'none'; 
-                    // Reset transform (handled by physics loop or css)
+                    element.style.filter = 'none';
                     if(!element.classList.contains('hit')) element.style.transform = 'none';
                 }
             }
         }
 
-        // --- VARIAVEIS DE ESTADO DO OBSTACULO ---
+        // VARIAVEIS
         let obsGlitchIntensity = 0;
-
-        // FÍSICA
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
         const LIMIT = 117; 
-        
         const OBS_RADIUS = 105; 
         const OBS_HIT_RAD = 29; 
 
@@ -264,16 +279,17 @@
                 if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             
-            // Glitch Titulo (Baseado na velocidade da roda)
+            // APLICAR GLITCH TÍTULO
             applyGlitch(title, Math.abs(wVel));
 
-            // Glitch Obstáculo (Decaimento)
+            // APLICAR GLITCH OBSTÁCULO (Decaimento)
             if (obsGlitchIntensity > 0) {
                 applyGlitch(obstacle, obsGlitchIntensity);
-                obsGlitchIntensity *= 0.9; // Fade out do efeito
-                if(obsGlitchIntensity < 0.5) obsGlitchIntensity = 0;
+                obsGlitchIntensity *= 0.85; // Fade out mais rápido
+                if(obsGlitchIntensity < 1) obsGlitchIntensity = 0;
             } else {
                 obstacle.style.boxShadow = 'none';
+                obstacle.style.filter = 'none';
                 obstacle.style.transform = 'none';
             }
 
@@ -299,11 +315,10 @@
                 const spinForce = wVel * 1.5;
                 bVX += -ny * spinForce; bVY += nx * spinForce;
 
-                // INTERAÇÃO NO IMPACTO
                 playClack();
-                // Definir intensidade do glitch baseado no impacto
+                // Intensidade do impacto define o glitch do quadrado
                 const impactForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
-                obsGlitchIntensity = Math.min(impactForce * 2, 20); // Cap de intensidade
+                obsGlitchIntensity = Math.min(impactForce * 3, 40); // Mais intenso
             }
 
             // Colisão Parede
@@ -319,8 +334,6 @@
             }
             
             bVX *= FRICTION; bVY *= FRICTION;
-            
-            // Render
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
 
             requestAnimationFrame(loop);
