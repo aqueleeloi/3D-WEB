@@ -26,21 +26,18 @@
             font-family: 'Inter', sans-serif;
             color: var(--text);
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            /* Ajuste de padding para subir o conteudo */
             padding: 50px 24px 40px 24px; 
         }
 
-        /* --- CABEÇALHO (POSICIONADO MAIS ACIMA) --- */
+        /* --- CABEÇALHO --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
             height: 120px; 
             display: flex; align-items: center; justify-content: center;
             position: relative;
-            /* Puxar para cima como pedido */
             margin-top: -30px; 
         }
 
-        /* Wrapper do Texto */
         .buzz-wrapper {
             position: relative;
             display: grid; 
@@ -48,7 +45,7 @@
             isolation: isolate; 
         }
 
-        /* Estilo Base Tipografia */
+        /* Tipografia */
         .buzz-text {
             font-size: 3.8rem;
             font-weight: 900;
@@ -57,49 +54,27 @@
             line-height: 1;
             margin: 0;
             white-space: nowrap;
-            /* Otimização para movimento em todos os eixos */
-            will-change: transform, filter, opacity;
+            /* Performance */
+            will-change: transform, filter;
             grid-area: 1 / 1; 
         }
 
-        /* O Espaçador (Invisível) */
         .buzz-spacer {
             font-size: 3.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 1;
             visibility: hidden; opacity: 0; pointer-events: none;
         }
 
-        /* --- CAMADAS DO EFEITO CAÓTICO --- */
+        /* --- CAMADAS DO EFEITO --- */
+        .layer-main { color: #000000; z-index: 20; position: absolute; }
         
-        /* 1. Camada Principal (PRETO PURO) */
-        .layer-main {
-            color: #000000; 
-            z-index: 20; 
-            position: absolute;
-        }
-
-        /* 2. Camadas de Cor (Vibrantes) */
         .layer-cyan {
-            color: #00FFFF; 
-            mix-blend-mode: multiply; 
-            z-index: 5;
-            position: absolute;
-            opacity: 0.9;
+            color: #00FFFF; mix-blend-mode: multiply; z-index: 5; position: absolute; opacity: 0.9;
         }
-
         .layer-magenta {
-            color: #FF00FF; 
-            mix-blend-mode: multiply;
-            z-index: 6;
-            position: absolute;
-            opacity: 0.9;
+            color: #FF00FF; mix-blend-mode: multiply; z-index: 6; position: absolute; opacity: 0.9;
         }
-
         .layer-yellow {
-            color: #FFFF00;
-            mix-blend-mode: multiply;
-            z-index: 4;
-            position: absolute;
-            opacity: 0.8;
+            color: #FFFF00; mix-blend-mode: multiply; z-index: 4; position: absolute; opacity: 0.8;
         }
 
         .badge {
@@ -112,6 +87,7 @@
 
         /* --- STAGE --- */
         .stage { position: relative; width: 290px; height: 290px; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        
         .static-shadow { position: absolute; width: 92%; height: 92%; border-radius: 50%; background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12); z-index: 0; pointer-events: none; }
 
         .wheel {
@@ -159,11 +135,10 @@
     <header>
         <div class="buzz-wrapper">
             <div class="buzz-spacer">ELOI SILVA</div>
-
+            
             <h1 class="buzz-text layer-cyan" id="txt-cyan">ELOI SILVA</h1>
             <h1 class="buzz-text layer-magenta" id="txt-magenta">ELOI SILVA</h1>
             <h1 class="buzz-text layer-yellow" id="txt-yellow">ELOI SILVA</h1>
-            
             <h1 class="buzz-text layer-main" id="txt-main">ELOI SILVA</h1>
         </div>
         
@@ -224,43 +199,48 @@
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        // --- EFEITO "CHAOTIC BUZZ" (POR TODO O LADO) ---
-        function updateBuzzEffect(velocity) {
-            const speed = Math.abs(velocity);
+        // --- EFEITO REATIVO À BOLA (Follow + Chaos) ---
+        function updateGlitchEffect(ballX, ballY, velocity) {
+            // 1. Normalizar posição da bola (-1 a 1)
+            // LIMIT é 117, então dividimos para ter um ratio
+            const ratioX = ballX / 117;
+            const ratioY = ballY / 117;
             
-            // Intensidade baseada na velocidade
-            const shift = Math.min(speed * 2.5, 60); // Expansão
-            const blur = Math.min(speed * 0.6, 12);  // Desfoque
-            
-            // Jitter Aleatório (Vibração caótica)
-            // Gera um número entre -1 e 1 multiplicado pela velocidade
-            const jitterX = (Math.random() - 0.5) * speed * 0.8;
-            const jitterY = (Math.random() - 0.5) * speed * 0.8;
+            // 2. Definir intensidade do glitch baseado na distância ao centro
+            // Quanto mais na borda, mais glitch
+            const distFromCenter = Math.sqrt(ratioX*ratioX + ratioY*ratioY); // 0 a 1
+            const baseShift = distFromCenter * 20; // Até 20px de deslocamento só pela posição
 
-            if (shift > 0.5) {
-                // CAMADAS MOVEM-SE EM DIREÇÕES OPOSTAS + VIBRAÇÃO
+            // 3. Adicionar componente de velocidade (Caos)
+            const speed = Math.abs(velocity);
+            const chaos = Math.min(speed * 1.5, 30); // Extra shift pela velocidade
+            
+            // Random Jitter se estiver rápido
+            const jitterX = (speed > 5) ? (Math.random() - 0.5) * chaos : 0;
+            const jitterY = (speed > 5) ? (Math.random() - 0.5) * chaos : 0;
+
+            const totalShiftX = (ratioX * (baseShift + chaos)) + jitterX;
+            const totalShiftY = (ratioY * (baseShift + chaos)) + jitterY;
+            
+            // Aplicar às camadas (RGB Split na direção da bola)
+            if (Math.abs(totalShiftX) > 0.5 || Math.abs(totalShiftY) > 0.5) {
+                // Ciano segue a bola
+                txtCyan.style.transform = `translate(${totalShiftX}px, ${totalShiftY}px)`;
+                // Magenta vai oposto (efeito profundidade/split)
+                txtMagenta.style.transform = `translate(${-totalShiftX}px, ${-totalShiftY}px)`;
+                // Amarelo gira ligeiramente
+                txtYellow.style.transform = `translate(${jitterY}px, ${jitterX}px) rotate(${speed * 0.5}deg)`;
                 
-                // Ciano: Sobe e Esquerda (Diagonal Top-Left) + Jitter
-                txtCyan.style.transform = `translate(calc(-${shift}px + ${jitterX}px), calc(-${shift/2}px + ${jitterY}px))`;
+                // Blur baseado na velocidade
+                const blur = Math.min(speed * 0.5 + distFromCenter * 2, 10);
                 txtCyan.style.filter = `blur(${blur}px)`;
-                
-                // Magenta: Desce e Direita (Diagonal Bottom-Right) + Jitter
-                txtMagenta.style.transform = `translate(calc(${shift}px + ${jitterX}px), calc(${shift/2}px + ${jitterY}px))`;
                 txtMagenta.style.filter = `blur(${blur}px)`;
-                
-                // Amarelo: Movimento cruzado ou rodopia + Jitter
-                txtYellow.style.transform = `translate(${jitterY}px, ${jitterX}px) scale(${1 + shift/150})`;
-                txtYellow.style.filter = `blur(${blur * 1.2}px)`;
-                
-                // Principal (Preto): Apenas vibra ligeiramente para manter legibilidade
-                txtMain.style.transform = `translate(${jitterX * 0.3}px, ${jitterY * 0.3}px)`;
             } else {
                 // Reset
-                const reset = `translate(0, 0)`;
+                const reset = 'translate(0,0)';
                 txtCyan.style.transform = reset; txtCyan.style.filter = 'none';
                 txtMagenta.style.transform = reset; txtMagenta.style.filter = 'none';
-                txtYellow.style.transform = reset; txtYellow.style.filter = 'none';
-                txtMain.style.transform = reset;
+                txtYellow.style.transform = reset;
             }
         }
 
@@ -305,9 +285,10 @@
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
             
-            // ATUALIZAR EFEITO CAÓTICO
-            updateBuzzEffect(wVel);
+            // ATUALIZAR EFEITO COM POSIÇÃO DA BOLA (bX, bY) + VELOCIDADE
+            updateGlitchEffect(bX, bY, wVel);
 
+            // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
