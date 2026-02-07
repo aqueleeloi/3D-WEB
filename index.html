@@ -17,7 +17,6 @@
             --ball-color: #FF4500;
         }
 
-        /* RESET & IOS FIXES */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -34,7 +33,6 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- CABEÇALHO GLITCH --- */
         header { text-align: center; z-index: 10; pointer-events: none; width: 100%; }
 
         h1 { 
@@ -49,7 +47,6 @@
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
 
-        /* --- STAGE --- */
         .stage {
             position: relative; width: 290px; height: 290px;
             display: flex; align-items: center; justify-content: center;
@@ -62,7 +59,6 @@
             z-index: 0; pointer-events: none;
         }
 
-        /* --- RODA BOLD --- */
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
@@ -72,37 +68,39 @@
         }
         .wheel:active { cursor: grabbing; }
 
-        /* QUADRADO RÍGIDO (OBSTÁCULO) */
+        /* QUADRADO PEQUENO E SÓLIDO */
         .obstacle {
             position: absolute;
-            width: 40px; height: 40px;
+            width: 24px; height: 24px; /* Mais pequeno */
             background-color: var(--wheel-border);
-            /* Posicionado mais ao centro como pedido */
-            top: 60px; left: 50%; 
-            margin-left: -20px; /* Centrar X */
-            border-radius: 4px;
+            top: 40px; /* Mais longe do centro */
+            left: 50%; 
+            margin-left: -12px;
+            border-radius: 2px;
             transition: background-color 0.05s, transform 0.05s;
         }
         
         .obstacle.hit {
             background-color: var(--ball-color);
-            transform: scale(1.1);
             box-shadow: 0 0 15px var(--ball-color);
         }
 
-        /* BOLA */
+        /* BOLA SOFT BODY */
         .ball {
             position: absolute; width: 30px; height: 30px;
             background-color: var(--ball-color);
             border-radius: 50%; z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            top: 50%; left: 50%; margin-top: -15px; margin-left: -15px;
-            pointer-events: none; will-change: transform;
+            /* Centrada para o transform funcionar bem */
+            top: 50%; left: 50%; 
+            margin-top: -15px; margin-left: -15px;
+            pointer-events: none; 
+            /* Importante para a performance do Soft Body */
+            will-change: transform;
         }
 
-        /* --- LINKS MINIMALISTAS --- */
+        /* LINKS */
         .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
-        
         .card {
             background: var(--white); padding: 18px 25px; border-radius: 18px;
             display: flex; align-items: center; justify-content: space-between;
@@ -124,7 +122,7 @@
     <header>
         <h1 id="dynamic-title">ELOI SILVA</h1>
         <div class="badge">Visual & Interaction</div>
-        <div id="sound-hint">🔊 Audio Active</div>
+        <div id="sound-hint">Sound Active</div>
     </header>
 
     <div class="stage">
@@ -167,7 +165,7 @@
         const obstacle = document.getElementById('obstacle');
         const title = document.getElementById('dynamic-title');
 
-        // --- SISTEMA DE SOM (Fidget Spinner + Collision) ---
+        // AUDIO
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -175,65 +173,52 @@
             const hint = document.getElementById('sound-hint');
             hint.style.opacity = 1; setTimeout(() => hint.style.opacity = 0, 3000);
         }
-
-        // Som de "Catraca/Rolamento" (Varia com a velocidade)
         function playRatchet(velocity) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            
-            // Pitch sobe com a velocidade
             const speed = Math.min(Math.abs(velocity), 50);
             osc.frequency.setValueAtTime(100 + (speed * 5), audioCtx.currentTime);
-            
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            
-            osc.type = 'triangle';
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.05);
         }
-
-        // Som de Colisão (Bola no Quadrado)
         function playClack() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(300, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-            osc.type = 'square';
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // --- EFEITO GLITCH NO TITULO ---
+        // TEXT GLITCH
         function updateTextEffect(velocity) {
             const speed = Math.abs(velocity);
             const shift = Math.min(speed * 0.8, 15);
             if (shift > 0.5) {
-                title.style.textShadow = `
-                    ${shift}px 0 rgba(255, 0, 0, 0.7), 
-                    -${shift}px 0 rgba(0, 255, 255, 0.7)
-                `;
+                title.style.textShadow = `${shift}px 0 rgba(255, 0, 0, 0.7), -${shift}px 0 rgba(0, 255, 255, 0.7)`;
                 title.style.transform = `skewX(${-velocity * 0.3}deg)`;
             } else {
-                title.style.textShadow = 'none';
-                title.style.transform = 'none';
+                title.style.textShadow = 'none'; title.style.transform = 'none';
             }
         }
 
-        // --- FÍSICA ---
+        // FÍSICA & SOFT BODY
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
         const LIMIT = 117; 
         
-        // Configuração do Obstáculo (Quadrado)
-        const OBS_RADIUS = 85; // Distância do centro (Offset)
-        const OBS_SIZE = 40; // Tamanho do quadrado (aproximado para colisão circular)
-        const OBS_HIT_RAD = 35; // Raio de colisão (Bola + Metade do Quadrado)
+        // Configuração Obstáculo (Mais longe do centro)
+        const OBS_RADIUS = 105; // ~70% do raio
+        const OBS_SIZE = 24; 
+        const OBS_HIT_RAD = 27; // 15px bola + 12px quadrado
+
+        // Variáveis de Soft Body
+        let squashX = 1, squashY = 1, squashAngle = 0;
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -257,86 +242,94 @@
             if (d > 180) d -= 360; if (d < -180) d += 360;
             wVel = d; wAngle += d;
             wheel.style.transform = `rotate(${wAngle}deg)`;
-            
-            // Som Interativo (Fidget Spinner)
-            if (Math.abs(wAngle - lastTick) > 15) { 
-                playRatchet(wVel); 
-                lastTick = wAngle; 
-            }
+            if (Math.abs(wAngle - lastTick) > 15) { playRatchet(wVel); lastTick = wAngle; }
         }
 
         function end() { isDrag = false; }
 
+        // Função de "Amassar"
+        function triggerSquash(nx, ny, intensity) {
+            // Calcular ângulo da normal para rodar o squash
+            squashAngle = Math.atan2(ny, nx);
+            
+            // Intensidade baseada na força do impacto (limitada)
+            const force = Math.min(intensity * 0.05, 0.4); 
+            
+            // Esmagar no eixo de impacto (X no sistema local), esticar no outro (Y)
+            // Como vamos rodar, 'squashX' é o eixo do impacto
+            squashX = 1 - force; 
+            squashY = 1 + force;
+        }
+
         function loop() {
-            // RODA INÉRCIA
             if (!isDrag) {
                 wVel *= 0.985; wAngle += wVel;
                 wheel.style.transform = `rotate(${wAngle}deg)`;
-                // Som na inércia
-                if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { 
-                    playRatchet(wVel); 
-                    lastTick = wAngle; 
-                }
+                if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             updateTextEffect(wVel);
 
-            // BOLA GRAVIDADE
+            // Recuperação do Soft Body (Mola)
+            squashX += (1 - squashX) * 0.15;
+            squashY += (1 - squashY) * 0.15;
+
+            // Física Bola
             bVY += GRAVITY; bX += bVX; bY += bVY;
 
-            // --- DETECÇÃO DE COLISÃO COM O QUADRADO (CORPO RÍGIDO) ---
-            // Calcular posição do obstáculo no mundo
-            // O obstáculo está no topo (ângulo -90 deg visual, mas roda com wAngle)
-            // Offset inicial de 60px top em CSS = raio ~85px para cima
+            // COLISÃO QUADRADO
             const rad = (wAngle - 90) * (Math.PI / 180);
             const obsX = Math.cos(rad) * OBS_RADIUS;
             const obsY = Math.sin(rad) * OBS_RADIUS;
-
-            // Distância Bola <-> Obstáculo
             const dx = bX - obsX;
             const dy = bY - obsY;
             const distObs = Math.sqrt(dx*dx + dy*dy);
 
-            // Se bater no quadrado
             if (distObs < OBS_HIT_RAD) {
-                // Vetor normal
                 const nx = dx / distObs;
                 const ny = dy / distObs;
-
-                // Empurrar para fora (evitar overlap)
                 const overlap = OBS_HIT_RAD - distObs;
-                bX += nx * overlap;
-                bY += ny * overlap;
-
-                // Refletir velocidade (Bounce)
-                const dot = bVX * nx + bVY * ny;
-                bVX -= 2 * dot * nx;
-                bVY -= 2 * dot * ny;
+                bX += nx * overlap; bY += ny * overlap; // Correção imediata
                 
-                // Transferência de momento angular da roda para a bola
+                const velocityMag = Math.sqrt(bVX*bVX + bVY*bVY);
+                const dot = bVX * nx + bVY * ny;
+                bVX -= 2 * dot * nx; bVY -= 2 * dot * ny;
+                
                 const spinForce = wVel * 1.5;
-                bVX += -ny * spinForce; 
-                bVY += nx * spinForce;
+                bVX += -ny * spinForce; bVY += nx * spinForce;
 
-                // Efeitos de impacto
                 playClack();
                 obstacle.classList.add('hit');
                 setTimeout(() => obstacle.classList.remove('hit'), 100);
+                
+                // Trigger Soft Body Effect
+                triggerSquash(nx, ny, velocityMag + Math.abs(spinForce));
             }
 
-            // LIMITE EXTERNO (Parede da roda)
+            // COLISÃO PAREDE
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > LIMIT) {
                 const nx = bX/d, ny = bY/d;
                 bX = nx*LIMIT; bY = ny*LIMIT;
+                
+                const velocityMag = Math.sqrt(bVX*bVX + bVY*bVY);
                 const dot = bVX*nx + bVY*ny;
                 bVX -= 2*dot*nx; bVY -= 2*dot*ny;
                 bVX *= BOUNCE; bVY *= BOUNCE;
-                const s = wVel * 1.2; 
-                bVX += -ny*s; bVY += nx*s;
+                const s = wVel * 1.2; bVX += -ny*s; bVY += nx*s;
+                
+                // Trigger Soft Body Effect (Impacto Parede)
+                if (velocityMag > 5) triggerSquash(nx, ny, velocityMag);
             }
             
             bVX *= FRICTION; bVY *= FRICTION;
-            ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
+            
+            // Aplicar posição e deformação
+            // A ordem do transform é crucial: Translate -> Rotate -> Scale
+            ball.style.transform = `
+                translate3d(${bX}px, ${bY}px, 0) 
+                rotate(${squashAngle}rad) 
+                scale(${squashX}, ${squashY})
+            `;
 
             requestAnimationFrame(loop);
         }
