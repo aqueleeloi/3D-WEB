@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Interaction</title>
+    <title>Eloi Silva | Quantum Interaction</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F0F0F2;
+            --bg: #ECECF0; /* Fundo ligeiramente mais técnico */
             --text: #050505;
             --white: #FFFFFF;
-            --wheel-border: #000000;
-            --ball-color: #FF4500;
+            --wheel-border: #1a1a1a;
+            --ball-color: #FF3300; /* Laranja mais agressivo */
+            --neon-cyan: #00FFFF;
+            --neon-pink: #FF0055;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; touch-action: manipulation; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; height: 100dvh; width: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 24px 30px 24px; }
 
-        body {
-            background-color: var(--bg);
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            height: 100dvh; width: 100%; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 40px 24px 30px 24px;
-        }
-
-        /* --- TITULO AURORA STYLE --- */
+        /* --- TITULO VOLUMÉTRICO 3D --- */
         header { 
             text-align: center; z-index: 10; pointer-events: none; width: 100%;
-            position: relative; height: 100px; display: flex; align-items: center; justify-content: center;
+            height: 110px; display: flex; align-items: center; justify-content: center;
+            perspective: 800px; /* Perspetiva profunda */
         }
 
-        .title-wrapper { position: relative; display: inline-block; }
+        .title-wrapper { 
+            position: relative; display: inline-block; 
+            transform-style: preserve-3d; /* Permite elementos 3D filhos */
+        }
 
         h1 {
             font-size: 3.8rem; font-weight: 900; text-transform: uppercase;
@@ -46,63 +44,105 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             white-space: nowrap; will-change: transform, filter, opacity;
+            backface-visibility: hidden;
         }
 
-        .layer-main { color: #000; z-index: 3; transform-origin: center bottom; }
-        .layer-red { color: #FF0055; z-index: 2; opacity: 0.8; mix-blend-mode: multiply; }
-        .layer-cyan { color: #00CCFF; z-index: 1; opacity: 0.8; mix-blend-mode: multiply; }
+        /* Camadas dispostas em profundidade Z */
+        .layer-main { color: #000; z-index: 10; transform: translateZ(0); }
+        .layer-red { color: var(--neon-pink); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-20px); }
+        .layer-cyan { color: var(--neon-cyan); z-index: 5; mix-blend-mode: multiply; opacity: 0; transform: translateZ(-40px); }
 
         .badge {
-            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-            display: inline-block; background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
+            position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+            background: var(--white); border: 1px solid rgba(0,0,0,0.08); padding: 5px 16px; border-radius: 100px;
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* --- STAGE --- */
-        .stage { position: relative; width: 290px; height: 290px; display: flex; align-items: center; justify-content: center; touch-action: none; }
-        .static-shadow { position: absolute; width: 92%; height: 92%; border-radius: 50%; background: transparent; box-shadow: 0 30px 70px rgba(0,0,0,0.12); z-index: 0; pointer-events: none; }
+        /* --- STAGE 3D --- */
+        .stage { 
+            position: relative; width: 300px; height: 300px; 
+            display: flex; align-items: center; justify-content: center; 
+            perspective: 1000px; /* Perspetiva global para o 3D */
+        }
+
+        .wheel-container {
+            position: relative; width: 100%; height: 100%;
+            transform-style: preserve-3d; /* Crucial para o obstáculo 3D */
+        }
+
+        .static-shadow { position: absolute; width: 90%; height: 90%; top: 5%; left: 5%; border-radius: 50%; background: transparent; box-shadow: 0 40px 80px rgba(0,0,0,0.15); z-index: 0; pointer-events: none; transform: translateZ(-50px); }
 
         .wheel {
             position: relative; width: 100%; height: 100%; border-radius: 50%;
-            border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; transform: translateZ(0);
+            border: 14px solid var(--wheel-border); cursor: grab; z-index: 2; 
+            background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.02) 100%);
+            transform-style: preserve-3d;
         }
-        .wheel:active { cursor: grabbing; }
+        .wheel:active { cursor: grabbing; border-color: #000; }
 
-        /* OBSTÁCULO (Glitch Direcional) */
+        /* --- OBSTÁCULO 3D QUANTUM --- */
+        .obstacle-anchor {
+            position: absolute; top: 45px; left: 50%;
+            width: 26px; height: 26px; margin-left: -13px;
+            transform-style: preserve-3d; /* Permite rotação 3D real */
+            z-index: 4;
+        }
+
         .obstacle {
-            position: absolute; width: 24px; height: 24px;
-            background-color: var(--wheel-border);
-            top: 40px; left: 50%; margin-left: -12px;
-            border-radius: 2px;
-            /* Sem transição suave no transform para o impacto ser imediato e "glitchy" */
-            will-change: transform, box-shadow, filter;
+            width: 100%; height: 100%;
+            background-color: #0a0a0a; /* Material escuro */
+            border-radius: 3px;
+            /* Transição super rápida para impacto físico */
+            transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.08s, filter 0.05s;
+            will-change: transform;
+            /* Borda subtil metálica */
+            border: 1px solid #333;
+            position: relative;
+            transform-origin: center center -13px; /* Roda em torno do seu centro 3D */
         }
 
-        /* BOLA */
+        /* O NÚCLEO DE ENERGIA (Escondido atrás) */
+        .obstacle::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+            transform: translateZ(-2px) scale(0.9); /* Ligeiramente atrás e menor */
+            opacity: 0; transition: all 0.1s;
+            box-shadow: 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-pink);
+            border-radius: 3px;
+            filter: blur(4px);
+        }
+        
+        /* Estado de Impacto */
+        .obstacle.hit::before {
+            opacity: 1;
+            transform: translateZ(-15px) scale(1.8); /* Explode para trás e cresce */
+        }
+        .obstacle.hit {
+            filter: brightness(1.5); /* Flash de luz no impacto */
+        }
+
+
+        /* BOLA FÍSICA */
         .ball {
-            position: absolute; width: 32px; height: 32px;
-            background-color: var(--ball-color); border-radius: 50%; z-index: 5;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(0,0,0,0.2);
-            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
+            position: absolute; width: 34px; height: 34px;
+            background: radial-gradient(circle at 30% 30%, #ff8a66, var(--ball-color));
+            border-radius: 50%; z-index: 10;
+            box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3), inset 0 -2px 5px rgba(0,0,0,0.2);
+            top: 50%; left: 50%; margin-top: -17px; margin-left: -17px;
             pointer-events: none; will-change: transform;
+            transform: translateZ(20px); /* Bola flutua acima da roda */
         }
 
         /* LINKS */
-        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
+        .menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; z-index: 20; transform: translateZ(50px); }
         .card {
-            background: var(--white); padding: 18px 25px; border-radius: 18px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); font-weight: 600;
-            transition: all 0.2s; border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            background: var(--white); padding: 18px 25px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text); font-weight: 700; transition: all 0.2s; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
-        .card-left { display: flex; align-items: center; gap: 14px; }
-        .card-icon { width: 20px; height: 20px; fill: currentColor; }
-        .card:active { transform: scale(0.97); background: #f9f9f9; }
-
-        footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.1em; }
-        #sound-hint { position: absolute; top: 120px; font-size: 0.6rem; color: #999; opacity: 0; }
+        .card-left { display: flex; align-items: center; gap: 14px; } .card-icon { width: 22px; height: 22px; fill: currentColor; }
+        .card:active { transform: scale(0.98); background: #f5f5f5; }
+        footer { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 20px; font-weight: 700;}
+        #sound-hint { position: absolute; top: 125px; font-size: 0.65rem; font-weight: 700; color: #aaa; opacity: 0; letter-spacing: 0.1em; }
 
     </style>
 </head>
@@ -113,41 +153,33 @@
             <h1 class="title-layer layer-cyan" id="title-cyan">ELOI SILVA</h1>
             <h1 class="title-layer layer-red" id="title-red">ELOI SILVA</h1>
             <h1 class="title-layer layer-main" id="title-main">ELOI SILVA</h1>
-            <h1 style="position:relative; visibility:hidden;">ELOI SILVA</h1>
+            <h1 style="visibility:hidden;">ELOI SILVA</h1>
         </div>
-        <div class="badge">Visual & Interaction</div>
-        <div id="sound-hint">Sound Active</div>
+        <div class="badge">QUANTUM INTERACTION</div>
+        <div id="sound-hint">AUDIO SYSTEM ACTIVE</div>
     </header>
 
     <div class="stage">
-        <div class="static-shadow"></div>
-        <div class="wheel" id="wheel">
-            <div class="obstacle" id="obstacle"></div>
+        <div class="wheel-container">
+            <div class="static-shadow"></div>
+            <div class="wheel" id="wheel">
+                <div class="obstacle-anchor">
+                    <div class="obstacle" id="obstacle"></div>
+                </div>
+            </div>
+            <div class="ball" id="ball"></div>
         </div>
-        <div class="ball" id="ball"></div>
     </div>
 
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
-                Instagram
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>Instagram</div><span>↗</span>
         </a>
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>
-                Behance
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M22,15V20H20V15H18V13H24V15M19.45,4.9C20.5,4.9 21.36,5.16 22,5.71C22.68,6.25 23,7 23,8C23,8.96 22.56,9.8 21.78,10.3C22.75,10.8 23.23,11.83 23.23,13.25V13.5C23.23,13.7 23.22,13.88 23.2,14.07C23.24,14 23.28,14 23.32,14H25V19.05C25,19.34 24.81,19.57 24.54,19.57H23.5V21H16V17H16.03C16.03,16.92 16.03,16.84 16.03,16.76C16.03,15.65 16.27,14.73 16.77,14.05C15.82,13.28 15.35,12.18 15.35,10.74C15.35,9.75 15.59,8.9 16.07,8.19C16.55,7.5 17.22,7.5 17.22,7.5H19.45M6.28,14.09H10.66C10.7,13.53 10.73,13.04 10.73,12.6C10.73,11.16 10.15,10.43 9,10.43C7.94,10.43 7.37,11.12 7.29,12.5H6.26C6.18,10.79 7.15,9.45 9,9.45C10.86,9.45 11.84,10.71 11.84,12.75V17H10.75V16.34C10.34,16.89 9.7,17.16 8.84,17.16C7.23,17.16 6.27,16.14 6.27,14.72C6.27,14.5 6.27,14.29 6.28,14.09M21.22,11.53C21.75,11.19 22,10.69 22,10.05C22,9.39 21.75,8.91 21.21,8.6C20.67,8.29 20,8.13 19.23,8.13H16.77V13.83H19.34C20.14,13.83 20.76,13.65 21.22,13.29C21.68,12.92 21.91,12.44 21.91,11.83V11.75C21.91,11.23 21.68,10.81 21.22,10.53Z"/></svg>Behance</div><span>↗</span>
         </a>
         <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">
-            <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-                WhatsApp
-            </div>
-            <span>→</span>
+            <div class="card-left"><svg class="card-icon" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>WhatsApp</div><span>↗</span>
         </a>
     </nav>
 
@@ -180,85 +212,83 @@
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.05);
         }
-        function playClack() {
+        function playClack(force) {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
-            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+            // Som mais grave e forte com o impacto
+            osc.frequency.setValueAtTime(250 - (force*2), audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(Math.min(0.1 + force*0.01, 0.4), audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.12);
+            osc.type = 'square'; osc.start(); osc.stop(audioCtx.currentTime + 0.12);
         }
 
-        // --- EFEITO TITULO AURORA ---
-        function updateAuroraEffect(velocity) {
+        // --- EFEITO TÍTULO VOLUMÉTRICO ---
+        function updateVolumetricTitle(velocity) {
             const speed = Math.abs(velocity);
-            const offset = Math.min(speed * 2.5, 40);
-            const blur = Math.min(speed * 0.8, 12);
-            const skew = -velocity * 0.5;
+            // Quanto mais rápido, mais as camadas se afastam em Z e desfocam
+            const zDepth = Math.min(speed * 2, 100); // Profundidade Z
+            const blur = Math.min(speed * 0.3, 8);
+            const opacity = Math.min(speed * 0.03, 0.8);
 
-            if (offset > 0.5) {
-                titleRed.style.transform = `translateX(-${offset}px) skewX(${skew}deg)`;
+            if (speed > 1) {
+                // Camadas traseiras afastam-se e desfocam
+                titleRed.style.transform = `translateZ(-${zDepth*1.5}px) scale(0.95)`;
                 titleRed.style.filter = `blur(${blur}px)`;
-                titleCyan.style.transform = `translateX(${offset}px) skewX(${skew}deg)`;
-                titleCyan.style.filter = `blur(${blur}px)`;
-                titleMain.style.transform = `skewX(${skew}deg)`;
-                const opacity = Math.min(0.8 + (speed * 0.01), 1);
                 titleRed.style.opacity = opacity;
+                
+                titleCyan.style.transform = `translateZ(-${zDepth*3}px) scale(0.9)`;
+                titleCyan.style.filter = `blur(${blur*1.5}px)`;
                 titleCyan.style.opacity = opacity;
+                
+                // Camada principal aproxima-se ligeiramente
+                titleMain.style.transform = `translateZ(${zDepth*0.2}px)`;
             } else {
-                titleRed.style.transform = 'none'; titleRed.style.filter = 'none';
-                titleCyan.style.transform = 'none'; titleCyan.style.filter = 'none';
-                titleMain.style.transform = 'none';
+                titleRed.style.transform = 'translateZ(-20px)'; titleRed.style.filter = 'none'; titleRed.style.opacity = 0;
+                titleCyan.style.transform = 'translateZ(-40px)'; titleCyan.style.filter = 'none'; titleCyan.style.opacity = 0;
+                titleMain.style.transform = 'translateZ(0)';
             }
         }
 
-        // --- GLITCH DIRECIONAL DO OBSTÁCULO ---
-        let obsGlitchIntensity = 0;
-        let obsImpactX = 0;
-        let obsImpactY = 0;
+        // --- FÍSICA 3D REATIVA DO OBSTÁCULO ---
+        let obsImpactForce = 0;
+        let impactNX = 0; let impactNY = 0; // Normal do impacto
 
-        function applyDirectionalGlitch() {
-            if (obsGlitchIntensity > 1) {
-                // Calcular deslocamento baseado no vetor de impacto
-                // O efeito "viaja" na direção do impacto
-                const shift = Math.min(obsGlitchIntensity * 0.8, 20);
-                const shiftX = obsImpactX * shift;
-                const shiftY = obsImpactY * shift;
+        function apply3DImpact() {
+            if (obsImpactForce > 0.5) {
+                // Rotação 3D baseada na direção do impacto
+                // Se bater da esquerda (nx < 0), roda no eixo Y positivo.
+                const rotateY = -impactNX * obsImpactForce * 2.5; // Rotação horizontal
+                const rotateX = impactNY * obsImpactForce * 2.5;  // Rotação vertical
                 
-                const blur = Math.min(obsGlitchIntensity * 0.2, 5);
+                // Empurrão para trás em Z (Profundidade)
+                const pushZ = -obsImpactForce * 3; // Empurra até -150px
 
-                obstacle.style.backgroundColor = '#000';
-                
-                // Box shadow Vermelho para um lado do vetor, Ciano para o outro
-                // Vermelho na direção do impacto, Ciano oposto (rasto)
-                obstacle.style.boxShadow = `
-                    ${shiftX}px ${shiftY}px ${blur}px rgba(255, 0, 85, 0.8), 
-                    ${-shiftX}px ${-shiftY}px ${blur}px rgba(0, 204, 255, 0.8)
+                obstacle.style.transform = `
+                    rotateX(${rotateX}deg) 
+                    rotateY(${rotateY}deg) 
+                    translateZ(${pushZ}px)
                 `;
                 
-                // Deslocar o próprio elemento na direção do impacto (Knockback)
-                obstacle.style.transform = `translate(${shiftX * 0.5}px, ${shiftY * 0.5}px) scale(${1 + obsGlitchIntensity/100})`;
-                obstacle.style.filter = `blur(${blur * 0.5}px)`;
+                // Ativa o núcleo de energia
+                obstacle.classList.add('hit');
 
-                // Decaimento
-                obsGlitchIntensity *= 0.85;
+                obsImpactForce *= 0.85; // Decaimento rápido
             } else {
-                obstacle.style.boxShadow = 'none';
-                obstacle.style.filter = 'none';
-                obstacle.style.transform = 'none';
-                obsGlitchIntensity = 0;
+                obstacle.style.transform = 'rotateX(0) rotateY(0) translateZ(0)';
+                obstacle.classList.remove('hit');
+                obsImpactForce = 0;
             }
         }
 
-        // FÍSICA
+        // FÍSICA CORE
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.75;
-        const LIMIT = 117; 
+        const LIMIT = 115; 
         const OBS_RADIUS = 105; 
-        const OBS_HIT_RAD = 29; 
+        const OBS_HIT_RAD = 30; 
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -294,13 +324,12 @@
                 if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { playRatchet(wVel); lastTick = wAngle; }
             }
             
-            updateAuroraEffect(wVel);
-            applyDirectionalGlitch();
+            updateVolumetricTitle(wVel);
+            apply3DImpact();
 
             // FÍSICA BOLA
             bVY += GRAVITY; bX += bVX; bY += bVY;
 
-            // COLISÃO QUADRADO
             const rad = (wAngle - 90) * (Math.PI / 180);
             const obsX = Math.cos(rad) * OBS_RADIUS;
             const obsY = Math.sin(rad) * OBS_RADIUS;
@@ -319,18 +348,13 @@
                 const spinForce = wVel * 1.5;
                 bVX += -ny * spinForce; bVY += nx * spinForce;
 
-                // --- CALCULAR IMPACTO PARA O GLITCH ---
-                playClack();
-                const impactForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
+                // CALCULAR IMPACTO 3D
+                const totalForce = Math.sqrt(bVX*bVX + bVY*bVY) + Math.abs(spinForce);
+                playClack(totalForce);
                 
-                // Guardar a direção NORMALIZADA do impacto (nx, ny apontam da caixa para a bola)
-                // Queremos que o glitch vá na direção da força recebida, ou seja, contrário à normal
-                // Mas visualmente, "empurrar" o glitch na direção que a bola vinha (ou para onde ela empurra)
-                // Usaremos a direção Inversa da Normal (-nx, -ny) para simular que a caixa foi empurrada
-                obsImpactX = -nx; 
-                obsImpactY = -ny;
-                
-                obsGlitchIntensity = Math.min(impactForce * 4, 50); // Intensidade alta
+                impactNX = nx; // Guardar a normal do impacto para a rotação
+                impactNY = ny;
+                obsImpactForce = Math.min(totalForce * 2, 50); // Força máxima do impacto
             }
 
             const d = Math.sqrt(bX*bX + bY*bY);
@@ -343,7 +367,8 @@
                 const s = wVel * 1.2; bVX += -ny*s; bVY += nx*s;
             }
             bVX *= FRICTION; bVY *= FRICTION;
-            ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
+            // A bola também se move em Z para dar profundidade
+            ball.style.transform = `translate3d(${bX}px, ${bY}px, 20px)`;
 
             requestAnimationFrame(loop);
         }
