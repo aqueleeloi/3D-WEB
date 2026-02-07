@@ -48,8 +48,8 @@
             font-size: 3.8rem; font-weight: 900; text-transform: uppercase;
             letter-spacing: -0.04em; line-height: 0.9; margin-bottom: 8px; 
             color: var(--text);
-            /* O EFEITO MÁGICO: Filtro SVG Dinâmico */
-            filter: url(#chromatic-motion);
+            /* O EFEITO MÁGICO: Filtro SVG Dinâmico - Estilo "AURORA/BUZZ" */
+            filter: url(#chromatic-motion-blur);
             will-change: filter; /* Otimização de performance */
         }
 
@@ -149,18 +149,19 @@
 
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="svg-filters">
         <defs>
-            <filter id="chromatic-motion" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="chromatic-motion-blur" x="-50%" y="-20%" width="200%" height="140%">
                 <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="red"/>
                 <feOffset in="red" dx="0" dy="0" result="red_shifted" id="svg-red-offset"/>
                 
                 <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" in="SourceGraphic" result="green"/>
-                
+                <feOffset in="green" dx="0" dy="0" result="green_shifted" id="svg-green-offset"/>
+
                 <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" in="SourceGraphic" result="blue"/>
                 <feOffset in="blue" dx="0" dy="0" result="blue_shifted" id="svg-blue-offset"/>
                 
                 <feMerge result="merged">
                     <feMergeNode in="red_shifted"/>
-                    <feMergeNode in="green"/>
+                    <feMergeNode in="green_shifted"/>
                     <feMergeNode in="blue_shifted"/>
                 </feMerge>
                 
@@ -218,6 +219,7 @@
         
         // Elementos SVG para manipular
         const svgRed = document.getElementById('svg-red-offset');
+        const svgGreen = document.getElementById('svg-green-offset');
         const svgBlue = document.getElementById('svg-blue-offset');
         const svgBlur = document.getElementById('svg-blur');
 
@@ -240,21 +242,26 @@
             osc.type = 'triangle'; osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        // --- ATUALIZAR EFEITO DO TÍTULO ---
+        // --- ATUALIZAR EFEITO DO TÍTULO (ESTILO AURORA/BUZZ) ---
         function updateTitleEffect(velocity) {
             const speed = Math.abs(velocity);
             
             // Intensidade do efeito baseada na velocidade
-            const shift = Math.min(speed * 1.5, 30); // Deslocamento de cor
-            const blur = Math.min(speed * 0.5, 8);   // Desfoque
+            // Multiplicadores maiores para o efeito dramático das imagens
+            const shift = Math.min(speed * 3.5, 60); // Deslocamento de cor grande
+            const blur = Math.min(speed * 1.5, 20);   // Motion Blur horizontal intenso
             
-            // Atualizar atributos SVG
+            // Atualizar atributos SVG em tempo real
+            // Vermelho para a esquerda, Azul para a direita
             svgRed.setAttribute('dx', -shift);
             svgBlue.setAttribute('dx', shift);
+            // Verde desloca-se menos para manter o centro legível
+            svgGreen.setAttribute('dx', shift * 0.2);
+            // Blur apenas horizontal (X, Y=0)
             svgBlur.setAttribute('stdDeviation', `${blur}, 0`);
         }
 
-        // FÍSICA
+        // FÍSICA DA RODA E BOLA
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.65;
@@ -295,7 +302,7 @@
                 if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
             }
             
-            // Atualizar o efeito SVG
+            // Atualizar o efeito SVG do título com a velocidade atual
             updateTitleEffect(wVel);
 
             // Física Bola
