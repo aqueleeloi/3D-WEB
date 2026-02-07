@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Visual Designer</title>
+    <title>Eloi Silva | Interaction</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #F5F5F7;
+            --bg: #F0F0F2;
             --text: #050505;
             --white: #FFFFFF;
             --wheel-border: #000000;
-            --ball-color: #FF4500; /* Cor da bola e do 'hit' */
+            --ball-color: #FF4500;
         }
 
-        /* --- CONFIGURAÇÕES IOS & RESET --- */
+        /* RESET & IOS FIXES */
         * {
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none;
@@ -34,22 +34,12 @@
             padding: 40px 24px 30px 24px;
         }
 
-        /* --- CABEÇALHO --- */
-        header { 
-            text-align: center; 
-            z-index: 10; 
-            pointer-events: none;
-            width: 100%;
-        }
+        /* --- CABEÇALHO GLITCH --- */
+        header { text-align: center; z-index: 10; pointer-events: none; width: 100%; }
 
         h1 { 
-            font-size: 3.5rem; 
-            font-weight: 900; 
-            text-transform: uppercase;
-            letter-spacing: -0.06em; 
-            line-height: 0.9;
-            margin-bottom: 5px;
-            color: #000;
+            font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: -0.06em; line-height: 0.9; margin-bottom: 5px; color: #000;
             will-change: text-shadow, transform;
         }
 
@@ -59,7 +49,7 @@
             font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 0.05em;
         }
 
-        /* --- STAGE DA RODA --- */
+        /* --- STAGE --- */
         .stage {
             position: relative; width: 290px; height: 290px;
             display: flex; align-items: center; justify-content: center;
@@ -76,40 +66,38 @@
         .wheel {
             position: relative; width: 100%; height: 100%;
             border-radius: 50%;
-            border: 14px solid var(--wheel-border);
+            border: 12px solid var(--wheel-border);
             cursor: grab; z-index: 2;
-            display: flex; align-items: center; justify-content: center;
             transform: translateZ(0);
         }
         .wheel:active { cursor: grabbing; }
 
-        /* NOVO MARCADOR QUADRADO */
-        .square-marker {
+        /* QUADRADO RÍGIDO (OBSTÁCULO) */
+        .obstacle {
             position: absolute;
-            width: 16px; height: 16px;
+            width: 40px; height: 40px;
             background-color: var(--wheel-border);
-            top: -8px; /* Posicionado na borda */
-            left: 50%;
-            transform: translateX(-50%);
-            transition: background-color 0.1s ease, transform 0.1s ease;
+            /* Posicionado mais ao centro como pedido */
+            top: 60px; left: 50%; 
+            margin-left: -20px; /* Centrar X */
+            border-radius: 4px;
+            transition: background-color 0.05s, transform 0.05s;
         }
         
-        /* Estado de 'Hit' do quadrado */
-        .square-marker.hit {
+        .obstacle.hit {
             background-color: var(--ball-color);
-            transform: translateX(-50%) scale(1.2);
-            box-shadow: 0 0 10px var(--ball-color);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--ball-color);
         }
 
-        /* --- BOLA SIMPLES (SEM EFEITO GLOW) --- */
+        /* BOLA */
         .ball {
-            position: absolute; width: 32px; height: 32px;
+            position: absolute; width: 30px; height: 30px;
+            background-color: var(--ball-color);
             border-radius: 50%; z-index: 5;
-            background: var(--ball-color); /* Cor sólida */
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            top: 50%; left: 50%; margin-top: -16px; margin-left: -16px;
-            pointer-events: none;
-            will-change: transform;
+            top: 50%; left: 50%; margin-top: -15px; margin-left: -15px;
+            pointer-events: none; will-change: transform;
         }
 
         /* --- LINKS MINIMALISTAS --- */
@@ -119,20 +107,12 @@
             background: var(--white); padding: 18px 25px; border-radius: 18px;
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text); font-weight: 600;
-            transition: all 0.2s cubic-bezier(0.2, 1, 0.3, 1);
-            border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: all 0.2s; border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        
         .card-left { display: flex; align-items: center; gap: 14px; }
         .card-icon { width: 20px; height: 20px; fill: currentColor; }
-
         .card:active { transform: scale(0.97); background: #f9f9f9; }
-        @media(hover: hover) {
-            .card:hover {
-                background: var(--text); color: var(--white);
-                transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            }
-        }
 
         footer { font-size: 0.7rem; color: #BBB; text-transform: uppercase; letter-spacing: 0.1em; }
         #sound-hint { position: absolute; top: 110px; opacity: 0; font-size: 0.7rem; color: #999;}
@@ -144,14 +124,13 @@
     <header>
         <h1 id="dynamic-title">ELOI SILVA</h1>
         <div class="badge">Visual & Interaction</div>
-        <div id="sound-hint">Sound Active</div>
+        <div id="sound-hint">🔊 Audio Active</div>
     </header>
 
     <div class="stage">
         <div class="static-shadow"></div>
         <div class="wheel" id="wheel">
-            <div class="square-marker" id="target-square"></div>
-            <div style="width: 100%; height: 100%; border-radius: 50%;"></div>
+            <div class="obstacle" id="obstacle"></div>
         </div>
         <div class="ball" id="ball"></div>
     </div>
@@ -159,7 +138,7 @@
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">
             <div class="card-left">
-                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
+                <svg class="card-icon" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M18,5A1.25,1.25 0 1,1 16.75,6.25A1.25,1.25 0 0,1 18,5Z"/></svg>
                 Instagram
             </div>
             <span>→</span>
@@ -185,10 +164,10 @@
     <script>
         const wheel = document.getElementById('wheel');
         const ball = document.getElementById('ball');
+        const obstacle = document.getElementById('obstacle');
         const title = document.getElementById('dynamic-title');
-        const targetSquare = document.getElementById('target-square');
 
-        // --- SISTEMA DE AUDIO ---
+        // --- SISTEMA DE SOM (Fidget Spinner + Collision) ---
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -196,55 +175,65 @@
             const hint = document.getElementById('sound-hint');
             hint.style.opacity = 1; setTimeout(() => hint.style.opacity = 0, 3000);
         }
-        // Som de "Tick" da roda
-        function playTick() {
+
+        // Som de "Catraca/Rolamento" (Varia com a velocidade)
+        function playRatchet(velocity) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.03);
+            
+            // Pitch sobe com a velocidade
+            const speed = Math.min(Math.abs(velocity), 50);
+            osc.frequency.setValueAtTime(100 + (speed * 5), audioCtx.currentTime);
+            
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.03);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
-        }
-        // Som de "Hit" no quadrado
-        function playHit() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            // Som mais agudo e curto para o impacto
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
-            osc.type = 'square'; // Som mais "digital"
-            osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            
+            osc.type = 'triangle';
+            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
         }
 
-        // --- EFEITO DE TEXTO (Apenas RGB Split) ---
+        // Som de Colisão (Bola no Quadrado)
+        function playClack() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            osc.type = 'square';
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // --- EFEITO GLITCH NO TITULO ---
         function updateTextEffect(velocity) {
             const speed = Math.abs(velocity);
             const shift = Math.min(speed * 0.8, 15);
-            
             if (shift > 0.5) {
                 title.style.textShadow = `
                     ${shift}px 0 rgba(255, 0, 0, 0.7), 
-                    -${shift}px 0 rgba(0, 255, 255, 0.7),
-                    0px 0px ${shift}px rgba(0, 255, 0, 0.3)
+                    -${shift}px 0 rgba(0, 255, 255, 0.7)
                 `;
-                title.style.transform = `skewX(${-velocity * 0.5}deg)`;
+                title.style.transform = `skewX(${-velocity * 0.3}deg)`;
             } else {
                 title.style.textShadow = 'none';
                 title.style.transform = 'none';
             }
         }
 
-        // --- FÍSICA & INTERAÇÃO ---
+        // --- FÍSICA ---
         let wAngle = 0, isDrag = false, sAngle = 0, wVel = 0, lastTick = 0;
         let bX = 0, bY = 0, bVX = 0, bVY = 0;
         const GRAVITY = 0.45, FRICTION = 0.995, BOUNCE = 0.85;
-        const LIMIT = 117; // Limite interno da roda
-        let isHit = false; // Estado de colisão
+        const LIMIT = 117; 
+        
+        // Configuração do Obstáculo (Quadrado)
+        const OBS_RADIUS = 85; // Distância do centro (Offset)
+        const OBS_SIZE = 40; // Tamanho do quadrado (aproximado para colisão circular)
+        const OBS_HIT_RAD = 35; // Raio de colisão (Bola + Metade do Quadrado)
 
         function getA(x, y) {
             const r = wheel.getBoundingClientRect();
@@ -268,26 +257,74 @@
             if (d > 180) d -= 360; if (d < -180) d += 360;
             wVel = d; wAngle += d;
             wheel.style.transform = `rotate(${wAngle}deg)`;
-            if (Math.abs(wAngle - lastTick) > 30) { playTick(); lastTick = wAngle; }
+            
+            // Som Interativo (Fidget Spinner)
+            if (Math.abs(wAngle - lastTick) > 15) { 
+                playRatchet(wVel); 
+                lastTick = wAngle; 
+            }
         }
 
         function end() { isDrag = false; }
 
         function loop() {
-            // RODA
+            // RODA INÉRCIA
             if (!isDrag) {
                 wVel *= 0.985; wAngle += wVel;
                 wheel.style.transform = `rotate(${wAngle}deg)`;
-                if (Math.abs(wAngle - lastTick) > 30 && Math.abs(wVel) > 0.5) { playTick(); lastTick = wAngle; }
+                // Som na inércia
+                if (Math.abs(wAngle - lastTick) > 15 && Math.abs(wVel) > 0.5) { 
+                    playRatchet(wVel); 
+                    lastTick = wAngle; 
+                }
             }
-            // Efeito do Texto
             updateTextEffect(wVel);
 
-            // BOLA FÍSICA
+            // BOLA GRAVIDADE
             bVY += GRAVITY; bX += bVX; bY += bVY;
+
+            // --- DETECÇÃO DE COLISÃO COM O QUADRADO (CORPO RÍGIDO) ---
+            // Calcular posição do obstáculo no mundo
+            // O obstáculo está no topo (ângulo -90 deg visual, mas roda com wAngle)
+            // Offset inicial de 60px top em CSS = raio ~85px para cima
+            const rad = (wAngle - 90) * (Math.PI / 180);
+            const obsX = Math.cos(rad) * OBS_RADIUS;
+            const obsY = Math.sin(rad) * OBS_RADIUS;
+
+            // Distância Bola <-> Obstáculo
+            const dx = bX - obsX;
+            const dy = bY - obsY;
+            const distObs = Math.sqrt(dx*dx + dy*dy);
+
+            // Se bater no quadrado
+            if (distObs < OBS_HIT_RAD) {
+                // Vetor normal
+                const nx = dx / distObs;
+                const ny = dy / distObs;
+
+                // Empurrar para fora (evitar overlap)
+                const overlap = OBS_HIT_RAD - distObs;
+                bX += nx * overlap;
+                bY += ny * overlap;
+
+                // Refletir velocidade (Bounce)
+                const dot = bVX * nx + bVY * ny;
+                bVX -= 2 * dot * nx;
+                bVY -= 2 * dot * ny;
+                
+                // Transferência de momento angular da roda para a bola
+                const spinForce = wVel * 1.5;
+                bVX += -ny * spinForce; 
+                bVY += nx * spinForce;
+
+                // Efeitos de impacto
+                playClack();
+                obstacle.classList.add('hit');
+                setTimeout(() => obstacle.classList.remove('hit'), 100);
+            }
+
+            // LIMITE EXTERNO (Parede da roda)
             const d = Math.sqrt(bX*bX + bY*bY);
-            
-            // Colisão com a borda
             if (d > LIMIT) {
                 const nx = bX/d, ny = bY/d;
                 bX = nx*LIMIT; bY = ny*LIMIT;
@@ -297,49 +334,22 @@
                 const s = wVel * 1.2; 
                 bVX += -ny*s; bVY += nx*s;
             }
+            
             bVX *= FRICTION; bVY *= FRICTION;
             ball.style.transform = `translate3d(${bX}px, ${bY}px, 0)`;
-
-            // --- DETECÇÃO DE INTERAÇÃO (BOLA x QUADRADO) ---
-            // O quadrado está no topo (ângulo -90 deg visualmente, mas 0 no nosso sistema de rotação local)
-            // Normalizamos o ângulo da roda para [0, 360)
-            let normWheelAngle = (wAngle % 360 + 360) % 360;
-            // O quadrado está sempre em 'normWheelAngle' no espaço global.
-            
-            // Ângulo da bola
-            let ballAngle = Math.atan2(bY, bX) * 180 / Math.PI;
-            // Ajustar para o sistema da roda (topo é 0, rotação horária)
-            ballAngle = (ballAngle + 90 + 360) % 360; 
-
-            // Diferença angular mínima
-            let angleDiff = Math.abs(normWheelAngle - ballAngle);
-            if (angleDiff > 180) angleDiff = 360 - angleDiff;
-
-            // Se a bola está perto da borda E perto do ângulo do quadrado
-            if (d > LIMIT - 10 && angleDiff < 15) {
-                if (!isHit) {
-                    isHit = true;
-                    targetSquare.classList.add('hit');
-                    playHit();
-                    // Remover o estado de hit após um curto período
-                    setTimeout(() => {
-                        targetSquare.classList.remove('hit');
-                        isHit = false;
-                    }, 150);
-                }
-            }
 
             requestAnimationFrame(loop);
         }
 
+        const p = {passive: false};
         wheel.addEventListener('mousedown', start);
         window.addEventListener('mousemove', move);
         window.addEventListener('mouseup', end);
-        wheel.addEventListener('touchstart', start, {passive: false});
-        window.addEventListener('touchmove', move, {passive: false});
+        wheel.addEventListener('touchstart', start, p);
+        window.addEventListener('touchmove', move, p);
         window.addEventListener('touchend', end);
 
-        bY = 50; loop(); // Bola começa em baixo
+        bY = 50; loop();
     </script>
 </body>
 </html>
