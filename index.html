@@ -31,14 +31,15 @@
             position: absolute; top: 0; left: 0; z-index: 2;
         }
         .bar {
-            position: absolute; width: 100px; height: 16px; background: var(--wheel);
+            position: absolute; width: 110px; height: 16px; background: var(--wheel);
             top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 10px;
         }
         .ball {
             position: absolute; width: 28px; height: 28px; background: var(--accent);
             border-radius: 50%; z-index: 5; pointer-events: none; will-change: transform;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: background 0.1s;
         }
+        .ball.active { background: #FF2200; box-shadow: 0 0 15px rgba(255, 69, 0, 0.5); }
 
         .menu { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
         .card { background: #fff; padding: 14px 20px; border-radius: 12px; text-decoration: none; color: #000; font-weight: 600; display: flex; justify-content: space-between; font-size: 0.9rem; border: 1px solid rgba(0,0,0,0.03); }
@@ -66,8 +67,9 @@
     </div>
 
     <nav class="menu">
-        <a href="https://www.instagram.com/aquele.eloi" class="card">Instagram <span>→</span></a>
-        <a href="https://www.behance.net/eloi_silva" class="card">Behance <span>→</span></a>
+        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">Instagram <span>→</span></a>
+        <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">Behance <span>→</span></a>
+        <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">WhatsApp <span>→</span></a>
     </nav>
 
     <footer>PORTUGAL 2026</footer>
@@ -82,12 +84,14 @@
         let wAngle = 0, wVel = 0, isDrag = false, lastA = 0;
         let bX = 0, bY = -80, bVX = 0, bVY = 0;
         let score = 0, highscore = 0;
+        let resetTimer = null; // Para evitar reset imediato
 
-        const GRAVITY = 0.3;
-        const FRICTION = 0.98;
-        const BOUNCE = 0.4;
+        const GRAVITY = 0.35;
+        const FRICTION_AIR = 0.99;
+        const FRICTION_BAR = 0.92; // Mais atrito na barra para controlo
+        const BOUNCE = 0.3;
         const RADIUS = 128; 
-        const BAR_W = 50, BAR_H = 8, BALL_R = 14;
+        const BAR_W = 55, BAR_H = 8, BALL_R = 14;
 
         function getAngle(e) {
             const rect = controller.getBoundingClientRect();
@@ -128,57 +132,95 @@
         function update() {
             if (!isDrag) { wVel *= 0.95; wAngle += wVel; }
 
-            // Física básica
+            // Gravidade
             bVY += GRAVITY;
             bX += bVX; bY += bVY;
 
-            // --- COLISÃO RÍGIDA ---
+            // --- FÍSICA E COLISÃO ---
             const rad = -wAngle * (Math.PI / 180);
             const cos = Math.cos(rad), sin = Math.sin(rad);
             
-            // Localiza a bola em relação à barra
+            // Coordenadas Locais (Bola relativa à barra)
             const lx = bX * cos - bY * sin;
             const ly = bX * sin + bY * cos;
 
-            let balanced = false;
+            let touchingBar = false;
 
-            // Verifica se a bola bateu na barra (caixa de colisão)
-            if (Math.abs(lx) < BAR_W + BALL_R && Math.abs(ly) < BAR_H + BALL_R) {
-                // Determina se a colisão é por cima (equilíbrio)
-                if (ly < 0 && bVY >= 0) {
-                    balanced = true;
-                    // Força a bola a ficar EXACTAMENTE em cima da barra (Rigidez)
-                    const fixedLocalY = -(BAR_H + BALL_R);
-                    bX = lx * Math.cos(-rad) - fixedLocalY * Math.sin(-rad);
-                    bY = lx * Math.sin(-rad) + fixedLocalY * Math.cos(-rad);
+            // Caixa de Colisão (Um pouco mais generosa para cima para não piscar o score)
+            if (Math.abs(lx) < BAR_W + BALL_R && ly > -(BAR_H + BALL_R + 5) && ly < (BAR_H + BALL_R)) {
+                
+                // Se estiver a tocar no topo ou perto dele
+                if (ly < 0) {
+                    touchingBar = true;
                     
-                    // Física de deslize baseada no ângulo
-                    const tilt = Math.sin(wAngle * Math.PI / 180);
-                    bVX += tilt * 0.7; 
-                    bVY = 0; // Para a queda vertical
+                    // Colisão Rígida: Não deixa passar para baixo
+                    const surfaceY = -(BAR_H + BALL_R);
+                    if (ly > surfaceY) {
+                        // Reposiciona a bola na superfície
+                        bX = lx * Math.cos(-rad) - surfaceY * Math.sin(-rad);
+                        bY = lx * Math.sin(-rad) + surfaceY * Math.cos(-rad);
+                        
+                        // Recalcula velocidades (Slope Physics)
+                        // A inclinação da barra afeta a velocidade lateral
+                        const slope = Math.sin(wAngle * Math.PI / 180);
+                        bVX += slope * 0.8; 
+                        
+                        // Transferência de momentum da rotação para a bola
+                        // Se rodares rápido, a bola é atirada
+                        bVX += wVel * 0.03; 
+
+                        // Anula velocidade vertical relativa à barra (para não saltar que nem maluca)
+                        bVY = 0;
+                        
+                        // Aplica atrito forte quando está na barra
+                        bVX *= FRICTION_BAR;
+                        bVY *= FRICTION_BAR;
+                    }
                 }
             }
 
-            // Cronómetro
-            if (balanced && Math.abs(lx) < BAR_W) {
+            // --- LÓGICA DE PONTUAÇÃO (Com tolerância) ---
+            if (touchingBar && Math.abs(lx) < BAR_W) {
+                // Se está na barra
                 score += 0.016;
+                ball.classList.add('active');
+                
+                // Cancela qualquer reset pendente
+                if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+                
             } else {
-                if (score > highscore) highscore = score;
-                score = 0;
+                ball.classList.remove('active');
+                
+                // Se a bola sair da barra, espera um pouco antes de zerar (Tolerância)
+                // Mas se bater na parede exterior, zera logo
+                const dist = Math.sqrt(bX*bX + bY*bY);
+                if (dist > RADIUS - BALL_R - 5) {
+                    score = 0; // Bateu na parede, perdeu logo
+                } else if (!resetTimer && score > 0) {
+                    // Saiu da barra mas ainda está no ar? Dá 0.2s de tolerância
+                    resetTimer = setTimeout(() => {
+                        if (score > highscore) highscore = score;
+                        score = 0;
+                        resetTimer = null;
+                    }, 200);
+                }
             }
 
-            // Parede da roda
-            const d = Math.sqrt(bX*bX + bY*bY);
-            if (d > RADIUS - BALL_R) {
-                const nx = bX/d, ny = bY/d;
+            // Paredes Exteriores
+            const dist = Math.sqrt(bX*bX + bY*bY);
+            if (dist > RADIUS - BALL_R) {
+                const nx = bX/dist, ny = bY/dist;
                 bX = nx * (RADIUS - BALL_R); bY = ny * (RADIUS - BALL_R);
                 const dot = bVX*nx + bVY*ny;
-                bVX = (bVX - 2*dot*nx) * BOUNCE + (-ny * wVel * 0.4);
-                bVY = (bVY - 2*dot*ny) * BOUNCE + (nx * wVel * 0.4);
+                bVX = (bVX - 2*dot*nx) * BOUNCE + (-ny * wVel * 0.3);
+                bVY = (bVY - 2*dot*ny) * BOUNCE + (nx * wVel * 0.3);
             }
 
-            bVX *= FRICTION; bVY *= FRICTION;
-            
+            if (!touchingBar) {
+                bVX *= FRICTION_AIR; 
+                bVY *= FRICTION_AIR;
+            }
+
             // Render
             ball.style.transform = `translate(${bX}px, ${bY}px)`;
             wheel.style.transform = `rotate(${wAngle}deg)`;
