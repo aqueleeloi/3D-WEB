@@ -28,12 +28,11 @@
         }
         #current-score { color: var(--accent); }
 
-        .stage { position: relative; width: 270px; height: 270px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
+        .stage { position: relative; width: 275px; height: 275px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
         .wheel {
             width: 100%; height: 100%; border-radius: 50%; border: 12px solid var(--wheel);
-            position: relative; cursor: grab; z-index: 2; transform-origin: center;
+            position: relative; cursor: grab; z-index: 2;
         }
-        .wheel.scoring { border-color: var(--accent); }
         .bar {
             position: absolute; width: 140px; height: 16px; background: var(--wheel);
             top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 10px;
@@ -49,9 +48,8 @@
             background: var(--white); padding: 12px 18px; border-radius: 12px;
             display: flex; align-items: center; justify-content: space-between;
             text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.85rem;
-            border: 1px solid rgba(0,0,0,0.03); transition: 0.2s;
+            border: 1px solid rgba(0,0,0,0.03);
         }
-        .card:active { transform: scale(0.97); background: #f9f9f9; }
         footer { font-size: 0.6rem; color: #bbb; letter-spacing: 0.1em; }
     </style>
 </head>
@@ -92,10 +90,14 @@
         const layers = [document.getElementById('txt-cyan'), document.getElementById('txt-magenta')];
 
         let wAngle = 0, wVel = 0, isDrag = false, lastA = 0;
-        let bX = 0, bY = -70, bVX = 0, bVY = 0;
+        let bX = 0, bY = -80, bVX = 0, bVY = 0;
         let score = 0, highscore = 0;
+        let gameStarted = false;
 
-        const GRAVITY = 0.28, FRICTION = 0.985, BOUNCE = 0.5, RADIUS = 123;
+        const GRAVITY = 0.3; 
+        const FRICTION = 0.98; 
+        const BOUNCE = 0.4; 
+        const RADIUS = 120;
         const BAR_W = 70, BAR_H = 8, BALL_R = 13;
 
         function getMouseAngle(e) {
@@ -137,61 +139,52 @@
         function update() {
             if (!isDrag) { wVel *= 0.96; wAngle += wVel; }
 
+            // Aplicar Gravidade no Mundo
             bVY += GRAVITY;
             bX += bVX; bY += bVY;
 
-            // --- FISICA REFINADA ---
+            // Converter para coordenadas locais da barra (eixo da barra)
             const rad = -wAngle * (Math.PI / 180);
             const cos = Math.cos(rad), sin = Math.sin(rad);
             const lx = bX * cos - bY * sin, ly = bX * sin + bY * cos;
 
-            // Encontrar o ponto mais próximo na barra (AABB Clamp)
-            const closestX = Math.max(-BAR_W, Math.min(BAR_W, lx));
-            const closestY = Math.max(-BAR_H, Math.min(BAR_H, ly));
+            let onSurface = false;
 
-            const distLX = lx - closestX, distLY = ly - closestY;
-            const distance = Math.sqrt(distLX * distLX + distLY * distLY);
+            // Detecção de colisão no topo da barra
+            if (Math.abs(lx) < BAR_W + 5 && ly > -(BAR_H + BALL_R) && ly < 0) {
+                if (bVY > 0) { 
+                    // Se a bola está a cair em direção à barra
+                    onSurface = true;
+                    gameStarted = true;
 
-            let isScoring = false;
-
-            if (distance < BALL_R) {
-                // Normal da colisão
-                const nx = distance === 0 ? 0 : distLX / distance;
-                const ny = distance === 0 ? -1 : distLY / distance;
-
-                // Reposicionar bola
-                const overlap = BALL_R - distance;
-                const worldNX = nx * Math.cos(-rad) - ny * Math.sin(-rad);
-                const worldNY = nx * Math.sin(-rad) + ny * Math.cos(-rad);
-
-                bX += worldNX * overlap;
-                bY += worldNY * overlap;
-
-                // Velocidade relativa à barra
-                const dot = bVX * worldNX + bVY * worldNY;
-                if (dot < 0) {
-                    bVX = (bVX - 2 * dot * worldNX) * BOUNCE;
-                    bVY = (bVY - 2 * dot * worldNY) * BOUNCE;
+                    // Física de Deslize Baseada na Inclinação
+                    // Quanto mais inclinada a barra, mais força lateral (lx) a bola ganha
+                    // A "gravidade local" na barra é GRAVITY * sin(barra_angle)
+                    const slopeForce = Math.sin(wAngle * Math.PI / 180) * 0.5;
                     
-                    // Fricção e rotação
-                    bVX += -worldNY * wVel * 0.4;
-                    bVY += worldNX * wVel * 0.4;
-                }
+                    // Reposicionar para não atravessar
+                    const worldTopY = -(BAR_H + BALL_R);
+                    bX = lx * Math.cos(-rad) - worldTopY * Math.sin(-rad);
+                    bY = lx * Math.sin(-rad) + worldTopY * Math.cos(-rad);
 
-                if (ly < 0 && Math.abs(lx) < BAR_W) isScoring = true;
+                    // Reação física
+                    bVY *= -0.2; // Mata a velocidade vertical para não saltar muito
+                    bVX += slopeForce; // Adiciona o deslize lateral
+                    
+                    // Adicionar inércia da rotação da barra
+                    bVX += wVel * 0.1; 
+                }
             }
 
-            // Score Logic
-            if (isScoring) {
+            // Sistema de Pontuação
+            if (onSurface && Math.abs(lx) < BAR_W) {
                 score += 0.016;
-                wheel.classList.add('scoring');
-            } else {
+            } else if (gameStarted) {
                 if (score > highscore) highscore = score;
                 score = 0;
-                wheel.classList.remove('scoring');
             }
 
-            // Parede exterior
+            // Colisão com as Paredes Circulares
             const d = Math.sqrt(bX*bX + bY*bY);
             if (d > RADIUS - BALL_R) {
                 const nx = bX/d, ny = bY/d;
@@ -202,10 +195,13 @@
             }
 
             bVX *= FRICTION; bVY *= FRICTION;
+            
+            // Renderização
             ball.style.transform = `translate(${bX}px, ${bY}px)`;
             wheel.style.transform = `rotate(${wAngle}deg)`;
             
-            const intensity = Math.min(Math.abs(wVel) * 0.7, 15);
+            // Efeito visual no texto
+            const intensity = Math.min(Math.abs(wVel) * 0.6, 12);
             layers[0].style.transform = `translate(${intensity}px, 0)`;
             layers[1].style.transform = `translate(${-intensity}px, 0)`;
 
