@@ -3,64 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Balance Game</title>
+    <title>Eloi Silva | Balance Challenge</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #F2F2F4; --text: #000; --white: #FFF;
-            --accent: #FF4500; --wheel: #000;
+            --bg: #F2F2F4; --text: #000; --accent: #FF4500; --wheel: #000;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
         html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; background: var(--bg); font-family: 'Inter', sans-serif; }
-        body { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 25px 20px; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; }
 
-        header { text-align: center; z-index: 10; width: 100%; }
-        .buzz-wrapper { position: relative; height: 50px; display: grid; place-items: center; margin-bottom: 5px; }
-        .buzz-text { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; position: absolute; will-change: transform; }
-        .layer-main { color: var(--text); z-index: 5; }
-        .layer-cyan { color: #0FF; mix-blend-mode: multiply; opacity: 0.7; }
-        .layer-magenta { color: #F0F; mix-blend-mode: multiply; opacity: 0.7; }
-
+        header { text-align: center; width: 100%; }
+        .buzz-text { font-size: 2.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 1; margin-bottom: 10px; }
+        
         .score-container {
-            display: inline-flex; gap: 15px; background: #fff; padding: 6px 18px; 
-            border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            font-weight: 900; font-size: 0.8rem; margin-top: 5px;
+            display: inline-flex; gap: 20px; background: #fff; padding: 10px 25px; 
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-weight: 900; font-size: 1rem;
         }
-        #current-score { color: var(--accent); }
+        #current-score { color: var(--accent); min-width: 40px; display: inline-block; }
 
-        .stage { position: relative; width: 275px; height: 275px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
+        .stage { position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; }
         .wheel {
             width: 100%; height: 100%; border-radius: 50%; border: 12px solid var(--wheel);
             position: relative; cursor: grab; z-index: 2;
         }
         .bar {
-            position: absolute; width: 140px; height: 16px; background: var(--wheel);
-            top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 10px;
+            position: absolute; width: 100px; height: 14px; background: var(--wheel);
+            top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 20px;
         }
         .ball {
-            position: absolute; width: 26px; height: 26px; background: var(--accent);
+            position: absolute; width: 28px; height: 28px; background: var(--accent);
             border-radius: 50%; z-index: 5; pointer-events: none; will-change: transform;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+            transition: background 0.2s;
         }
+        .ball.active { background: #ff7700; box-shadow: 0 0 20px rgba(255, 69, 0, 0.6); }
 
-        .menu { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 8px; }
+        .menu { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px; }
         .card {
-            background: var(--white); padding: 12px 18px; border-radius: 12px;
+            background: #fff; padding: 15px 20px; border-radius: 14px;
             display: flex; align-items: center; justify-content: space-between;
-            text-decoration: none; color: var(--text); font-weight: 600; font-size: 0.85rem;
+            text-decoration: none; color: var(--text); font-weight: 600;
             border: 1px solid rgba(0,0,0,0.03);
         }
-        footer { font-size: 0.6rem; color: #bbb; letter-spacing: 0.1em; }
+        footer { font-size: 0.7rem; color: #bbb; letter-spacing: 0.1em; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="buzz-wrapper">
-            <h1 class="buzz-text layer-cyan" id="txt-cyan">ELOI SILVA</h1>
-            <h1 class="buzz-text layer-magenta" id="txt-magenta">ELOI SILVA</h1>
-            <h1 class="buzz-text layer-main" id="txt-main">ELOI SILVA</h1>
-        </div>
+        <h1 class="buzz-text">ELOI SILVA</h1>
         <div class="score-container">
             <span>TIME: <span id="current-score">0.0</span>s</span>
             <span>BEST: <span id="high-score">0.0</span>s</span>
@@ -77,7 +70,6 @@
     <nav class="menu">
         <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">Instagram <span>→</span></a>
         <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">Behance <span>→</span></a>
-        <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">WhatsApp <span>→</span></a>
     </nav>
 
     <footer>PORTUGAL 2026</footer>
@@ -87,18 +79,18 @@
         const ball = document.getElementById('ball');
         const scoreEl = document.getElementById('current-score');
         const highscoreEl = document.getElementById('high-score');
-        const layers = [document.getElementById('txt-cyan'), document.getElementById('txt-magenta')];
 
         let wAngle = 0, wVel = 0, isDrag = false, lastA = 0;
-        let bX = 0, bY = -80, bVX = 0, bVY = 0;
+        let bX = 0, bY = -100, bVX = 0, bVY = 0;
         let score = 0, highscore = 0;
-        let gameStarted = false;
 
-        const GRAVITY = 0.3; 
-        const FRICTION = 0.98; 
-        const BOUNCE = 0.4; 
-        const RADIUS = 120;
-        const BAR_W = 70, BAR_H = 8, BALL_R = 13;
+        const GRAVITY = 0.35;
+        const FRICTION = 0.98;
+        const BOUNCE = 0.4;
+        const RADIUS = 135; // Limite da roda
+        const BAR_W = 50;   // Metade da largura (Total 100px)
+        const BAR_H = 7;    // Metade da altura (Total 14px)
+        const BALL_R = 14;
 
         function getMouseAngle(e) {
             const rect = wheel.getBoundingClientRect();
@@ -137,76 +129,71 @@
         window.addEventListener('touchend', () => isDrag = false);
 
         function update() {
-            if (!isDrag) { wVel *= 0.96; wAngle += wVel; }
+            if (!isDrag) { wVel *= 0.95; wAngle += wVel; }
 
-            // Aplicar Gravidade no Mundo
+            // Gravidade constante
             bVY += GRAVITY;
             bX += bVX; bY += bVY;
 
-            // Converter para coordenadas locais da barra (eixo da barra)
+            // Coordenadas locais da barra
             const rad = -wAngle * (Math.PI / 180);
             const cos = Math.cos(rad), sin = Math.sin(rad);
-            const lx = bX * cos - bY * sin, ly = bX * sin + bY * cos;
+            const lx = bX * cos - bY * sin;
+            const ly = bX * sin + bY * cos;
 
-            let onSurface = false;
+            let isBalanced = false;
 
-            // Detecção de colisão no topo da barra
-            if (Math.abs(lx) < BAR_W + 5 && ly > -(BAR_H + BALL_R) && ly < 0) {
-                if (bVY > 0) { 
-                    // Se a bola está a cair em direção à barra
-                    onSurface = true;
-                    gameStarted = true;
-
-                    // Física de Deslize Baseada na Inclinação
-                    // Quanto mais inclinada a barra, mais força lateral (lx) a bola ganha
-                    // A "gravidade local" na barra é GRAVITY * sin(barra_angle)
-                    const slopeForce = Math.sin(wAngle * Math.PI / 180) * 0.5;
+            // Colisão com o topo da barra
+            if (ly > -(BAR_H + BALL_R) && ly < -BAR_H + 5 && Math.abs(lx) < BAR_W + 5) {
+                if (bVY > 0) { // Só colide se estiver a cair
+                    isBalanced = true;
                     
-                    // Reposicionar para não atravessar
-                    const worldTopY = -(BAR_H + BALL_R);
-                    bX = lx * Math.cos(-rad) - worldTopY * Math.sin(-rad);
-                    bY = lx * Math.sin(-rad) + worldTopY * Math.cos(-rad);
+                    // Impedir que a bola atravesse a barra
+                    const fixedY = -(BAR_H + BALL_R);
+                    bX = lx * Math.cos(-rad) - fixedY * Math.sin(-rad);
+                    bY = lx * Math.sin(-rad) + fixedY * Math.cos(-rad);
 
-                    // Reação física
-                    bVY *= -0.2; // Mata a velocidade vertical para não saltar muito
-                    bVX += slopeForce; // Adiciona o deslize lateral
+                    // Reação de equilíbrio: a inclinação da barra empurra a bola
+                    const tilt = Math.sin(wAngle * Math.PI / 180);
+                    bVX += tilt * 0.6; // Força de deslize
+                    bVY *= -0.1; // Suaviza o impacto vertical
                     
-                    // Adicionar inércia da rotação da barra
-                    bVX += wVel * 0.1; 
+                    // Inércia do movimento da mão
+                    bVX += wVel * 0.05;
                 }
             }
 
-            // Sistema de Pontuação
-            if (onSurface && Math.abs(lx) < BAR_W) {
+            // Lógica do Cronómetro
+            if (isBalanced && Math.abs(lx) < BAR_W) {
                 score += 0.016;
-            } else if (gameStarted) {
-                if (score > highscore) highscore = score;
+                ball.classList.add('active');
+            } else {
+                if (score > highscore) {
+                    highscore = score;
+                    highscoreEl.innerText = highscore.toFixed(1);
+                }
                 score = 0;
+                ball.classList.remove('active');
             }
+            scoreEl.innerText = score.toFixed(1);
 
-            // Colisão com as Paredes Circulares
-            const d = Math.sqrt(bX*bX + bY*bY);
-            if (d > RADIUS - BALL_R) {
-                const nx = bX/d, ny = bY/d;
+            // Colisão com a Roda Exterior
+            const dist = Math.sqrt(bX*bX + bY*bY);
+            if (dist > RADIUS - BALL_R) {
+                const nx = bX/dist, ny = bY/dist;
                 bX = nx * (RADIUS - BALL_R); bY = ny * (RADIUS - BALL_R);
                 const dot = bVX*nx + bVY*ny;
-                bVX = (bVX - 2*dot*nx) * BOUNCE + (-ny * wVel * 0.5);
-                bVY = (bVY - 2*dot*ny) * BOUNCE + (nx * wVel * 0.5);
+                bVX = (bVX - 2*dot*nx) * BOUNCE;
+                bVY = (bVY - 2*dot*ny) * BOUNCE;
+                // Impulso ao bater na borda girando
+                bVX += -ny * wVel * 0.3;
+                bVY += nx * wVel * 0.3;
             }
 
             bVX *= FRICTION; bVY *= FRICTION;
-            
-            // Renderização
+
             ball.style.transform = `translate(${bX}px, ${bY}px)`;
             wheel.style.transform = `rotate(${wAngle}deg)`;
-            
-            // Efeito visual no texto
-            const intensity = Math.min(Math.abs(wVel) * 0.6, 12);
-            layers[0].style.transform = `translate(${intensity}px, 0)`;
-            layers[1].style.transform = `translate(${-intensity}px, 0)`;
-
-            scoreEl.innerText = score.toFixed(1);
-            highscoreEl.innerText = highscore.toFixed(1);
 
             requestAnimationFrame(update);
         }
