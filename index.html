@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Hard Balance</title>
+    <title>Eloi Silva | Balance Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,10 +31,10 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
         
-        /* BARRA PEQUENA E DIFICIL */
+        /* BARRA MUITO PEQUENA (70px) */
         .bar {
-            position: absolute; width: 90px; height: 16px; background: var(--wheel);
-            top: 50%; left: 50%; margin-left: -45px; margin-top: -8px; border-radius: 8px;
+            position: absolute; width: 70px; height: 16px; background: var(--wheel);
+            top: 50%; left: 50%; margin-left: -35px; margin-top: -8px; border-radius: 8px;
         }
 
         .ball {
@@ -94,17 +94,14 @@
         let wAngle = 0, wVel = 0;
         let bX = 0, bY = -100, bVX = 0, bVY = 0;
 
-        // --- DEFINIÇÕES DE DIFICULDADE ---
-        const WHEEL_INERTIA = 0.995; // Fidget Spinner
+        // --- AJUSTES DE FÍSICA ---
+        const WHEEL_INERTIA = 0.995; 
         
-        // DIFICULDADE NA BARRA:
-        // 0.99 = Sabão (Muito difícil) | 0.80 = Fácil
-        const BAR_SLIPPERINESS = 0.99; 
-        // Força da gravidade na inclinação (Quanto maior, mais rápido cai)
-        const TILT_GRAVITY = 0.8; 
-
-        // ADERÊNCIA NA PAREDE:
-        const WALL_GRIP = 0.18; // Força centrípeta artificial (Cola à parede)
+        // ADERÊNCIA BARRA: 0.88 (Bom Grip, não é sabão, mas também não é super cola)
+        const BAR_FRICTION = 0.88; 
+        
+        // ADERÊNCIA PAREDE: 0.45 (MUITO GRIP - Acompanha a rotação!)
+        const WALL_GRIP_SPIN = 0.45; 
 
         const GRAVITY = 0.45;
         const FRICTION_AIR = 0.99;
@@ -112,7 +109,7 @@
         
         const RADIUS = 138;
         const BALL_R = 14;
-        const BAR_HW = 45; 
+        const BAR_HW = 35; // BARRA PEQUENA (35+35=70px)
         const BAR_HH = 8;
 
         function getAngle(e) {
@@ -164,7 +161,7 @@
 
             let onBar = false;
 
-            // --- COLISÃO BARRA (DIFÍCIL) ---
+            // --- COLISÃO BARRA ---
             if (lx > -BAR_HW - BALL_R && lx < BAR_HW + BALL_R && 
                 ly > -(BAR_HH + BALL_R + 15) && ly < (BAR_HH + BALL_R)) {
                 
@@ -175,23 +172,22 @@
                     bX = lx * Math.cos(-rad) - targetLY * Math.sin(-rad);
                     bY = lx * Math.sin(-rad) + targetLY * Math.cos(-rad);
 
-                    // Física de Deslize Agressiva
+                    // Física na Barra
                     const centrifugal = wVel * 0.08; 
                     const slope = Math.sin(wAngle * Math.PI/180);
                     
-                    // A inclinação empurra a bola com força (TILT_GRAVITY)
-                    bVX += slope * TILT_GRAVITY;      
+                    bVX += slope * 0.6; // Deslize moderado
                     bVX += centrifugal;      
                     
                     bVY = 0;
                     
-                    // Quase sem atrito (Sabão)
-                    bVX *= BAR_SLIPPERINESS;
-                    bVY *= BAR_SLIPPERINESS;
+                    // Aderência da Barra (Grip)
+                    bVX *= BAR_FRICTION;
+                    bVY *= BAR_FRICTION;
                 }
             }
 
-            // --- COLISÃO PAREDE (COM ADERÊNCIA) ---
+            // --- COLISÃO PAREDE (COM MUITA ADERÊNCIA) ---
             const dist = Math.sqrt(bX*bX + bY*bY);
             if(dist > RADIUS - BALL_R) {
                 const nx = bX/dist, ny = bY/dist;
@@ -202,9 +198,10 @@
                 bVX = (bVX - 2*dot*nx) * BOUNCE_WALL;
                 bVY = (bVY - 2*dot*ny) * BOUNCE_WALL;
                 
-                // ADERÊNCIA EXTRA À PAREDE (Acompanha a roda)
-                bVX += -ny * wVel * WALL_GRIP; 
-                bVY += nx * wVel * WALL_GRIP;
+                // --- SUPER ADERÊNCIA AO CÍRCULO ---
+                // Faz a bola rodar junto com a parede
+                bVX += -ny * wVel * WALL_GRIP_SPIN; 
+                bVY += nx * wVel * WALL_GRIP_SPIN;
                 
                 onBar = false;
             }
