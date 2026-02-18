@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Balance Challenge</title>
+    <title>Eloi Silva | Fidget Balance</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,7 +23,6 @@
         }
         #current-score { color: var(--accent); min-width: 40px; display: inline-block; text-align: left; }
 
-        /* JOGO */
         .stage { position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
         .wheel-wrap { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 2; will-change: transform; }
@@ -32,7 +31,6 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
         
-        /* BARRA MAIS PEQUENA */
         .bar {
             position: absolute; width: 90px; height: 16px; background: var(--wheel);
             top: 50%; left: 50%; margin-left: -45px; margin-top: -8px; border-radius: 8px;
@@ -45,7 +43,6 @@
         }
         .ball.scoring { background: #FF2200; box-shadow: 0 0 20px rgba(255, 69, 0, 0.8); transition: box-shadow 0.2s; }
 
-        /* MENU */
         .menu { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; z-index: 10; }
         .card { 
             background: #fff; padding: 14px 20px; border-radius: 12px; 
@@ -96,15 +93,17 @@
         let wAngle = 0, wVel = 0;
         let bX = 0, bY = -100, bVX = 0, bVY = 0;
 
-        // AJUSTES DE FÍSICA (Mais fácil de colar)
-        const GRAVITY = 0.35;       // Gravidade um pouco menor (cai mais devagar)
+        // --- CONFIGURAÇÃO "FIDGET SPINNER" ---
+        const WHEEL_FRICTION = 0.995; // Quase sem atrito (roda para sempre)
+        const BALL_TRACTION = 0.85;   // Bola cola bem na barra
+
+        const GRAVITY = 0.4;
         const FRICTION_AIR = 0.99;
-        const FRICTION_BAR = 0.92;  // Tração ALTA: A bola "cola" na barra e não desliza tanto
-        const BOUNCE_WALL = 0.3;    // Paredes menos elásticas (para a bola acalmar)
+        const BOUNCE_WALL = 0.4;
         
         const RADIUS = 138;
         const BALL_R = 14;
-        const BAR_HW = 45;          // Meia largura: 45px (Total 90px) - BEM MAIS PEQUENA
+        const BAR_HW = 45; // Barra pequena
         const BAR_HH = 8;
 
         function getAngle(e) {
@@ -116,7 +115,7 @@
             return Math.atan2(y, x);
         }
 
-        function startDrag(e) { isDrag = true; lastMouseAngle = getAngle(e); }
+        function startDrag(e) { isDrag = true; lastMouseAngle = getAngle(e); wVel = 0; }
         function endDrag() { isDrag = false; }
         
         function moveDrag(e) {
@@ -126,6 +125,7 @@
             while(d > Math.PI) d -= Math.PI*2;
             while(d < -Math.PI) d += Math.PI*2;
             
+            // Sensibilidade direta
             wVel = d * (180/Math.PI); 
             wAngle += wVel;
             lastMouseAngle = a;
@@ -139,11 +139,13 @@
         window.addEventListener('touchend', endDrag);
 
         function loop() {
+            // 1. Física da Roda (Estilo Fidget Spinner)
             if(!isDrag) {
-                wVel *= 0.92; 
+                wVel *= WHEEL_FRICTION; // Perde muito pouco impulso
                 wAngle += wVel;
             }
 
+            // 2. Física da Bola
             bVY += GRAVITY;
             bX += bVX; 
             bY += bVY;
@@ -157,35 +159,34 @@
 
             let onBar = false;
 
-            // Caixa de colisão da barra (90px largura)
+            // Colisão com a Barra
             if (lx > -BAR_HW - BALL_R && lx < BAR_HW + BALL_R && 
-                ly > -(BAR_HH + BALL_R + 10) && ly < (BAR_HH + BALL_R)) {
+                ly > -(BAR_HH + BALL_R + 15) && ly < (BAR_HH + BALL_R)) {
                 
                 if(ly < 0) {
                     onBar = true;
                     
-                    // Colar a bola na superfície
                     const targetLY = -(BAR_HH + BALL_R);
                     bX = lx * Math.cos(-rad) - targetLY * Math.sin(-rad);
                     bY = lx * Math.sin(-rad) + targetLY * Math.cos(-rad);
 
-                    // --- FÍSICA DE TRAÇÃO ---
+                    // A bola "sente" a rotação da roda
+                    // Se a roda girar muito rápido, a bola é cuspida (Centrífuga)
+                    const centrifugal = wVel * 0.08; 
                     const slope = Math.sin(wAngle * Math.PI/180);
                     
-                    // Multiplicador menor (0.4) = bola desliza MENOS com a inclinação
-                    bVX += slope * 0.4; 
-                    
-                    // Influência da rotação
-                    bVX += wVel * 0.05; 
+                    bVX += slope * 0.5;      // Deslize pela gravidade
+                    bVX += centrifugal;      // Lançamento pela rotação
                     
                     bVY = 0;
-
-                    // Fricção forte
-                    bVX *= FRICTION_BAR;
-                    bVY *= FRICTION_BAR;
+                    
+                    // Tração "Cola"
+                    bVX *= BALL_TRACTION;
+                    bVY *= BALL_TRACTION;
                 }
             }
 
+            // Colisão Paredes
             const dist = Math.sqrt(bX*bX + bY*bY);
             if(dist > RADIUS - BALL_R) {
                 const nx = bX/dist, ny = bY/dist;
@@ -194,8 +195,11 @@
                 const dot = bVX*nx + bVY*ny;
                 bVX = (bVX - 2*dot*nx) * BOUNCE_WALL;
                 bVY = (bVY - 2*dot*ny) * BOUNCE_WALL;
-                bVX += -ny * wVel * 0.2;
-                bVY += nx * wVel * 0.2;
+                
+                // Spin nas paredes
+                bVX += -ny * wVel * 0.1;
+                bVY += nx * wVel * 0.1;
+                
                 onBar = false;
             }
 
@@ -204,6 +208,7 @@
                 bVY *= FRICTION_AIR;
             }
 
+            // Pontuação
             if(onBar && Math.abs(lx) < BAR_HW) {
                 score += 1/60; 
                 ball.classList.add('scoring');
