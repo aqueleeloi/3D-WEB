@@ -32,9 +32,10 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
         
+        /* BARRA MAIS PEQUENA */
         .bar {
-            position: absolute; width: 130px; height: 16px; background: var(--wheel);
-            top: 50%; left: 50%; margin-left: -65px; margin-top: -8px; border-radius: 8px;
+            position: absolute; width: 90px; height: 16px; background: var(--wheel);
+            top: 50%; left: 50%; margin-left: -45px; margin-top: -8px; border-radius: 8px;
         }
 
         .ball {
@@ -84,40 +85,34 @@
     <footer>PORTUGAL 2026</footer>
 
     <script>
-        // Elementos
         const wheelWrap = document.getElementById('wheel-wrap');
         const ball = document.getElementById('ball');
         const scoreEl = document.getElementById('current-score');
         const highscoreEl = document.getElementById('high-score');
         const stage = document.getElementById('stage');
 
-        // Estado do Jogo
         let score = 0, highscore = 0;
         let isDrag = false, lastMouseAngle = 0;
-        
-        // Física
-        let wAngle = 0, wVel = 0; // Roda
-        let bX = 0, bY = -100, bVX = 0, bVY = 0; // Bola
+        let wAngle = 0, wVel = 0;
+        let bX = 0, bY = -100, bVX = 0, bVY = 0;
 
-        // Constantes (Ajustadas para sensação "Sólida")
-        const GRAVITY = 0.45;       // Mais pesado
+        // AJUSTES DE FÍSICA (Mais fácil de colar)
+        const GRAVITY = 0.35;       // Gravidade um pouco menor (cai mais devagar)
         const FRICTION_AIR = 0.99;
-        const FRICTION_BAR = 0.90;  // Prende mais na barra
-        const BOUNCE_WALL = 0.5;
-        const BOUNCE_BAR = 0.0;     // Sem ressalto na barra (cola)
+        const FRICTION_BAR = 0.92;  // Tração ALTA: A bola "cola" na barra e não desliza tanto
+        const BOUNCE_WALL = 0.3;    // Paredes menos elásticas (para a bola acalmar)
         
-        const RADIUS = 138;         // Raio limite (ajuste visual)
+        const RADIUS = 138;
         const BALL_R = 14;
-        const BAR_HW = 65;          // Meia largura da barra
-        const BAR_HH = 8;           // Meia altura da barra
+        const BAR_HW = 45;          // Meia largura: 45px (Total 90px) - BEM MAIS PEQUENA
+        const BAR_HH = 8;
 
-        // --- CONTROLO (Input) ---
         function getAngle(e) {
             const r = stage.getBoundingClientRect();
             const cx = r.left + r.width/2; 
             const cy = r.top + r.height/2;
-            const x = (e.clientX || e.touches[0].clientX) - cx;
-            const y = (e.clientY || e.touches[0].clientY) - cy;
+            const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - cx;
+            const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - cy;
             return Math.atan2(y, x);
         }
 
@@ -126,14 +121,11 @@
         
         function moveDrag(e) {
             if(!isDrag) return;
-            // e.preventDefault(); // Opcional: previne scroll em mobile
             const a = getAngle(e);
             let d = a - lastMouseAngle;
-            // Correção da passagem -PI a PI
             while(d > Math.PI) d -= Math.PI*2;
             while(d < -Math.PI) d += Math.PI*2;
             
-            // Sensibilidade direta (1:1)
             wVel = d * (180/Math.PI); 
             wAngle += wVel;
             lastMouseAngle = a;
@@ -142,94 +134,69 @@
         stage.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', moveDrag);
         window.addEventListener('mouseup', endDrag);
-
         stage.addEventListener('touchstart', startDrag, {passive:false});
         window.addEventListener('touchmove', moveDrag, {passive:false});
         window.addEventListener('touchend', endDrag);
 
-
-        // --- LOOP DE FÍSICA ---
         function loop() {
-            // 1. Inércia da Roda
             if(!isDrag) {
-                wVel *= 0.92; // Roda para rápido se largares
+                wVel *= 0.92; 
                 wAngle += wVel;
             }
 
-            // 2. Gravidade na Bola
             bVY += GRAVITY;
             bX += bVX; 
             bY += bVY;
 
-            // 3. Colisão com a Barra (Matemática de Rotação)
             const rad = -wAngle * (Math.PI/180);
             const cos = Math.cos(rad); 
             const sin = Math.sin(rad);
 
-            // Converter posição da bola para o espaço local da barra
-            // (Como se a barra estivesse deitada e a bola rodasse à volta dela)
             const lx = bX * cos - bY * sin;
             const ly = bX * sin + bY * cos;
 
             let onBar = false;
 
-            // Detecção de AABB (Caixa) no espaço local
-            // Adicionei margem de segurança (+5) para apanhar a bola rápida
+            // Caixa de colisão da barra (90px largura)
             if (lx > -BAR_HW - BALL_R && lx < BAR_HW + BALL_R && 
                 ly > -(BAR_HH + BALL_R + 10) && ly < (BAR_HH + BALL_R)) {
                 
-                // Se estiver a bater na parte de CIMA da barra
                 if(ly < 0) {
                     onBar = true;
                     
-                    // --- CORREÇÃO DE POSIÇÃO (Hard Constraint) ---
-                    // Força a bola a ficar exatamente na superfície.
-                    // Não deixa entrar nem um píxel.
+                    // Colar a bola na superfície
                     const targetLY = -(BAR_HH + BALL_R);
-                    
-                    // Converte de volta para coordenadas do mundo para atualizar a bola
-                    // Mas usa o targetLY em vez do ly atual (remove a penetração)
                     bX = lx * Math.cos(-rad) - targetLY * Math.sin(-rad);
                     bY = lx * Math.sin(-rad) + targetLY * Math.cos(-rad);
 
-                    // --- REAÇÃO DE VELOCIDADE ---
-                    // 1. A inclinação da barra faz a bola deslizar (Gravidade projetada)
+                    // --- FÍSICA DE TRAÇÃO ---
                     const slope = Math.sin(wAngle * Math.PI/180);
-                    bVX += slope * 0.8; 
-
-                    // 2. A rotação da barra "lança" a bola (Força centrífuga/tangencial)
-                    // Se a barra roda para a direita, a bola ganha velocidade para a direita
+                    
+                    // Multiplicador menor (0.4) = bola desliza MENOS com a inclinação
+                    bVX += slope * 0.4; 
+                    
+                    // Influência da rotação
                     bVX += wVel * 0.05; 
                     
-                    // 3. Remove velocidade vertical relativa à barra (ela está apoiada)
                     bVY = 0;
 
-                    // 4. Atrito
+                    // Fricção forte
                     bVX *= FRICTION_BAR;
                     bVY *= FRICTION_BAR;
                 }
             }
 
-            // 4. Colisão com o Círculo Exterior
             const dist = Math.sqrt(bX*bX + bY*bY);
             if(dist > RADIUS - BALL_R) {
-                const nx = bX/dist; 
-                const ny = bY/dist;
-                
-                // Reposicionar dentro do círculo
+                const nx = bX/dist, ny = bY/dist;
                 bX = nx * (RADIUS - BALL_R);
                 bY = ny * (RADIUS - BALL_R);
-
-                // Refletir velocidade (Bounce)
                 const dot = bVX*nx + bVY*ny;
                 bVX = (bVX - 2*dot*nx) * BOUNCE_WALL;
                 bVY = (bVY - 2*dot*ny) * BOUNCE_WALL;
-                
-                // Adiciona um pouco de "spin" da parede se estiver a tocar nela
                 bVX += -ny * wVel * 0.2;
                 bVY += nx * wVel * 0.2;
-                
-                onBar = false; // Se bateu na parede, não está equilibrada
+                onBar = false;
             }
 
             if(!onBar) {
@@ -237,28 +204,25 @@
                 bVY *= FRICTION_AIR;
             }
 
-            // 5. Pontuação e Reset
             if(onBar && Math.abs(lx) < BAR_HW) {
-                score += 1/60; // Assumindo 60fps ~ 1 segundo real
+                score += 1/60; 
                 ball.classList.add('scoring');
             } else {
                 if(score > 0) {
                     if(score > highscore) highscore = score;
-                    score = 0; // Reset imediato se sair da barra
+                    score = 0; 
                 }
                 ball.classList.remove('scoring');
             }
 
-            // 6. Renderizar
             wheelWrap.style.transform = `rotate(${wAngle}deg)`;
             ball.style.transform = `translate(${bX}px, ${bY}px)`;
             
-            scoreEl.innerText = score.toFixed(2); // Duas casas decimais para parecer mais preciso
+            scoreEl.innerText = score.toFixed(2);
             highscoreEl.innerText = highscore.toFixed(2);
 
             requestAnimationFrame(loop);
         }
-
         loop();
     </script>
 </body>
