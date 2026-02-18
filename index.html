@@ -93,17 +93,18 @@
         let wAngle = 0, wVel = 0;
         let bX = 0, bY = -100, bVX = 0, bVY = 0;
 
-        // --- CONFIGURAÇÃO "FIDGET SPINNER" ---
-        const WHEEL_FRICTION = 0.995; // Quase sem atrito (roda para sempre)
-        const BALL_TRACTION = 0.85;   // Bola cola bem na barra
+        // --- CONFIGURAÇÃO DE ADERÊNCIA ---
+        const WHEEL_FRICTION = 0.995; // Fidget Spinner (roda muito tempo)
+        const BALL_BAR_GRIP = 0.6;    // MUITO GRIP na barra (quanto menor, mais cola)
+        const BALL_WALL_GRIP = 0.8;   // MUITO GRIP na parede (acompanha a roda)
 
         const GRAVITY = 0.4;
         const FRICTION_AIR = 0.99;
-        const BOUNCE_WALL = 0.4;
+        const BOUNCE_WALL = 0.2;      // Ressalto baixo na parede (para não saltar para longe)
         
         const RADIUS = 138;
         const BALL_R = 14;
-        const BAR_HW = 45; // Barra pequena
+        const BAR_HW = 45; 
         const BAR_HH = 8;
 
         function getAngle(e) {
@@ -125,7 +126,6 @@
             while(d > Math.PI) d -= Math.PI*2;
             while(d < -Math.PI) d += Math.PI*2;
             
-            // Sensibilidade direta
             wVel = d * (180/Math.PI); 
             wAngle += wVel;
             lastMouseAngle = a;
@@ -139,9 +139,9 @@
         window.addEventListener('touchend', endDrag);
 
         function loop() {
-            // 1. Física da Roda (Estilo Fidget Spinner)
+            // 1. Física da Roda
             if(!isDrag) {
-                wVel *= WHEEL_FRICTION; // Perde muito pouco impulso
+                wVel *= WHEEL_FRICTION; 
                 wAngle += wVel;
             }
 
@@ -159,7 +159,7 @@
 
             let onBar = false;
 
-            // Colisão com a Barra
+            // --- COLISÃO BARRA ---
             if (lx > -BAR_HW - BALL_R && lx < BAR_HW + BALL_R && 
                 ly > -(BAR_HH + BALL_R + 15) && ly < (BAR_HH + BALL_R)) {
                 
@@ -170,35 +170,38 @@
                     bX = lx * Math.cos(-rad) - targetLY * Math.sin(-rad);
                     bY = lx * Math.sin(-rad) + targetLY * Math.cos(-rad);
 
-                    // A bola "sente" a rotação da roda
-                    // Se a roda girar muito rápido, a bola é cuspida (Centrífuga)
-                    const centrifugal = wVel * 0.08; 
+                    // Aderência máxima na barra
+                    const centrifugal = wVel * 0.05; 
                     const slope = Math.sin(wAngle * Math.PI/180);
                     
-                    bVX += slope * 0.5;      // Deslize pela gravidade
-                    bVX += centrifugal;      // Lançamento pela rotação
+                    bVX += slope * 0.3;      // Deslize suave
+                    bVX += centrifugal;      
                     
                     bVY = 0;
                     
-                    // Tração "Cola"
-                    bVX *= BALL_TRACTION;
-                    bVY *= BALL_TRACTION;
+                    // GRIP FORTE (Trava a bola na barra)
+                    bVX *= BALL_BAR_GRIP;
+                    bVY *= BALL_BAR_GRIP;
                 }
             }
 
-            // Colisão Paredes
+            // --- COLISÃO PAREDE (Aderência aumentada) ---
             const dist = Math.sqrt(bX*bX + bY*bY);
             if(dist > RADIUS - BALL_R) {
                 const nx = bX/dist, ny = bY/dist;
                 bX = nx * (RADIUS - BALL_R);
                 bY = ny * (RADIUS - BALL_R);
+                
+                // BOUNCE
                 const dot = bVX*nx + bVY*ny;
                 bVX = (bVX - 2*dot*nx) * BOUNCE_WALL;
                 bVY = (bVY - 2*dot*ny) * BOUNCE_WALL;
                 
-                // Spin nas paredes
-                bVX += -ny * wVel * 0.1;
-                bVY += nx * wVel * 0.1;
+                // ADERÊNCIA CIRCULAR (A MÁGICA)
+                // Se a roda gira, a parede "puxa" a bola com força (Tangencial)
+                // ny * wVel cria um vetor tangente à parede
+                bVX += -ny * wVel * BALL_WALL_GRIP; 
+                bVY += nx * wVel * BALL_WALL_GRIP;
                 
                 onBar = false;
             }
@@ -208,7 +211,7 @@
                 bVY *= FRICTION_AIR;
             }
 
-            // Pontuação
+            // Score
             if(onBar && Math.abs(lx) < BAR_HW) {
                 score += 1/60; 
                 ball.classList.add('scoring');
