@@ -2,274 +2,686 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eloi Silva | Balance Challenge</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Elói Silva - Artista de Variedades</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg: #F2F2F4; --text: #000; --accent: #FF4500; --wheel: #000;
+            --bg: #e0e5ec;
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+            --accent: #ff4757; 
+            --text: #4d5b6d;
+            --text-dark: #454f54; 
+            --text-soft: #9aa5b1;
+            --win: #00ca85;
+            --lose: #ff1744;
+            --marker: #aab8c2;
+            --fret: #cbd1d8;
         }
-        
-        /* BLOQUEIO DE SELEÇÃO E ZOOM */
+
         * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
+            box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
             user-select: none; 
-            touch-action: none;
-            outline: none;
+            touch-action: none; 
+            margin: 0; padding: 0; 
         }
 
-        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; background: var(--bg); font-family: 'Inter', sans-serif; }
-        body { display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 20px; }
-
-        header { text-align: center; width: 100%; pointer-events: none; }
-        .buzz-text { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 10px; color: var(--text); }
-        
-        .score-container {
-            display: inline-flex; gap: 15px; background: #fff; padding: 10px 24px; 
-            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            font-weight: 900; font-size: 1rem; pointer-events: auto;
-        }
-        #current-score { color: var(--accent); min-width: 40px; display: inline-block; text-align: left; }
-
-        .stage { position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        
-        .wheel-wrap { width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 2; will-change: transform; cursor: grab; }
-        .wheel-wrap:active { cursor: grabbing; }
-        
-        .wheel {
-            width: 100%; height: 100%; border-radius: 50%; border: 12px solid var(--wheel);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-        }
-        
-        /* BARRA MINÚSCULA (60px) */
-        .bar {
-            position: absolute; width: 60px; height: 16px; background: var(--wheel);
-            top: 50%; left: 50%; margin-left: -30px; margin-top: -8px; border-radius: 6px;
+        html, body {
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            overscroll-behavior: none; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: scale(var(--scale, 1));
+            transform-origin: center center;
+            width: 100%;
+        }
+
+        /* --- TÍTULO E SUBTÍTULO ALINHADOS À LARGURA DAS REDES --- */
+        .portfolio-title-container {
+            margin-top: -4vh; 
+            margin-bottom: 80px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        #titleSvg {
+            width: 368px; 
+            height: auto;
+            fill: var(--text-dark);
+            display: block;
+            will-change: transform, filter;
+            transition: transform 0.15s ease-out, filter 0.15s ease-out;
+        }
+
+        .portfolio-title-container .role {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem; 
+            font-style: italic;
+            letter-spacing: 6.5px; 
+            color: var(--text-soft);
+            margin-top: 5px;
+            text-transform: uppercase;
+            padding-left: 7.5px; 
+        }
+
+        /* --- PALCO (460px) --- */
+        .stage {
+            position: relative; 
+            width: 460px; 
+            height: 460px;
+            display: grid; place-items: center;
+            border-radius: 50%;
+            transition: box-shadow 0.4s ease;
+            z-index: 10;
+        }
+
+        .base-outer {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            background: var(--bg);
+            box-shadow: 25px 25px 60px var(--shadow-dark), -25px -25px 60px var(--shadow-light);
+            z-index: 0;
+        }
+
+        .track-inner {
+            position: absolute; 
+            width: 380px; 
+            height: 380px; 
+            border-radius: 50%;
+            background: var(--bg);
+            box-shadow: inset 8px 8px 25px var(--shadow-dark), inset -8px -8px 25px var(--shadow-light);
+            z-index: 1;
+        }
+
+        /* --- BOLA DE PORCELANA (CENTRADA NA CALHA) --- */
+        .ball-layer {
+            position: absolute; width: 100%; height: 100%; 
+            z-index: 500; pointer-events: none;
+        }
         .ball {
-            position: absolute; width: 28px; height: 28px; background: var(--accent);
-            border-radius: 50%; z-index: 5; pointer-events: none; will-change: transform;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); top: 50%; left: 50%; margin: -14px 0 0 -14px;
+            position: absolute;
+            top: 40px; /* Centrada matematicamente entre o Hub e a borda exterior */
+            left: 50%; 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            will-change: transform;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #fcfcfc 15%, #e8e8e8 45%, #b8b8b8 75%, #8a8a8a 100%);
+            box-shadow: inset -2px -2px 8px rgba(69, 79, 84, 0.05), 4px 4px 10px rgba(69, 79, 84, 0.25);          
         }
-        .ball.scoring { background: #FF2200; box-shadow: 0 0 25px rgba(255, 69, 0, 0.9); transition: box-shadow 0.1s; }
 
-        .menu { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; z-index: 10; }
-        .card { 
-            background: #fff; padding: 14px 20px; border-radius: 12px; 
-            text-decoration: none; color: #000; font-weight: 600; 
-            display: flex; justify-content: space-between; font-size: 0.9rem; 
-            border: 1px solid rgba(0,0,0,0.03); transition: transform 0.1s, background 0.1s;
+        .touch-ball-zone {
+            position: absolute; 
+            width: 460px; height: 460px; 
+            border-radius: 50%;
+            z-index: 300; cursor: grab;
+            -webkit-mask-image: radial-gradient(circle, transparent 150px, black 151px);
+            mask-image: radial-gradient(circle, transparent 150px, black 151px);
         }
-        .card:active { transform: scale(0.96); background: #f0f0f0; }
+
+        /* --- HUB CENTRAL (300px) --- */
+        .center-hub {
+            position: absolute; 
+            width: 300px; 
+            height: 300px; 
+            border-radius: 50%;
+            background: var(--bg); 
+            z-index: 400; 
+            box-shadow: 8px 8px 22px var(--shadow-dark), -8px -8px 22px var(--shadow-light);
+            display: grid; place-items: center;
+            overflow: hidden; cursor: ns-resize;
+            transition: box-shadow 0.4s ease;
+        }
+
+        /* DRUM 3D */
+        .drum-viewport {
+            width: 100%; height: 100%; perspective: 1200px; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            mask-image: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.15) 35%, black 45%, black 55%, rgba(0,0,0,0.15) 65%, transparent 80%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.15) 35%, black 45%, black 55%, rgba(0,0,0,0.15) 65%, transparent 80%);
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .drum-wheel { width: 100%; height: 45px; position: relative; transform-style: preserve-3d; will-change: transform; }
+        .drum-item {
+            position: absolute; width: 100%; height: 45px; top: 50%; margin-top: -22.5px; 
+            line-height: 45px; text-align: center; 
+            font-weight: 900; font-size: 28px; 
+            color: var(--text-dark);
+            backface-visibility: hidden;
+        }
+
+        .status-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; pointer-events: none; opacity: 0; transition: opacity 0.5s;
+        }
+        .is-roulette .status-svg { opacity: 1; }
         
-        footer { font-size: 0.6rem; color: #bbb; letter-spacing: 0.1em; }
+        .status-svg text {
+            font-size: 13px; font-weight: 800; letter-spacing: 2px;
+            fill: var(--text-soft); text-transform: uppercase;
+            transition: fill 0.3s, font-size 0.3s;
+        }
+
+        /* RELÓGIO UI */
+        .clock-ui { position: absolute; width: 100%; height: 100%; transition: opacity 0.5s; pointer-events: none;}
+        .hand { position: absolute; left: 50%; bottom: 50%; transform-origin: bottom center; border-radius: 4px; }
+        .hand-h { width: 10px; height: 90px; margin-left: -5px; background-color: var(--text-dark); } 
+        .hand-m { width: 6px; height: 200px; margin-left: -3px; background-color: var(--text-dark); }
+        .center-dot { position:absolute; top:50%; left:50%; width:18px; height:18px; background:var(--text-dark); border-radius:50%; transform:translate(-50%,-50%); z-index: 10; }
+
+        /* MARCADORES E LABELS */
+        .clock-markers-layer { position: absolute; width: 100%; height: 100%; pointer-events: none; transition: opacity 0.5s; z-index: 20; }
+        .clock-tick {
+            position: absolute; background-color: var(--text-soft); border-radius: 2px;
+            width: 4px; height: 12px; left: 50%; top: 5px; margin-left: -2px; transform-origin: 50% 225px; 
+        }
+        .track-frets { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5; opacity: 0; transition: 0.5s; }
+        .fret { position: absolute; width: 2px; height: 100%; left: 50%; top: 0; margin-left: -1px; }
+        .fret::after { content: ''; position: absolute; top: 6px; left: 0; width: 2px; height: 35px; background: var(--fret); border-radius: 2px; }
+        .roulette-ui { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 0.5s; z-index: 20; pointer-events: none; }
+        .pin { position: absolute; width: 1px; height: 8px; background: #cbd1d8; left: 50%; margin-left: -0.5px; top: 2px; transform-origin: 50% 228px; }
+        .label { 
+            position: absolute; width: 30px; text-align: center; font-size: 16px; 
+            font-weight: 700; color: var(--text-soft); opacity: 1;
+            left: 50%; margin-left: -15px; top: 10px; transform-origin: 50% 220px;
+        }
+
+        /* --- GLOW MODERNO APENAS NO CÍRCULO EXTERIOR --- */
+        .glow-win { box-shadow: 0 0 0 2px var(--win), 0 0 35px 2px rgba(0, 202, 133, 0.3) !important; }
+        .glow-lose { box-shadow: 0 0 0 2px var(--lose), 0 0 35px 2px rgba(255, 23, 68, 0.3) !important; }
+
+        .hub-win .status-svg text { fill: var(--win); font-size: 14px; }
+        .hub-lose .status-svg text { fill: var(--lose); }
+
+        .is-roulette .roulette-ui, .is-roulette .drum-viewport, .is-roulette .track-frets { opacity: 1; }
+        .is-roulette .clock-ui, .is-roulette .clock-markers-layer { opacity: 0; }
+        
+        .status-container { height: 20px; display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 15px;}
+        #status-text {
+            font-weight: 700; color: var(--text-soft); text-transform: uppercase; 
+            font-size: 0.8rem; letter-spacing: 2px; transition: all 0.3s; text-align: center;
+        }
+
+        /* --- CONTROLS SWITCH --- */
+        .controls-container {
+            margin-top: 35px; 
+            z-index: 1000; display: flex; align-items: center; justify-content: center; gap: 20px; 
+        }
+        .icon-svg { width: 26px; height: 26px; fill: var(--text-soft); transition: all 0.3s ease; cursor: pointer; }
+        .icon-svg.active { fill: var(--text-dark); filter: drop-shadow(0 0 5px rgba(69,79,84,0.1)); transform: scale(1.1); }
+
+        .custom-switch {
+            position: relative; width: 110px; height: 44px; background: var(--bg); border-radius: 22px; 
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            cursor: pointer; overflow: hidden; padding: 0; display: flex; touch-action: none; 
+        }
+        .custom-switch input { display: none; }
+        .slider-pill {
+            position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: #e6e9ef;
+            border-radius: 22px; transition: all 0.3s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+            box-shadow: 2px 2px 6px rgba(163, 177, 198, 0.4), -2px -2px 6px rgba(255, 255, 255, 0.8); z-index: 2; pointer-events: none; 
+        }
+        input:checked ~ .slider-pill {
+            transform: translateX(100%); background: #f0f0f3;
+            box-shadow: 4px 0 15px var(--accent), 2px 2px 5px rgba(163, 177, 198, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.8);
+        }
+
+        /* --- REDES SOCIAIS PREMIUM (LARGURA TOTAL 368px) --- */
+        .social-container {
+            display: flex; justify-content: center; align-items: center;
+            gap: 40px; 
+            margin-top: 35px; z-index: 1000;
+        }
+
+        .social-btn {
+            position: relative;
+            width: 96px;  
+            height: 96px;
+            border-radius: 30px; 
+            background: var(--bg);
+            box-shadow: 
+                inset 5px 5px 12px var(--shadow-dark),
+                inset -5px -5px 12px var(--shadow-light);
+            display: flex; justify-content: center; align-items: center;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+            overflow: hidden;
+        }
+
+        .social-btn::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0; transition: all 0.4s ease; z-index: 1;
+        }
+
+        .social-icon {
+            position: relative; z-index: 2;
+            width: 48px; 
+            height: 48px;
+            fill: var(--text-dark); 
+            transition: all 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .social-btn:hover { transform: translateY(-6px) scale(1.02); }
+        .social-btn:hover .social-icon { fill: #ffffff; transform: scale(1.15); }
+
+        .social-btn.insta:hover { box-shadow: 10px 10px 22px var(--shadow-dark), -10px -10px 22px var(--shadow-light), 0 18px 35px rgba(225, 48, 108, 0.4); }
+        .social-btn.insta:hover::before { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); opacity: 1; }
+
+        .social-btn.behance:hover { box-shadow: 10px 10px 22px var(--shadow-dark), -10px -10px 22px var(--shadow-light), 0 18px 35px rgba(23, 105, 255, 0.4); }
+        .social-btn.behance:hover::before { background: #1769ff; opacity: 1; }
+
+        .social-btn.whatsapp:hover { box-shadow: 10px 10px 22px var(--shadow-dark), -10px -10px 22px var(--shadow-light), 0 18px 35px rgba(37, 211, 102, 0.4); }
+        .social-btn.whatsapp:hover::before { background: #25D366; opacity: 1; }
+
+        .social-btn:active {
+            transform: translateY(0) scale(0.95);
+            box-shadow: inset 8px 8px 18px rgba(69,79,84,0.15), inset -8px -8px 18px rgba(255,255,255,0.2);
+        }
+
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-    <header>
-        <h1 class="buzz-text">ELOI SILVA</h1>
-        <div class="score-container">
-            <span>TIME: <span id="current-score">0.0</span>s</span>
-            <span>BEST: <span id="high-score">0.0</span>s</span>
+    <div class="app-wrapper">
+
+        <div class="portfolio-title-container">
+            <svg class="name-svg" id="titleSvg" viewBox="0 0 1370.7 248" xmlns="http://www.w3.org/2000/svg">
+                <path d="M451.7,180.4c2.9-6.9,6.8-18.8,12.7-29.6c15.8-28.7,35.5-54.8,56.1-80.3c7.9-9.8,17.4-16.5,29.9-6.7c11.8,9.2,10,19.6,2.4,30.6C529,129,509,166.5,476.5,194.4c-5.3,4.5-11.4,9.8-18.6,7.2C451.5,199.2,450.5,192.2,451.7,180.4z"/>
+                <path d="M939.3,87.4c-3.9-3.8-9.1-8.3-14.9-11.5c2.3-1.9,9.4-11.2,8-19.2c-1.3-7.7-10.8-17.3-34-12.9c-40.8,7.7-69.1,38.3-92.3,71.3c-11.8,16.8-19.3,36.3-7.7,56.8c12.1,21.3,32.6,27.3,49.5,28.3c42.7,0.1,88.4-32.8,101.2-68.2C955.4,114.8,952.5,100.2,939.3,87.4z M901.9,136.2c-12.5,13.2-26.9,23.6-48.2,22.4c-5-0.8-13.2,2.3-17-5.8c-3.4-7.3,0.8-13.5,4.6-19.4c7.7-11.9,17.9-21.4,28.8-30.2c9-7.3,17-15.5,28.9-1.5C909,113.7,913.1,124.3,901.9,136.2z"/>
+                <path d="M183.2,51.3C146,50.9,72.9,98.9,58.5,133.1c-9.7,23.2-5,43,13.5,55.9c28.9,20.2,90.3,15.6,123.6-7.3c6.3-4.4,4.9-14.4-2.5-16.6c-16.6-5-33.1-1.8-49.2-2c-14.8-0.2-29.7,1.9-44.1-2.7c-6.7-2.1-11.5-10.4-1.3-21.8c1.2,2,3.3,5,6.8,6.1c22.9,7.6,95.9-31.5,105.1-54.1C219,69.2,206.9,51.5,183.2,51.3z M118.3,115.4c0,0,48.6-38.9,53.7-28.5C175.9,95,118.3,115.4,118.3,115.4z"/>
+                <path d="M1309.8,81c-2.9,6.9-6.8,18.8-12.7,29.6c-15.8,28.7-35.5,54.8-56.1,80.3c-7.9,9.8-17.4,16.5-29.9,6.7c-11.8-9.2-10-19.6-2.4-30.6c23.9-34.5,43.9-71.9,76.3-99.9c5.3-4.5,11.4-9.8,18.6-7.2C1310,62.2,1311,69.2,1309.8,81z"/>
+            </svg>
+            <div class="role">Artista de Variedades</div>
         </div>
-    </header>
 
-    <div class="stage" id="stage">
-        <div class="wheel-wrap" id="wheel-wrap">
-            <div class="wheel"></div>
-            <div class="bar"></div>
-        </div>
-        <div class="ball" id="ball"></div>
-    </div>
+        <svg width="0" height="0" style="position:absolute;">
+            <defs>
+                <linearGradient id="instaGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f09433" />
+                    <stop offset="25%" stop-color="#e6683c" />
+                    <stop offset="50%" stop-color="#dc2743" />
+                    <stop offset="75%" stop-color="#cc2366" />
+                    <stop offset="100%" stop-color="#bc1888" />
+                </linearGradient>
+            </defs>
+        </svg>
 
-    <nav class="menu">
-        <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="card">Instagram <span>→</span></a>
-        <a href="https://www.behance.net/eloi_silva" target="_blank" class="card">Behance <span>→</span></a>
-        <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="card">WhatsApp <span>→</span></a>
-    </nav>
-
-    <footer>PORTUGAL 2026</footer>
-
-    <script>
-        const wheelWrap = document.getElementById('wheel-wrap');
-        const ball = document.getElementById('ball');
-        const scoreEl = document.getElementById('current-score');
-        const highscoreEl = document.getElementById('high-score');
-        const stage = document.getElementById('stage');
-
-        let score = 0, highscore = 0;
-        let isDrag = false, lastMouseAngle = 0;
-        
-        // ESTADO INICIAL:
-        // A roda começa com um ligeiro movimento
-        let wAngle = 10, wVel = 2; 
-        
-        // A bola começa à direita (x=50) para motivar a ação
-        let bX = 50, bY = -120, bVX = 0, bVY = 0;
-
-        // --- FÍSICA ---
-        // 0.998 = Roda quase sem atrito (Fidget Spinner)
-        const WHEEL_INERTIA = 0.998; 
-        
-        const GRAVITY = 0.45;
-        const FRICTION_AIR = 0.99;
-        const BOUNCE_WALL = 0.4;
-        
-        const RADIUS = 138;
-        const WALL_GRIP = 0.5; // Aderência forte à parede
-        
-        // BARRA PEQUENA (60px total)
-        const BAR_HW = 30; 
-        const BAR_HH = 8;
-        const BALL_R = 14;
-        const BAR_FRICTION = 0.90; // Bola desliza se rodares a barra
-
-        function getAngle(e) {
-            const r = stage.getBoundingClientRect();
-            const cx = r.left + r.width/2; 
-            const cy = r.top + r.height/2;
-            const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - cx;
-            const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - cy;
-            return Math.atan2(y, x);
-        }
-
-        function startDrag(e) { 
-            isDrag = true; 
-            lastMouseAngle = getAngle(e); 
-            wVel = 0; 
-            if(e.cancelable) e.preventDefault(); 
-        }
-        function endDrag() { isDrag = false; }
-        
-        function moveDrag(e) {
-            if(!isDrag) return;
-            if(e.cancelable) e.preventDefault();
-            const a = getAngle(e);
-            let d = a - lastMouseAngle;
-            while(d > Math.PI) d -= Math.PI*2;
-            while(d < -Math.PI) d += Math.PI*2;
-            wVel = d * (180/Math.PI); 
-            wAngle += wVel;
-            lastMouseAngle = a;
-        }
-
-        stage.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', endDrag);
-        stage.addEventListener('touchstart', startDrag, {passive:false});
-        window.addEventListener('touchmove', moveDrag, {passive:false});
-        window.addEventListener('touchend', endDrag);
-
-        function loop() {
-            if(!isDrag) {
-                wVel *= WHEEL_INERTIA; 
-                wAngle += wVel;
-            }
-
-            // Aplicar Gravidade
-            bVY += GRAVITY;
-            bX += bVX; 
-            bY += bVY;
-
-            // --- COLISÃO BARRA ---
-            const rad = -wAngle * (Math.PI/180);
-            const cos = Math.cos(rad); 
-            const sin = Math.sin(rad);
-
-            // Coordenadas locais (Bola relativa à barra)
-            const lx = bX * cos - bY * sin;
-            const ly = bX * sin + bY * cos;
-
-            let onBar = false;
-
-            // Verificar se está dentro da caixa da barra
-            if (lx > -BAR_HW - BALL_R && lx < BAR_HW + BALL_R && 
-                ly > -(BAR_HH + BALL_R + 15) && ly < (BAR_HH + BALL_R)) {
-                
-                // Se estiver a tocar em CIMA da barra
-                if(ly < 0) {
-                    onBar = true;
-                    
-                    // 1. FORÇAR SUPERFÍCIE (Não atravessa)
-                    const targetLY = -(BAR_HH + BALL_R);
-                    
-                    // Converter de volta para mundo
-                    bX = lx * Math.cos(-rad) - targetLY * Math.sin(-rad);
-                    bY = lx * Math.sin(-rad) + targetLY * Math.cos(-rad);
-
-                    // 2. TRANSFERÊNCIA DE ENERGIA (Física Realista)
-                    // Velocidade Tangencial (Força da Roda batendo na bola)
-                    // wVel está em graus, converter para radianos por frame aprox
-                    const angVelRad = wVel * (Math.PI/180);
-                    
-                    // Força centrífuga (Atira para longe se rodar rápido)
-                    const centrifugal = angVelRad * 2.5; 
-                    
-                    // Inclinação (Gravidade na rampa)
-                    const slope = Math.sin(wAngle * Math.PI/180);
-                    
-                    bVX += slope * 0.5;      
-                    bVX += centrifugal;      
-                    
-                    // Zera velocidade vertical relativa à barra
-                    bVY = 0; 
-                    
-                    // Fricção da barra
-                    bVX *= BAR_FRICTION;
-                    bVY *= BAR_FRICTION;
-                }
-            }
-
-            // --- COLISÃO PAREDES ---
-            const dist = Math.sqrt(bX*bX + bY*bY);
-            if(dist > RADIUS - BALL_R) {
-                const nx = bX/dist, ny = bY/dist;
-                bX = nx * (RADIUS - BALL_R);
-                bY = ny * (RADIUS - BALL_R);
-                
-                const dot = bVX*nx + bVY*ny;
-                bVX = (bVX - 2*dot*nx) * BOUNCE_WALL;
-                bVY = (bVY - 2*dot*ny) * BOUNCE_WALL;
-                
-                // Spin Grip (A parede arrasta a bola)
-                bVX += -ny * wVel * WALL_GRIP; 
-                bVY += nx * wVel * WALL_GRIP;
-                
-                onBar = false;
-            }
-
-            if(!onBar) {
-                bVX *= FRICTION_AIR;
-                bVY *= FRICTION_AIR;
-            }
-
-            // --- SCORE ---
-            // Só conta se estiver MESMO em cima da parte visual da barra
-            if(onBar && Math.abs(lx) < BAR_HW) {
-                score += 1/60; 
-                ball.classList.add('scoring');
-            } else {
-                if(score > 0) {
-                    if(score > highscore) highscore = score;
-                    score = 0; 
-                }
-                ball.classList.remove('scoring');
-            }
-
-            wheelWrap.style.transform = `rotate(${wAngle}deg)`;
-            ball.style.transform = `translate(${bX}px, ${bY}px)`;
+        <div class="stage" id="mainStage">
+            <div class="base-outer"></div>
+            <div class="track-inner"></div>
             
-            scoreEl.innerText = score.toFixed(2);
-            highscoreEl.innerText = highscore.toFixed(2);
+            <div class="track-frets" id="trackFrets"></div>
+            <div class="roulette-ui" id="rouletteUI"></div>
+            <div class="clock-markers-layer" id="clockMarkers"></div>
 
-            requestAnimationFrame(loop);
+            <div class="touch-ball-zone" id="touchZone"></div>
+            
+            <div class="center-hub" id="centerHub">
+                <svg class="status-svg" viewBox="0 0 300 300">
+                    <path id="status-curve" d="M 30 150 A 120 120 0 0 1 270 150" fill="transparent" />
+                    <text><textPath href="#status-curve" startOffset="50%" text-anchor="middle" id="statusTextPath">ESCOLHE A TUA APOSTA!</textPath></text>
+                </svg>
+
+                <div class="clock-ui" id="clockUI">
+                    <div class="hand hand-h" id="hHand"></div>
+                    <div class="hand hand-m" id="mHand"></div>
+                    <div class="center-dot"></div>
+                </div>
+                <div class="drum-viewport">
+                    <div class="drum-wheel" id="drumWheel"></div>
+                </div>
+            </div>
+
+            <div class="ball-layer" id="ballLayer">
+                <div class="ball" id="ballVisual"></div>
+            </div>
+        </div>
+
+        <div class="controls-container">
+            <svg class="icon-svg active" id="iconClock" viewBox="0 0 24 24" onclick="setMode(false)">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+            
+            <div class="custom-switch" id="switchContainer">
+                <input type="checkbox" id="modeToggle">
+                <div class="slider-pill"></div>
+            </div>
+
+            <svg class="icon-svg" id="iconRoulette" viewBox="0 0 24 24" onclick="setMode(true)">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/> 
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 4v4m0 8v4m4-8h4m-16 0h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <div class="status-container">
+            <div id="status-text"></div>
+        </div>
+
+        <div class="social-container">
+            <a href="https://www.instagram.com/aquele.eloi" target="_blank" class="social-btn insta" title="Instagram">
+                <svg class="social-icon" viewBox="0 0 200 200">
+                    <path d="m106.91,23.25c10.71,0,21.41,0,32.13,0,9.39,0,18.56,3.49,25.8,9.83,7.23,6.33,11.9,14.92,13.14,24.2.22,1.75.34,3.51.35,5.2.03,9.77.03,19.72.02,29.34v9.8s0,38.73,0,38.73c0,18.28-12.9,34.46-30.65,38.47-3.05.68-5.58,1.02-7.72,1.02-4.48.02-8.96.03-13.44.05-10.72.04-21.8.09-32.69.09-13.1,0-24.03-.06-34.41-.2-9.07-.12-17.98-3.89-25.09-10.6-7.13-6.73-11.51-15.51-12.32-24.68-.22-2.51-.32-4.95-.32-7.26,0-5.87-.01-11.75-.02-17.62-.03-19.01-.05-38.66.12-57.98.07-9.11,3.66-18.06,10.1-25.2,6.45-7.15,15.05-11.71,24.22-12.84,1.81-.22,3.59-.34,5.26-.35,15.18-.01,30.36-.02,45.54-.02m0-12.6c-15.18,0-30.37,0-45.55.02-2.26.01-4.54.16-6.79.44C29.44,14.2,9.4,36.3,9.19,61.56c-.23,25.24-.11,50.47-.1,75.7,0,2.78.13,5.57.37,8.33,2.24,25.3,24.43,46.47,49.8,46.8,11.52.15,23.05.2,34.57.2,15.39,0,30.79-.09,46.18-.14,3.49-.01,7.02-.57,10.43-1.33,23.62-5.33,40.5-26.55,40.5-50.76v-38.73c0-13.06.02-26.12-.02-39.18-.01-2.25-.16-4.54-.45-6.79-3.38-25.48-25.7-45-51.43-45-10.71,0-21.42,0-32.13,0h0Z"/>
+                    <path d="m147.6,102.01c-.11,26.44-21.24,47.47-47.72,47.23-25.54-.23-46.77-20.58-46.73-47.33.04-26.54,21.36-47.29,47.82-47.14,25.64.12,46.74,21.52,46.63,47.25m-82.15-.25c.11,18.87,14.55,34.36,33.86,35.14,18.57.76,35.32-14.62,35.89-32.75.62-20.14-14.14-36.4-33.62-37.03-19.52-.63-35.4,14.6-36.13,34.65"/>
+                    <path d="m149.06,62.69c-5.38-.02-9.74-4.39-9.69-9.69.06-5.32,4.47-9.66,9.8-9.65,5.36.02,9.63,4.36,9.6,9.76-.04,5.43-4.27,9.61-9.72,9.59"/>
+                </svg>
+            </a>
+            
+            <a href="https://www.behance.net/eloi_silva" target="_blank" class="social-btn behance" title="Behance">
+                <svg class="social-icon" viewBox="0 0 200 200">
+                    <path d="m100,23.25c43.24,0,78.41,35.18,78.41,78.41s-35.18,78.41-78.41,78.41S21.59,144.9,21.59,101.66,56.76,23.25,100,23.25m0-12.53C49.78,10.72,9.06,51.44,9.06,101.66s40.71,90.94,90.94,90.94,90.94-40.71,90.94-90.94S150.22,10.72,100,10.72h0Z"/>
+                    <g>
+                        <path d="m90.56,98.63c1.16.52,2.33.97,3.42,1.56,4.47,2.41,6.92,6.31,7.94,11.15,1.17,5.5.42,10.7-2.9,15.35-2.58,3.62-6.33,5.58-10.46,6.85-3.47,1.07-7.05,1.6-10.69,1.6-10.21,0-20.42.02-30.63.03-1.32,0-1.32,0-1.32-1.34,0-21.46,0-42.92,0-64.38,0-1.37,0-1.37,1.38-1.37,10.6,0,21.19-.03,31.79.02,4.33.02,8.55.78,12.53,2.62,4.53,2.1,6.74,5.78,7.43,10.56.34,2.37.37,4.73-.08,7.08-.69,3.57-2.75,6.26-5.58,8.4-.89.68-1.87,1.25-2.83,1.88Zm-29.49,15.87c0,2.7.03,5.4-.02,8.1-.02.87.28,1.1,1.12,1.09,4.6-.04,9.19.02,13.79-.03,1.53-.02,3.09-.1,4.59-.4,3.48-.7,5.79-2.71,6.55-6.29.4-1.87.28-3.71-.22-5.54-.67-2.45-2.13-4.26-4.56-5.06-1.39-.46-2.87-.86-4.32-.89-5.34-.11-10.67-.04-16.01-.07-.7,0-.92.24-.92.93.03,2.73.01,5.46.01,8.18Zm8.55-34.57c0-.05,0-.1,0-.15-2.52,0-5.04.03-7.57-.02-.81-.02-1,.27-1,1.03.03,4.45.03,8.9,0,13.35,0,.84.27,1.05,1.07,1.04,4.45-.04,8.9-.02,13.35-.04.86,0,1.73-.02,2.57-.18,4.76-.91,6.27-3.06,6.56-6.53.39-4.63-1.2-7.79-6.46-8.44-2.8-.35-5.68-.06-8.53-.06Z"/>
+                        <path d="m153.41,118.53c-.03.24-.03.46-.09.64-1.57,4.37-3.77,8.33-7.48,11.27-3.03,2.4-6.55,3.69-10.31,4.32-5.57.93-11.01.37-16.2-1.92-5.35-2.36-9.17-6.32-11.35-11.72-2.84-7.05-3.21-14.32-.64-21.48,3.34-9.29,10.08-14.65,19.92-15.9,4.23-.54,8.42-.28,12.43,1.33,6.12,2.46,10.01,7.08,12.58,13.01,1.22,2.81,1.67,5.74,1.78,8.74.06,1.6,0,3.21.03,4.81.02.73-.29,1.03-.99,1-.33-.01-.65,0-.98,0-10.86,0-21.72-.01-32.59-.02-.14,0-.29.03-.59.07.08.81.09,1.6.23,2.37.65,3.5,1.89,6.67,5.33,8.36,4.26,2.09,11.48,1.92,15.12-2.24.58-.66,1-1.46,1.55-2.15.23-.28.61-.63.93-.63,3.56-.04,7.12-.03,10.68-.02.19,0,.39.09.62.16Zm-12.96-14.51c.06-.16.1-.22.09-.27-.78-4.95-3.27-8.94-9.06-9.65-5.01-.62-11.7,2.2-12.18,8.89-.08,1.09-.16,1.09.93,1.09,6.44,0,12.88,0,19.32,0,.31,0,.63-.04.9-.05Z"/>
+                        <path d="m129.99,72.15c4.6,0,9.2.02,13.8-.02.81,0,1.1.22,1.06,1.05-.06,1.6-.05,3.21,0,4.81.02.76-.28,1.02-.97.99-.24-.01-.47,0-.71,0-8.9,0-17.81,0-26.71,0q-1.47,0-1.47-1.48c0-1.45.03-2.91-.01-4.36-.02-.78.27-1.02,1.04-1.01,4.66.03,9.32.01,13.98.01Z"/>
+                    </g>
+                </svg>
+            </a>
+
+            <a href="https://api.whatsapp.com/send/?phone=351913525033" target="_blank" class="social-btn whatsapp" title="WhatsApp">
+                <svg class="social-icon" viewBox="0 0 200 200">
+                    <path d="m11.84,193.31c2.93-10.7,5.77-21.06,8.61-31.42,1.26-4.6,2.48-9.21,3.8-13.79.33-1.14.21-2.04-.37-3.09-18.03-32.72-14.24-72.72,9.58-101.55C73.36-4.83,149.55,1.29,181.23,55.33c30.24,51.6,3.01,118.11-54.75,133.39-22.57,5.97-44.35,3.42-65.17-7.17-1.06-.54-1.96-.66-3.1-.35-14.73,3.9-29.47,7.76-44.21,11.62-.62.16-1.25.29-2.16.5Zm17.91-16.37c.68-.14,19.53-7.16,27.86-9.46,2.01-.56,3.57-.37,5.4.72,16.39,9.72,34.04,13.12,52.86,10.09,45.74-7.37,75.21-53.84,62.43-98.35-13.28-46.24-64.28-69.99-107.79-49.47-28.14,13.27-43.31,36.24-45.32,67.39-1.09,16.83,3.58,32.32,12.77,46.44.65,1,.8,1.86.47,3-1.66,5.86-6.09,21.44-8.7,29.65Z"/>
+                    <path d="m55.95,79.29c.02-8.17,3.23-14.89,9.29-20.28,3.08-2.74,9.2-3.43,12.68-1.21,1.25.8,2.44,2.16,2.99,3.52,2.39,5.95,4.61,11.97,6.71,18.03.38,1.1.28,2.74-.29,3.72-1.14,1.96-2.68,3.73-4.2,5.43-4.06,4.54-4.13,5.16-1.01,10.39,6.57,11,15.71,19.19,27.1,24.94.83.42,1.7.77,2.59,1.04,1.89.59,3.52.28,4.87-1.34,2.35-2.82,4.82-5.54,7.19-8.34,1.4-1.66,2.41-2.1,4.46-1.25,2.27.94,4.48,2.07,6.66,3.21,4.08,2.13,8.1,4.39,12.2,6.48,1.87.95,2.63,2.28,2.41,4.35-.98,9.23-3.44,13.73-14.39,18.13-5.81,2.34-11.73,1.58-17.58-.21-21.58-6.6-38.17-19.69-50.37-38.55-3.57-5.52-7.43-10.91-9.35-17.3-1.05-3.49-1.63-7.11-2.43-10.68.16-.03.32-.07.48-.1Z"/>
+                </svg>
+            </a>
+        </div>
+    </div> 
+    
+    <script>
+        // --- PREVENIR SCROLL E INSPECIONAR ---
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 67))) {
+                e.preventDefault(); return false;
+            }
+        });
+
+        // --- RESPONSIVIDADE AUTOMÁTICA ---
+        function resizeApp() {
+            const scale = Math.min(1, window.innerWidth / 500, window.innerHeight / 1000);
+            document.documentElement.style.setProperty('--scale', scale);
         }
-        loop();
+        window.addEventListener('resize', resizeApp);
+        resizeApp();
+
+        // --- LÓGICA CORE ---
+        const drumWheel = document.getElementById('drumWheel');
+        const rUI = document.getElementById('rouletteUI');
+        const trackFrets = document.getElementById('trackFrets');
+        const clockMarkers = document.getElementById('clockMarkers');
+        const modeToggle = document.getElementById('modeToggle');
+        const stage = document.getElementById('mainStage');
+        const ballLayer = document.getElementById('ballLayer');
+        const ballVisual = document.getElementById('ballVisual');
+        const centerHub = document.getElementById('centerHub');
+        
+        const statusTextPath = document.getElementById('statusTextPath');
+        const titleSvg = document.getElementById('titleSvg');
+        
+        const iconClock = document.getElementById('iconClock');
+        const iconRoulette = document.getElementById('iconRoulette');
+        const switchContainer = document.getElementById('switchContainer');
+
+        const ROULETTE_NUMBERS = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const TOTAL_SLOTS = 37;
+        const DEG_PER_SLOT = 360 / TOTAL_SLOTS;
+
+        const DRUM_RADIUS = 310; 
+        
+        for(let i = 0; i < TOTAL_SLOTS; i++){
+            let num = ROULETTE_NUMBERS[i];
+            let angle = i * DEG_PER_SLOT;
+
+            let fret = document.createElement('div'); fret.className='fret';
+            fret.style.transform=`rotate(${angle + (DEG_PER_SLOT/2)}deg)`;
+            trackFrets.appendChild(fret);
+            
+            let p = document.createElement('div'); p.className='pin'; 
+            p.style.transform=`rotate(${angle + (DEG_PER_SLOT/2)}deg)`;
+            rUI.appendChild(p);
+            
+            let l = document.createElement('div'); l.className='label'; 
+            l.innerText=num; 
+            l.style.transform=`rotate(${angle}deg)`;
+            rUI.appendChild(l);
+            
+            let dn = document.createElement('div'); dn.className='drum-item';
+            dn.innerText = num; 
+            dn.style.transform = `rotateX(${-angle}deg) translateZ(${DRUM_RADIUS}px)`;
+            drumWheel.appendChild(dn);
+        }
+
+        for(let j=0; j<12; j++){
+            let tick = document.createElement('div'); tick.className = 'clock-tick';
+            tick.style.transform = `rotate(${j * 30}deg)`;
+            clockMarkers.appendChild(tick);
+        }
+
+        let isRoulette = false, dragBall = false, ballAngle = 0, ballVel = 0, clockOffset = 0, lastMouseAngle = 0;
+        let dragDrum = false, drumAngle = 0, selectedNum = 0, lastMouseY = 0, isSpinning = false;
+        let lastLayerRotation = 0;
+
+        const initDate = new Date();
+        const startRealTimeSec = (initDate.getHours() * 3600) + (initDate.getMinutes() * 60) + initDate.getSeconds() + (initDate.getMilliseconds() / 1000);
+        const startPerf = performance.now();
+
+        function animate(timestamp) {
+            if (!timestamp) timestamp = performance.now();
+            const realTimeSec = startRealTimeSec + ((timestamp - startPerf) / 1000);
+            let layerRotation = 0, rattle = 0;
+
+            if (!isRoulette) {
+                if (!dragBall) { 
+                    ballVel += -clockOffset * 0.08; ballVel *= 0.90; clockOffset += ballVel; 
+                    if(Math.abs(clockOffset) < 0.001 && Math.abs(ballVel) < 0.001) { clockOffset = 0; ballVel = 0; }
+                } else {
+                    ballVel *= 0.8; 
+                }
+                const totalTime = realTimeSec + clockOffset;
+                layerRotation = totalTime * 6;
+                ballLayer.style.transform = `rotate(${layerRotation}deg)`;
+                document.getElementById('hHand').style.transform = `rotate(${totalTime / 120}deg)`;
+                document.getElementById('mHand').style.transform = `rotate(${totalTime * 0.1}deg)`;
+            } else {
+                if (!dragBall && isSpinning) {
+                    ballAngle += ballVel; ballVel *= 0.985;
+                    
+                    let mod = Math.abs(ballAngle % DEG_PER_SLOT);
+                    if(Math.abs(ballVel)>0.1 && (mod > (DEG_PER_SLOT*0.35) && mod < (DEG_PER_SLOT*0.65))) { rattle = (Math.random()-0.5)*Math.abs(ballVel)*2; }
+                    
+                    if (Math.abs(ballVel) < 0.3) { 
+                        let nearestAngle = Math.round(ballAngle/DEG_PER_SLOT) * DEG_PER_SLOT;
+                        ballVel += (nearestAngle - ballAngle) * 0.05; ballVel *= 0.92; 
+                    }
+                    if (Math.abs(ballVel) < 0.01 && Math.abs(ballAngle % DEG_PER_SLOT) < 0.5) { 
+                        ballVel = 0; ballAngle = Math.round(ballAngle / DEG_PER_SLOT) * DEG_PER_SLOT; isSpinning = false; finishSpin(); 
+                    }
+                }
+                layerRotation = ballAngle;
+                ballLayer.style.transform = `rotate(${layerRotation}deg)`;
+            }
+            
+            ballVisual.style.transform = `translateX(-50%) translateY(${rattle}px) rotate(${-layerRotation}deg)`;
+            
+            let deltaRotation = layerRotation - lastLayerRotation;
+            if (deltaRotation > 180) deltaRotation -= 360;
+            if (deltaRotation < -180) deltaRotation += 360;
+            lastLayerRotation = layerRotation;
+
+            let safeDelta = Math.max(-20, Math.min(20, deltaRotation));
+            const speedMultiplier = isRoulette ? 1 : 1.5; 
+            const speed = Math.abs(safeDelta) * speedMultiplier;
+            const glitchIntensity = Math.min(speed, 10);
+
+            if (glitchIntensity > 0.5) {
+                const skew = safeDelta * (isRoulette ? -0.4 : -0.8);
+                const split = glitchIntensity * 0.6;
+                const shake = glitchIntensity > 7 ? (Math.random()*1.5 - 0.75) : 0;
+                
+                titleSvg.style.transform = `skewX(${skew}deg)`;
+                titleSvg.style.filter = `
+                    drop-shadow(${split}px ${shake}px 0px rgba(255, 71, 87, 0.8)) 
+                    drop-shadow(-${split}px ${-shake}px 0px rgba(0, 202, 133, 0.8))
+                `;
+            } else {
+                titleSvg.style.transform = `skewX(0deg)`;
+                titleSvg.style.filter = `none`;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function finishSpin() {
+            let normalizedAngle = (ballAngle % 360 + 360) % 360;
+            let winningIndex = Math.round(normalizedAngle / DEG_PER_SLOT) % TOTAL_SLOTS;
+            let result = ROULETTE_NUMBERS[winningIndex];
+
+            ballVisual.style.transform = `translateX(-50%) rotate(${-ballAngle}deg)`; 
+            
+            if (result === selectedNum) {
+                statusTextPath.textContent = "VITÓRIA! SAIU O " + result;
+                centerHub.classList.add('hub-win');
+                stage.classList.add('glow-win');
+            } else {
+                statusTextPath.textContent = "PERDESTE. SAIU O " + result;
+                centerHub.classList.add('hub-lose');
+                stage.classList.add('glow-lose');
+            }
+            setTimeout(() => {
+                centerHub.classList.remove('hub-win', 'hub-lose');
+                stage.classList.remove('glow-win', 'glow-lose');
+                if(isRoulette) statusTextPath.textContent = "APOSTA: " + selectedNum;
+            }, 3000);
+        }
+
+        function getAngle(x, y) {
+            const rect = stage.getBoundingClientRect();
+            const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            return Math.atan2(y - cy, x - cx) * (180 / Math.PI) + 90;
+        }
+
+        const touchZone = document.getElementById('touchZone');
+        touchZone.addEventListener('pointerdown', e => {
+            dragBall = true; isSpinning = false;
+            centerHub.classList.remove('hub-win', 'hub-lose');
+            stage.classList.remove('glow-win', 'glow-lose');
+            if(isRoulette) statusTextPath.textContent = "A RODAR...";
+            lastMouseAngle = getAngle(e.clientX, e.clientY);
+        });
+        
+        centerHub.addEventListener('pointerdown', e => {
+            if (!isRoulette) return;
+            dragDrum = true; lastMouseY = e.clientY;
+            centerHub.classList.remove('hub-win', 'hub-lose');
+            stage.classList.remove('glow-win', 'glow-lose');
+        });
+
+        window.addEventListener('pointermove', e => {
+            if (dragBall) {
+                let cur = getAngle(e.clientX, e.clientY), delta = cur - lastMouseAngle;
+                if (delta < -180) delta += 360; if (delta > 180) delta -= 360;
+                
+                if (!isRoulette) { 
+                    clockOffset += delta / 6; 
+                    ballVel = delta; 
+                } else { 
+                    ballAngle += delta; ballVel = delta; 
+                }
+                lastMouseAngle = cur;
+            }
+            if (dragDrum) {
+                const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+                drumAngle += ((lastMouseY - e.clientY) / scale) * 0.5; 
+                lastMouseY = e.clientY;
+                drumWheel.style.transform = `rotateX(${drumAngle}deg)`;
+                
+                let idx = Math.round(drumAngle / DEG_PER_SLOT);
+                let normalizedIdx = ((idx % TOTAL_SLOTS) + TOTAL_SLOTS) % TOTAL_SLOTS;
+                selectedNum = ROULETTE_NUMBERS[normalizedIdx];
+                statusTextPath.textContent = "APOSTA: " + selectedNum;
+            }
+        });
+
+        window.addEventListener('pointerup', () => {
+            if (dragBall && isRoulette) isSpinning = true;
+            if (dragDrum) {
+                let snapIndex = Math.round(drumAngle / DEG_PER_SLOT);
+                drumAngle = snapIndex * DEG_PER_SLOT;
+                drumWheel.style.transition = "transform 0.2s ease-out";
+                drumWheel.style.transform = `rotateX(${drumAngle}deg)`;
+                setTimeout(() => drumWheel.style.transition = "none", 200);
+            }
+            dragBall = false; dragDrum = false;
+        });
+
+        function setMode(rouletteMode) {
+            if (modeToggle.checked === rouletteMode) return;
+            modeToggle.checked = rouletteMode;
+            modeToggle.dispatchEvent(new Event('change'));
+        }
+
+        let dragStartX = 0, isDraggingSwitch = false, isSwitchMoved = false;
+
+        switchContainer.addEventListener('pointerdown', e => {
+            isDraggingSwitch = true; isSwitchMoved = false; dragStartX = e.clientX;
+            switchContainer.setPointerCapture(e.pointerId);
+        });
+        switchContainer.addEventListener('pointermove', e => {
+            if (!isDraggingSwitch) return;
+            let deltaX = e.clientX - dragStartX;
+            if (Math.abs(deltaX) > 5) isSwitchMoved = true;
+            if (!modeToggle.checked && deltaX > 15) { setMode(true); isDraggingSwitch = false; } 
+            else if (modeToggle.checked && deltaX < -15) { setMode(false); isDraggingSwitch = false; }
+        });
+        switchContainer.addEventListener('pointerup', e => {
+            isDraggingSwitch = false;
+            if (!isSwitchMoved) setMode(!modeToggle.checked);
+            switchContainer.releasePointerCapture(e.pointerId);
+        });
+
+        modeToggle.addEventListener('change', e => {
+            isRoulette = e.target.checked;
+            stage.classList.toggle('is-roulette', isRoulette);
+            
+            if(isRoulette) { 
+                iconRoulette.classList.add('active'); iconClock.classList.remove('active'); 
+            } else { 
+                iconClock.classList.add('active'); iconRoulette.classList.remove('active'); 
+            }
+
+            statusTextPath.textContent = isRoulette ? "ESCOLHE A TUA APOSTA!" : "";
+            const currentRealTimeSec = startRealTimeSec + ((performance.now() - startPerf) / 1000);
+            if (isRoulette) { 
+                ballAngle = (currentRealTimeSec + clockOffset) * 6; ballVel = 0; 
+            } else {
+                clockOffset = ((ballAngle/6) - currentRealTimeSec) % 60;
+                if (clockOffset > 30) clockOffset -= 60; if (clockOffset < -30) clockOffset += 60;
+                ballVel = 0; centerHub.classList.remove('hub-win', 'hub-lose'); stage.classList.remove('glow-win', 'glow-lose'); 
+            }
+        });
+        
+        requestAnimationFrame(animate);
     </script>
 </body>
 </html>
